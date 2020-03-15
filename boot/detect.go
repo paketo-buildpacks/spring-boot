@@ -14,13 +14,23 @@
  * limitations under the License.
  */
 
-package main
+package boot
 
 import (
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/spring-boot/boot"
+	"github.com/buildpacks/libcnb"
 )
 
-func main() {
-	libpak.Detect(boot.Detect{})
+type Detect struct{}
+
+func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+	return libcnb.DetectResult{
+		Pass: true,
+		Plans: []libcnb.BuildPlan{
+			{
+				Requires: []libcnb.BuildPlanRequire{
+					{Name: "jvm-application"},
+				},
+			},
+		},
+	}, nil
 }

@@ -14,13 +14,36 @@
  * limitations under the License.
  */
 
-package main
+package boot_test
 
 import (
-	"github.com/paketo-buildpacks/libpak"
+	"testing"
+
+	"github.com/buildpacks/libcnb"
+	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/spring-boot/boot"
+	"github.com/sclevine/spec"
 )
 
-func main() {
-	libpak.Detect(boot.Detect{})
+func testDetect(t *testing.T, context spec.G, it spec.S) {
+	var (
+		Expect = NewWithT(t).Expect
+
+		ctx    libcnb.DetectContext
+		detect boot.Detect
+	)
+
+	it("always passes", func() {
+		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Requires: []libcnb.BuildPlanRequire{
+						{Name: "jvm-application"},
+					},
+				},
+			},
+		}))
+	})
+
 }

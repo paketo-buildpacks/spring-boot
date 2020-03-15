@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package main
+package boot_test
 
 import (
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/spring-boot/boot"
+	"testing"
+
+	"github.com/sclevine/spec"
+	"github.com/sclevine/spec/report"
 )
 
-func main() {
-	libpak.Detect(boot.Detect{})
+func TestUnit(t *testing.T) {
+	suite := spec.New("boot", spec.Report(report.Terminal{}))
+	suite("Build", testBuild)
+	suite("Dependencies", testDependencies)
+	suite("Detect", testDetect)
+	suite("Slices", testSlices)
+	suite.Run(t)
 }
