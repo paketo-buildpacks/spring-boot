@@ -2,7 +2,6 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.0.3 h1:znjIyLfpXEDQjOIEWh+ehwpTU14UzUPub3c3sm36u14=
 github.com/Masterminds/semver/v3 v3.0.3/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/buildpacks/libcnb v1.4.0/go.mod h1:heL8ONtmWudtDiTJsV6XgCszCUT2LC0t972PLnPQ4aE=
 github.com/buildpacks/libcnb v1.4.2 h1:Dcjw0oZeyaFUTfnUGCMjsuKoz08B4FciU71JrP7/7Aw=
 github.com/buildpacks/libcnb v1.4.2/go.mod h1:heL8ONtmWudtDiTJsV6XgCszCUT2LC0t972PLnPQ4aE=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
@@ -43,9 +42,8 @@ github.com/onsi/ginkgo v1.12.0/go.mod h1:oUhWkIvk5aDxtKvDDuw8gItl8pKl42LzjC9KZE0
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.9.0 h1:R1uwffexN6Pr340GtYRIdZmAiN4J+iw6WG4wog1DUXg=
 github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
-github.com/paketo-buildpacks/libjvm v1.6.2 h1:xfP5DkomHPYvz3EIMWwrQifYgiOYgL08mMIuOtQw95s=
-github.com/paketo-buildpacks/libjvm v1.6.2/go.mod h1:1uLuYWw5KRWFNkQq00/uNbjISN9wzJUogC30H46bwYU=
-github.com/paketo-buildpacks/libpak v1.16.0/go.mod h1:ZPsEZludrCEgdJR1aGWh+NipxCmiNXu0iSLOjXljaR8=
+github.com/paketo-buildpacks/libjvm v1.6.3 h1:B+SPh3kpYZ+W8LXCJS76C09tE5EjxcLOq8VZXBTE7cM=
+github.com/paketo-buildpacks/libjvm v1.6.3/go.mod h1:xP9iOCpYfoCLHdv/vrE3gqY5a7oTj01G2ooNbbcWuk8=
 github.com/paketo-buildpacks/libpak v1.17.1 h1:J8UhbuuFCdQjnoeqkpNV8hkzRO40R6hVA4kMztA8Qrk=
 github.com/paketo-buildpacks/libpak v1.17.1/go.mod h1:+ojBNBALxM4VkIX65FuBA52dZsojJLpzmzS6M30GS/g=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
