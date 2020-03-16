@@ -78,11 +78,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return result, nil
 	}
 
-	classes, ok := manifest.Get("Spring-Boot-Classes")
-	if !ok {
-		classes = "BOOT-INF/classes"
-	}
-
 	libs, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
 		libs = "BOOT-INF/lib"
@@ -93,7 +88,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}
 
-	result.Slices, err = ConventionSlices(context.Application.Path, filepath.Join(context.Application.Path, classes), filepath.Join(context.Application.Path, libs))
+	result.Slices, err = ConventionSlices(context.Application.Path, filepath.Join(context.Application.Path, libs))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate slices from %s\n%w", context.Application.Path, err)
 	}

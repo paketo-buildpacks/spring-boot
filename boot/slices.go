@@ -25,7 +25,7 @@ import (
 	"github.com/buildpacks/libcnb"
 )
 
-func ConventionSlices(root string, classes string, libs string) ([]libcnb.Slice, error) {
+func ConventionSlices(root string, libs string) ([]libcnb.Slice, error) {
 	var slices []libcnb.Slice
 
 	slice := libcnb.Slice{}
@@ -65,18 +65,6 @@ func ConventionSlices(root string, classes string, libs string) ([]libcnb.Slice,
 		})); err != nil && !os.IsNotExist(err) {
 			return nil, fmt.Errorf("unable to walk %s\n%w", file, err)
 		}
-	}
-
-	if len(slice.Paths) > 0 {
-		slices = append(slices, slice)
-	}
-
-	slice = libcnb.Slice{}
-
-	if err := filepath.Walk(classes, files(root, func(path string) {
-		slice.Paths = append(slice.Paths, path)
-	})); err != nil && !os.IsNotExist(err) {
-		return nil, fmt.Errorf("unable to walk %s\n%w", classes, err)
 	}
 
 	if len(slice.Paths) > 0 {

@@ -100,10 +100,7 @@ Spring-Boot-Layers-Index: layers.idx`), 0644)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
-Spring-Boot-Classes: classes
 Spring-Boot-Lib: lib`), 0644)).To(Succeed())
-			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "classes"), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "classes", "test-file"), []byte{}, 0644)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "lib"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "lib", "test-file-2.2.2.jar"), []byte{}, 0644)).To(Succeed())
 		})
@@ -137,7 +134,6 @@ Spring-Boot-Lib: lib`), 0644)).To(Succeed())
 
 			Expect(result.Slices).To(Equal([]libcnb.Slice{
 				{Paths: []string{filepath.Join("lib", "test-file-2.2.2.jar")}},
-				{Paths: []string{filepath.Join("classes", "test-file")}},
 			}))
 		})
 
@@ -148,8 +144,6 @@ Spring-Boot-Lib: lib`), 0644)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1`), 0644)).To(Succeed())
-			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF", "classes"), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "classes", "test-file"), []byte{}, 0644)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-file-2.2.2.jar"), []byte{}, 0644)).To(Succeed())
 		})
@@ -183,7 +177,6 @@ Spring-Boot-Version: 1.1.1`), 0644)).To(Succeed())
 
 			Expect(result.Slices).To(Equal([]libcnb.Slice{
 				{Paths: []string{filepath.Join("BOOT-INF", "lib", "test-file-2.2.2.jar")}},
-				{Paths: []string{filepath.Join("BOOT-INF", "classes", "test-file")}},
 			}))
 		})
 	})

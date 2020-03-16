@@ -58,11 +58,8 @@ func testSlices(t *testing.T, context spec.G, it spec.S) {
 		Expect(ioutil.WriteFile(filepath.Join(path, "static", "test-file"), []byte{}, 0644)).To(Succeed())
 		Expect(os.MkdirAll(filepath.Join(path, "public"), 0755)).To(Succeed())
 		Expect(ioutil.WriteFile(filepath.Join(path, "public", "test-file"), []byte{}, 0644)).To(Succeed())
-		Expect(os.MkdirAll(filepath.Join(path, "classes"), 0755)).To(Succeed())
-		Expect(ioutil.WriteFile(filepath.Join(path, "classes", "test-file"), []byte{}, 0644)).To(Succeed())
 
 		Expect(boot.ConventionSlices(path,
-			filepath.Join(path, "classes"),
 			filepath.Join(path, "libs"))).To(Equal([]libcnb.Slice{
 			{Paths: []string{filepath.Join("libs", "test-file")}},
 			{Paths: []string{filepath.Join("libs", "test-file-SNAPSHOT")}},
@@ -72,7 +69,6 @@ func testSlices(t *testing.T, context spec.G, it spec.S) {
 				filepath.Join("static", "test-file"),
 				filepath.Join("public", "test-file"),
 			}},
-			{Paths: []string{filepath.Join("classes", "test-file")}},
 		}))
 	})
 
