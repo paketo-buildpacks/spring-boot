@@ -2,7 +2,6 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.0.3 h1:znjIyLfpXEDQjOIEWh+ehwpTU14UzUPub3c3sm36u14=
 github.com/Masterminds/semver/v3 v3.0.3/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/buildpacks/libcnb v1.4.2 h1:Dcjw0oZeyaFUTfnUGCMjsuKoz08B4FciU71JrP7/7Aw=
 github.com/buildpacks/libcnb v1.4.2/go.mod h1:heL8ONtmWudtDiTJsV6XgCszCUT2LC0t972PLnPQ4aE=
 github.com/buildpacks/libcnb v1.5.0 h1:ip0rR0/mrv6iv/0M9Z6qVN8kJ+Er4lKTnl75+SOUs3A=
 github.com/buildpacks/libcnb v1.5.0/go.mod h1:heL8ONtmWudtDiTJsV6XgCszCUT2LC0t972PLnPQ4aE=
@@ -48,6 +47,8 @@ github.com/paketo-buildpacks/libjvm v1.6.3 h1:B+SPh3kpYZ+W8LXCJS76C09tE5EjxcLOq8
 github.com/paketo-buildpacks/libjvm v1.6.3/go.mod h1:xP9iOCpYfoCLHdv/vrE3gqY5a7oTj01G2ooNbbcWuk8=
 github.com/paketo-buildpacks/libpak v1.17.1 h1:J8UhbuuFCdQjnoeqkpNV8hkzRO40R6hVA4kMztA8Qrk=
 github.com/paketo-buildpacks/libpak v1.17.1/go.mod h1:+ojBNBALxM4VkIX65FuBA52dZsojJLpzmzS6M30GS/g=
+github.com/paketo-buildpacks/libpak v1.18.0 h1:DYJSe1XzA2p2dGlkeegLOvgMOIpBVwuLagl/c7u1ACA=
+github.com/paketo-buildpacks/libpak v1.18.0/go.mod h1:UFNvxzr7rdkpVhAr1mAH87LHJrooKNN5U/cZYcyw5AY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sclevine/spec v1.4.0 h1:z/Q9idDcay5m5irkZ28M7PtQM4aOISzOpj4bUPkDee8=
@@ -82,7 +83,6 @@ golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200116001909-b77594299b42/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20200316202146-9a0dfc3c5568 h1:Ip/m9sYEEdDs63C8nMVGQHt7PtpAs7opyjZDr9M4dY0=
 golang.org/x/sys v0.0.0-20200316202146-9a0dfc3c5568/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d h1:62ap6LNOjDU6uGmKXHJbSfciMoV+FeI1sRXx/pLDL44=
 golang.org/x/sys v0.0.0-20200317113312-5766fd39f98d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
