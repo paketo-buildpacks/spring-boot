@@ -42,8 +42,8 @@ github.com/onsi/ginkgo v1.12.0/go.mod h1:oUhWkIvk5aDxtKvDDuw8gItl8pKl42LzjC9KZE0
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.9.0 h1:R1uwffexN6Pr340GtYRIdZmAiN4J+iw6WG4wog1DUXg=
 github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
-github.com/paketo-buildpacks/libjvm v1.8.0 h1:4luAoYyfVPz3moOoh5uY+8nRbVSxigF1O+FHZGcl7aA=
-github.com/paketo-buildpacks/libjvm v1.8.0/go.mod h1:TiH1dD8KblLZktjKey9qXMex1TTNZngP3wHoRul52B4=
+github.com/paketo-buildpacks/libjvm v1.8.1 h1:/0hzAwT4e2/SLxGaj2zkr7czxdIUdhdFpdLneyPxzZU=
+github.com/paketo-buildpacks/libjvm v1.8.1/go.mod h1:TiH1dD8KblLZktjKey9qXMex1TTNZngP3wHoRul52B4=
 github.com/paketo-buildpacks/libpak v1.20.1 h1:+P0C3+KnyPhawDXjPTgvWuxDYN0377CblQAXCjS+294=
 github.com/paketo-buildpacks/libpak v1.20.1/go.mod h1:Ls8c6OXC53rk2jday3/up5TfVHFGw/HUnDMPRj5hZn8=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
