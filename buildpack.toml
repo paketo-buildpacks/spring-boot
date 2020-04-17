@@ -22,6 +22,9 @@ version = "{{.version}}"
 [[stacks]]
 id = "io.buildpacks.stacks.bionic"
 
+[[stacks]]
+id = "org.cloudfoundry.stacks.cflinuxfs3"
+
 [metadata]
 pre-package   = "scripts/build.sh"
 include-files = [
