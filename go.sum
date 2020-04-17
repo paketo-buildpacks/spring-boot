@@ -46,8 +46,8 @@ github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoT
 github.com/paketo-buildpacks/libjvm v1.9.3 h1:9u1oAi/sNMXNPnsGiaYy9+CyZgNcPNHwWcihNzrm2/8=
 github.com/paketo-buildpacks/libjvm v1.9.3/go.mod h1:EaHX3O6A/VjztLAV4w9JKVuwBhEWpNMQiDAx5JHta1Q=
 github.com/paketo-buildpacks/libpak v1.24.0/go.mod h1:TWTP+vRhQeSJPX19APbA1Gs/0AaI7wUcSsFgwhFzvtA=
-github.com/paketo-buildpacks/libpak v1.27.1 h1:jolk+55PkqQvd3hFzh2n5bK7mHqGxMW245pcJ5qn+TI=
-github.com/paketo-buildpacks/libpak v1.27.1/go.mod h1:XqpeN/8NXEi3CCE/2Gvn3y1YmnYC2Habw6vSn4V0PQQ=
+github.com/paketo-buildpacks/libpak v1.27.2 h1:qTOSw2pt0n05/Yfp6KRiEZx7yV95MokXjmIjTTAFmcE=
+github.com/paketo-buildpacks/libpak v1.27.2/go.mod h1:XqpeN/8NXEi3CCE/2Gvn3y1YmnYC2Habw6vSn4V0PQQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rakyll/statik v0.1.7 h1:OF3QCZUuyPxuGEP7B4ypUa7sB/iHtqOTDYZXGM8KOdQ=
