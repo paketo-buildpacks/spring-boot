@@ -24,6 +24,7 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
+	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/spring-boot/boot"
 	"github.com/sclevine/spec"
 )
@@ -72,7 +73,7 @@ Spring-Boot-Layers-Index: layers.idx`), 0644)).To(Succeed())
 						Name:    "spring-boot",
 						Version: "1.1.1",
 						Metadata: map[string]interface{}{
-							"dependencies": []boot.Dependency{
+							"dependencies": []libjvm.MavenJAR{
 								{
 									Name:    "test-file",
 									Version: "2.2.2",
@@ -115,7 +116,7 @@ Spring-Boot-Lib: lib`), 0644)).To(Succeed())
 						Name:    "spring-boot",
 						Version: "1.1.1",
 						Metadata: map[string]interface{}{
-							"dependencies": []boot.Dependency{
+							"dependencies": []libjvm.MavenJAR{
 								{
 									Name:    "test-file",
 									Version: "2.2.2",
@@ -158,7 +159,7 @@ Spring-Boot-Version: 1.1.1`), 0644)).To(Succeed())
 						Name:    "spring-boot",
 						Version: "1.1.1",
 						Metadata: map[string]interface{}{
-							"dependencies": []boot.Dependency{
+							"dependencies": []libjvm.MavenJAR{
 								{
 									Name:    "test-file",
 									Version: "2.2.2",

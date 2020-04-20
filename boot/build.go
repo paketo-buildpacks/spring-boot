@@ -65,7 +65,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			libs = append(libs, filepath.Join(l, "lib"))
 		}
 
-		entry.Metadata["dependencies"], err = Dependencies(libs...)
+		entry.Metadata["dependencies"], err = libjvm.NewMavenJARListing(libs...)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 		}
@@ -83,7 +83,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		libs = "BOOT-INF/lib"
 	}
 
-	entry.Metadata["dependencies"], err = Dependencies(filepath.Join(context.Application.Path, libs))
+	entry.Metadata["dependencies"], err = libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, libs))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}

@@ -26,7 +26,6 @@ import (
 func TestUnit(t *testing.T) {
 	suite := spec.New("boot", spec.Report(report.Terminal{}))
 	suite("Build", testBuild)
-	suite("Dependencies", testDependencies)
 	suite("Detect", testDetect)
 	suite("Slices", testSlices)
 	suite.Run(t)
