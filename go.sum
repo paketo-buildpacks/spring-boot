@@ -44,7 +44,6 @@ github.com/onsi/gomega v1.9.0 h1:R1uwffexN6Pr340GtYRIdZmAiN4J+iw6WG4wog1DUXg=
 github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
 github.com/paketo-buildpacks/libjvm v1.10.2 h1:8JNMy0pp+dmzb4oTk9BzXzoJLv/ZIuQ0E39r7vN/CWs=
 github.com/paketo-buildpacks/libjvm v1.10.2/go.mod h1:KkyTYD2oYbkGx3zXXYBVwehXubLs2T+zc00uGlQu3Sc=
-github.com/paketo-buildpacks/libpak v1.27.2 h1:qTOSw2pt0n05/Yfp6KRiEZx7yV95MokXjmIjTTAFmcE=
 github.com/paketo-buildpacks/libpak v1.27.2/go.mod h1:XqpeN/8NXEi3CCE/2Gvn3y1YmnYC2Habw6vSn4V0PQQ=
 github.com/paketo-buildpacks/libpak v1.27.3 h1:1XLjVGguaPq288A83BHagd7Zh0ps4TXDWDBIX8D1Vwo=
 github.com/paketo-buildpacks/libpak v1.27.3/go.mod h1:XqpeN/8NXEi3CCE/2Gvn3y1YmnYC2Habw6vSn4V0PQQ=
