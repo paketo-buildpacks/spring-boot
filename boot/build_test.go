@@ -67,7 +67,7 @@ Spring-Boot-Layers-Index: layers.idx`), 0644)).To(Succeed())
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Plan).To(Equal(libcnb.BuildpackPlan{
+			Expect(result.Plan).To(Equal(&libcnb.BuildpackPlan{
 				Entries: []libcnb.BuildpackPlanEntry{
 					{
 						Name:    "spring-boot",
@@ -110,7 +110,7 @@ Spring-Boot-Lib: lib`), 0644)).To(Succeed())
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Plan).To(Equal(libcnb.BuildpackPlan{
+			Expect(result.Plan).To(Equal(&libcnb.BuildpackPlan{
 				Entries: []libcnb.BuildpackPlanEntry{
 					{
 						Name:    "spring-boot",
@@ -153,7 +153,7 @@ Spring-Boot-Version: 1.1.1`), 0644)).To(Succeed())
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Plan).To(Equal(libcnb.BuildpackPlan{
+			Expect(result.Plan).To(Equal(&libcnb.BuildpackPlan{
 				Entries: []libcnb.BuildpackPlanEntry{
 					{
 						Name:    "spring-boot",

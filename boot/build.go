@@ -43,7 +43,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	b.Logger.Title(context.Buildpack)
-	result := libcnb.BuildResult{}
+	result := libcnb.NewBuildResult()
 
 	entry := libcnb.BuildpackPlanEntry{
 		Name:     "spring-boot",
