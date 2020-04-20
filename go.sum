@@ -42,8 +42,8 @@ github.com/onsi/ginkgo v1.12.0/go.mod h1:oUhWkIvk5aDxtKvDDuw8gItl8pKl42LzjC9KZE0
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.9.0 h1:R1uwffexN6Pr340GtYRIdZmAiN4J+iw6WG4wog1DUXg=
 github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
-github.com/paketo-buildpacks/libjvm v1.10.0 h1:IwpcxxrGUAVtLJsqKnPz7zp6kwYDnNXgAvbch8bnJLM=
-github.com/paketo-buildpacks/libjvm v1.10.0/go.mod h1:KkyTYD2oYbkGx3zXXYBVwehXubLs2T+zc00uGlQu3Sc=
+github.com/paketo-buildpacks/libjvm v1.10.1 h1:7HhXRUPKJLQGWUPmTGE1JXbvFrXJLuzANUuvtsnKMyo=
+github.com/paketo-buildpacks/libjvm v1.10.1/go.mod h1:KkyTYD2oYbkGx3zXXYBVwehXubLs2T+zc00uGlQu3Sc=
 github.com/paketo-buildpacks/libpak v1.27.2 h1:qTOSw2pt0n05/Yfp6KRiEZx7yV95MokXjmIjTTAFmcE=
 github.com/paketo-buildpacks/libpak v1.27.2/go.mod h1:XqpeN/8NXEi3CCE/2Gvn3y1YmnYC2Habw6vSn4V0PQQ=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -84,7 +84,6 @@ golang.org/x/sys v0.0.0-20200116001909-b77594299b42/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 h1:opSr2sbRXk5X5/givKrrKj9HXxFpW2sdCiP8MJSKLQY=
 golang.org/x/sys v0.0.0-20200413165638-669c56c373c4/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f h1:gWF768j/LaZugp8dyS4UwsslYCYz9XgFxvlgsn0n9H8=
 golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
