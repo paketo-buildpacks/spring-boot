@@ -45,12 +45,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
 
-	entry := libcnb.BuildpackPlanEntry{
-		Name:     "spring-boot",
-		Version:  version,
-		Metadata: map[string]interface{}{},
-	}
-	result.Plan.Entries = append(result.Plan.Entries, entry)
+	result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "spring-boot", Version: version})
 
 	if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
 		b.Logger.Body("Using layers index")
@@ -65,10 +60,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			libs = append(libs, filepath.Join(l, "lib"))
 		}
 
-		entry.Metadata["dependencies"], err = libjvm.NewMavenJARListing(libs...)
+		d, err := libjvm.NewMavenJARListing(libs...)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 		}
+		result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{
+			Name:     "dependencies",
+			Metadata: map[string]interface{}{"dependencies": d},
+		})
 
 		result.Slices, err = IndexSlices(context.Application.Path, layers...)
 		if err != nil {
@@ -83,10 +82,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		libs = "BOOT-INF/lib"
 	}
 
-	entry.Metadata["dependencies"], err = libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, libs))
+	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, libs))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}
+	result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{
+		Name:     "dependencies",
+		Metadata: map[string]interface{}{"dependencies": d},
+	})
 
 	result.Slices, err = ConventionSlices(context.Application.Path, filepath.Join(context.Application.Path, libs))
 	if err != nil {

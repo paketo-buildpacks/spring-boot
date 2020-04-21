@@ -72,6 +72,9 @@ Spring-Boot-Layers-Index: layers.idx`), 0644)).To(Succeed())
 					{
 						Name:    "spring-boot",
 						Version: "1.1.1",
+					},
+					{
+						Name:    "dependencies",
 						Metadata: map[string]interface{}{
 							"dependencies": []libjvm.MavenJAR{
 								{
@@ -115,6 +118,9 @@ Spring-Boot-Lib: lib`), 0644)).To(Succeed())
 					{
 						Name:    "spring-boot",
 						Version: "1.1.1",
+					},
+					{
+						Name:    "dependencies",
 						Metadata: map[string]interface{}{
 							"dependencies": []libjvm.MavenJAR{
 								{
@@ -158,6 +164,9 @@ Spring-Boot-Version: 1.1.1`), 0644)).To(Succeed())
 					{
 						Name:    "spring-boot",
 						Version: "1.1.1",
+					},
+					{
+						Name:    "dependencies",
 						Metadata: map[string]interface{}{
 							"dependencies": []libjvm.MavenJAR{
 								{
