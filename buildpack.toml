@@ -15,9 +15,10 @@
 api = "0.2"
 
 [buildpack]
-id      = "paketo-buildpacks/spring-boot"
-name    = "Paketo Spring Boot Buildpack"
-version = "{{.version}}"
+id       = "paketo-buildpacks/spring-boot"
+name     = "Paketo Spring Boot Buildpack"
+version  = "{{.version}}"
+homepage = "https://github.com/paketo-buildpacks/spring-boot"
 
 [[stacks]]
 id = "io.buildpacks.stacks.bionic"
