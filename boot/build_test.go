@@ -88,6 +88,40 @@ Spring-Boot-Lib: BOOT-INF/lib
 		}))
 	})
 
+	it("contributes org.opencontainers.image.title label", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+Implementation-Title: test-title
+`), 0644)).To(Succeed())
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Labels).To(ContainElement(libcnb.Label{
+			Key:   "org.opencontainers.image.title",
+			Value: "test-title",
+		}))
+	})
+
+	it("contributes org.opencontainers.image.version label", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+Implementation-Version: 2.2.2
+`), 0644)).To(Succeed())
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Labels).To(ContainElement(libcnb.Label{
+			Key:   "org.opencontainers.image.version",
+			Value: "2.2.2",
+		}))
+	})
+
 	it("contributes dependencies plan entry", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1

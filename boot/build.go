@@ -93,6 +93,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		})
 	}
 
+	if s, ok := manifest.Get("Implementation-Title"); ok {
+		result.Labels = append(result.Labels, libcnb.Label{Key: "org.opencontainers.image.title", Value: s})
+	}
+
+	if s, ok := manifest.Get("Implementation-Version"); ok {
+		result.Labels = append(result.Labels, libcnb.Label{Key: "org.opencontainers.image.version", Value: s})
+	}
+
 	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
