@@ -57,77 +57,69 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(result).To(BeZero())
 	})
 
-	it("contributes spring-boot plan entry", func() {
+	it("contributes org.springframework.boot.version label", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
 
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Plan.Entries).To(ContainElement(libcnb.BuildpackPlanEntry{
-			Name:    "spring-boot",
-			Version: "1.1.1",
+		Expect(result.Labels).To(ContainElement(libcnb.Label{Key: "org.springframework.boot.version", Value: "1.1.1"}))
+	})
+
+	it("contributes org.springframework.boot.spring-configuration-metadata.json label", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
+			[]byte(`{ "groups": [ { "name": "alpha" } ] }`), 0644))
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Labels).To(ContainElement(libcnb.Label{
+			Key:   "org.springframework.boot.spring-configuration-metadata.json",
+			Value: `{"groups":[{"name":"alpha"}]}`,
 		}))
 	})
 
-	context("dependencies plan entry", func() {
-
-		it("contributes from Spring-Boot-Lib", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+	it("contributes dependencies plan entry", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
-Spring-Boot-Lib: ALTERNATE/lib
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
-			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "ALTERNATE", "lib"), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "ALTERNATE", "lib", "test-file-2.2.2.jar"),
-				[]byte{}, 0644)).To(Succeed())
+		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib"), 0755)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-file-2.2.2.jar"),
+			[]byte{}, 0644)).To(Succeed())
 
-			result, err := build.Build(ctx)
-			Expect(err).NotTo(HaveOccurred())
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Plan.Entries).To(ContainElement(libcnb.BuildpackPlanEntry{
-				Name: "dependencies",
-				Metadata: map[string]interface{}{
-					"dependencies": []libjvm.MavenJAR{
-						{
-							Name:    "test-file",
-							Version: "2.2.2",
-							SHA256:  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-						},
+		Expect(result.Plan.Entries).To(ContainElement(libcnb.BuildpackPlanEntry{
+			Name: "dependencies",
+			Metadata: map[string]interface{}{
+				"dependencies": []libjvm.MavenJAR{
+					{
+						Name:    "test-file",
+						Version: "2.2.2",
+						SHA256:  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
 					},
 				},
-			}))
-		})
-
-		it("contributes from default", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
-Spring-Boot-Version: 1.1.1
-`), 0644)).To(Succeed())
-			Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib"), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-file-2.2.2.jar"),
-				[]byte{}, 0644)).To(Succeed())
-
-			result, err := build.Build(ctx)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(result.Plan.Entries).To(ContainElement(libcnb.BuildpackPlanEntry{
-				Name: "dependencies",
-				Metadata: map[string]interface{}{
-					"dependencies": []libjvm.MavenJAR{
-						{
-							Name:    "test-file",
-							Version: "2.2.2",
-							SHA256:  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-						},
-					},
-				},
-			}))
-		})
+			},
+		}))
 	})
 
 	it("contributes slices from layers index", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
 Spring-Boot-Layers-Index: layers.idx
 `), 0644)).To(Succeed())
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "layers.idx"), []byte(`

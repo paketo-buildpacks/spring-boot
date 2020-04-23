@@ -17,9 +17,12 @@
 package boot
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm"
@@ -45,12 +48,51 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
 
-	result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "spring-boot", Version: version})
-
+	classes, ok := manifest.Get("Spring-Boot-Classes")
+	if !ok {
+		return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Classes")
+	}
 	lib, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
-		lib = "BOOT-INF/lib"
+		return libcnb.BuildResult{}, fmt.Errorf("manifest does not container Spring-Boot-Lib")
 	}
+
+	result.Labels = append(result.Labels, libcnb.Label{Key: "org.springframework.boot.version", Value: version})
+
+	c, err := NewConfigurationMetadataFromPath(context.Application.Path)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to read configuration metadata from %s\n%w", classes, err)
+	}
+
+	file := filepath.Join(lib, "*.jar")
+	files, err := filepath.Glob(file)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to glob %s\n%w", file, err)
+	}
+
+	for _, file := range files {
+		d, err := NewConfigurationMetadataFromJAR(file)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to read configuration metadata from %s\n%w", file, err)
+		}
+
+		c.Groups = append(c.Groups, d.Groups...)
+		c.Properties = append(c.Properties, d.Properties...)
+		c.Hints = append(c.Hints, d.Hints...)
+	}
+
+	if len(c.Groups) > 0 || len(c.Properties) > 0 || len(c.Hints) > 0 {
+		b := &bytes.Buffer{}
+		if err := json.NewEncoder(b).Encode(c); err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to encode configuration metadata\n%w", err)
+		}
+
+		result.Labels = append(result.Labels, libcnb.Label{
+			Key:   "org.springframework.boot.spring-configuration-metadata.json",
+			Value: strings.TrimSpace(b.String()),
+		})
+	}
+
 	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
