@@ -17,7 +17,6 @@
 package boot
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,6 +24,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"gopkg.in/yaml.v2"
 )
 
 type Build struct {
@@ -47,42 +47,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{Name: "spring-boot", Version: version})
 
-	if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
-		b.Logger.Body("Using layers index")
-
-		layers, err := b.layers(filepath.Join(context.Application.Path, index))
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to read layers index\n%w", err)
-		}
-
-		var libs []string
-		for _, l := range layers {
-			libs = append(libs, filepath.Join(l, "lib"))
-		}
-
-		d, err := libjvm.NewMavenJARListing(libs...)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
-		}
-		result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{
-			Name:     "dependencies",
-			Metadata: map[string]interface{}{"dependencies": d},
-		})
-
-		result.Slices, err = IndexSlices(context.Application.Path, layers...)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to generate slices from %s\n%w", context.Application.Path, err)
-		}
-
-		return result, nil
-	}
-
-	libs, ok := manifest.Get("Spring-Boot-Lib")
+	lib, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
-		libs = "BOOT-INF/lib"
+		lib = "BOOT-INF/lib"
 	}
-
-	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, libs))
+	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}
@@ -91,31 +60,28 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		Metadata: map[string]interface{}{"dependencies": d},
 	})
 
-	result.Slices, err = ConventionSlices(context.Application.Path, filepath.Join(context.Application.Path, libs))
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to generate slices from %s\n%w", context.Application.Path, err)
+	if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
+		b.Logger.Header("Creating slices from layers index")
+
+		file := filepath.Join(context.Application.Path, index)
+		in, err := os.Open(file)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to open %s\n%w", file, err)
+		}
+		defer in.Close()
+
+		var layers []map[string][]string
+		if err := yaml.NewDecoder(in).Decode(&layers); err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to decode %s\n%w", file, err)
+		}
+
+		for _, layer := range layers {
+			for name, paths := range layer {
+				b.Logger.Body(name)
+				result.Slices = append(result.Slices, libcnb.Slice{Paths: paths})
+			}
+		}
 	}
 
 	return result, nil
-}
-
-func (Build) layers(path string) ([]string, error) {
-	in, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open %s\n%w", path, err)
-	}
-	defer in.Close()
-
-	var layers []string
-
-	root := filepath.Dir(path)
-	scanner := bufio.NewScanner(in)
-	for scanner.Scan() {
-		layers = append(layers, filepath.Join(root, "layers", scanner.Text()))
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("unable to read %s\n%w", path, err)
-	}
-
-	return layers, nil
 }

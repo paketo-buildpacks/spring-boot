@@ -8,4 +8,5 @@ require (
 	github.com/paketo-buildpacks/libjvm v1.10.4
 	github.com/paketo-buildpacks/libpak v1.27.5
 	github.com/sclevine/spec v1.4.0
+	gopkg.in/yaml.v2 v2.2.8
 )

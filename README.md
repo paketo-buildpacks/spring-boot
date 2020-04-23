@@ -8,15 +8,10 @@ This buildpack will participate if all the following conditions are met
 
 The buildpack will do the following:
 
-* Contributes dependency information extract from Maven naming conventions to the images BOM
+* Contributes Spring Boot version information to the image's BOM
+* Contributes dependency information extracted from Maven naming conventions to the image's BOM
 * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Layers-Index` entry
-  * Contributes application slices as defined by the index
-* If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` does not a `Spring-Boot-Layers-Index` entry
-  * Contributes application slices as defined by convention
-    * `BOOT-INF/lib/*-[^SNAPSHOT].jar`
-    * `BOOT-INF/lib/*-[SNAPSHOT].jar`
-    * `META-INF/resources/**`, `resources/**`, `static/**`, `public/**`
-    * `BOOT-INF/classes/**`
+  * Contributes application slices as defined by the layer's index
 
 ## License
 This buildpack is released under version 2.0 of the [Apache License][a].
