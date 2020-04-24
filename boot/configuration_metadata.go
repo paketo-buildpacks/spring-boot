@@ -20,8 +20,12 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/magiconair/properties"
 )
 
 type Group struct {
@@ -39,12 +43,12 @@ type Deprecation struct {
 }
 
 type Property struct {
-	Name         string      `json:"name"`
-	Type         string      `json:"type,omitempty"`
-	Description  string      `json:"description,omitempty"`
-	SourceType   string      `json:"sourceType,omitempty"`
-	DefaultValue interface{} `json:"defaultValue,omitempty"`
-	Deprecation  Deprecation `json:"deprecation,omitempty"`
+	Name         string       `json:"name"`
+	Type         string       `json:"type,omitempty"`
+	Description  string       `json:"description,omitempty"`
+	SourceType   string       `json:"sourceType,omitempty"`
+	DefaultValue interface{}  `json:"defaultValue,omitempty"`
+	Deprecation  *Deprecation `json:"deprecation,omitempty"`
 }
 
 type ValueHint struct {
@@ -65,7 +69,7 @@ type Hint struct {
 
 type ConfigurationMetadata struct {
 	Groups     []Group    `json:"groups,omitempty"`
-	Properties []Property `json:"property,omitempty"`
+	Properties []Property `json:"properties,omitempty"`
 	Hints      []Hint     `json:"hints,omitempty"`
 }
 
@@ -116,4 +120,60 @@ func NewConfigurationMetadataFromJAR(jar string) (ConfigurationMetadata, error) 
 	}
 
 	return c, nil
+}
+
+func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadata) (ConfigurationMetadata, error) {
+	file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties")
+	b, err := ioutil.ReadFile(file)
+	if os.IsNotExist(err) {
+		return ConfigurationMetadata{}, nil
+	} else if err != nil {
+		return ConfigurationMetadata{}, fmt.Errorf("unable to open %s\n%w", file, err)
+	}
+
+	p, err := properties.Load(b, properties.UTF8)
+	if err != nil {
+		return ConfigurationMetadata{}, fmt.Errorf("unable to load properties from %s\n%w", file, err)
+	}
+
+	s, ok := p.Get("configuration-properties.classes")
+	if !ok {
+		return ConfigurationMetadata{}, nil
+	}
+
+	var classes []string
+	for _, s := range strings.Split(s, ",") {
+		classes = append(classes, strings.TrimSpace(s))
+	}
+
+	m := ConfigurationMetadata{}
+
+	for _, g := range metadata.Groups {
+		for _, c := range classes {
+			if c == g.SourceType {
+				m.Groups = append(m.Groups, g)
+				break
+			}
+		}
+	}
+
+	for _, p := range metadata.Properties {
+		for _, c := range classes {
+			if c == p.SourceType {
+				m.Properties = append(m.Properties, p)
+				break
+			}
+		}
+	}
+
+	for _, h := range metadata.Hints {
+		for _, p := range m.Properties {
+			if p.Name == h.Name {
+				m.Hints = append(m.Hints, h)
+				break
+			}
+		}
+	}
+
+	return m, nil
 }

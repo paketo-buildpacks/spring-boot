@@ -59,6 +59,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	result.Labels = append(result.Labels, libcnb.Label{Key: "org.springframework.boot.version", Value: version})
 
+	if s, ok := manifest.Get("Implementation-Title"); ok {
+		result.Labels = append(result.Labels, libcnb.Label{Key: "org.opencontainers.image.title", Value: s})
+	}
+
+	if s, ok := manifest.Get("Implementation-Version"); ok {
+		result.Labels = append(result.Labels, libcnb.Label{Key: "org.opencontainers.image.version", Value: s})
+	}
+
 	c, err := NewConfigurationMetadataFromPath(context.Application.Path)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to read configuration metadata from %s\n%w", classes, err)
@@ -93,12 +101,20 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		})
 	}
 
-	if s, ok := manifest.Get("Implementation-Title"); ok {
-		result.Labels = append(result.Labels, libcnb.Label{Key: "org.opencontainers.image.title", Value: s})
+	c, err = NewDataFlowConfigurationMetadata(context.Application.Path, c)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to generate data flow configuration metadata\n%w", err)
 	}
+	if len(c.Groups) > 0 || len(c.Properties) > 0 || len(c.Hints) > 0 {
+		b := &bytes.Buffer{}
+		if err := json.NewEncoder(b).Encode(c); err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to encode configuration metadata\n%w", err)
+		}
 
-	if s, ok := manifest.Get("Implementation-Version"); ok {
-		result.Labels = append(result.Labels, libcnb.Label{Key: "org.opencontainers.image.version", Value: s})
+		result.Labels = append(result.Labels, libcnb.Label{
+			Key:   "org.springframework.cloud.dataflow.spring-configuration-metadata.json",
+			Value: strings.TrimSpace(b.String()),
+		})
 	}
 
 	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
