@@ -17,10 +17,16 @@
 package main
 
 import (
+	"os"
+
 	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/spring-boot/boot"
 )
 
 func main() {
-	libpak.Detect(boot.Detect{})
+	libpak.Main(
+		boot.Detect{},
+		boot.Build{Logger: bard.NewLogger(os.Stdout)},
+	)
 }

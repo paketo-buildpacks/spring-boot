@@ -34,5 +34,6 @@ include-files = [
   "README.md",
   "bin/build",
   "bin/detect",
+  "bin/main",
   "buildpack.toml",
 ]
