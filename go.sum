@@ -43,6 +43,8 @@ github.com/onsi/ginkgo v1.12.0/go.mod h1:oUhWkIvk5aDxtKvDDuw8gItl8pKl42LzjC9KZE0
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.9.0 h1:R1uwffexN6Pr340GtYRIdZmAiN4J+iw6WG4wog1DUXg=
 github.com/onsi/gomega v1.9.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
+github.com/onsi/gomega v1.10.0 h1:Gwkk+PTu/nfOwNMtUB/mRUv0X7ewW5dO4AERT1ThVKo=
+github.com/onsi/gomega v1.10.0/go.mod h1:Ho0h+IUsWyvy1OpqCwxlQ/21gkhVunqlU8fDGcoTdcA=
 github.com/paketo-buildpacks/libjvm v1.12.0 h1:u3yAFhqRzEMg7bbCZWEKlkb9doslvs31pBorKh7xg1U=
 github.com/paketo-buildpacks/libjvm v1.12.0/go.mod h1:lFUyhEujSMioOJvuRIyccPNAPJxV3q6Dr/ICtN+wkNU=
 github.com/paketo-buildpacks/libpak v1.30.0 h1:P+IwKk+lc8RUi03b11OlgjcZV8TtpGJZMZisdDTPzzg=
