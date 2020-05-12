@@ -9,5 +9,6 @@ require (
 	github.com/paketo-buildpacks/libjvm v1.13.2
 	github.com/paketo-buildpacks/libpak v1.33.0
 	github.com/sclevine/spec v1.4.0
-	gopkg.in/yaml.v2 v2.2.8
+	golang.org/x/sys v0.0.0-20200511232937-7e40ca221e25 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )
