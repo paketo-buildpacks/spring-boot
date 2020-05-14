@@ -17,20 +17,35 @@
 package boot
 
 import (
+	"fmt"
+
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libpak"
 )
 
 type Detect struct{}
 
 func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
+
+	requires := []libcnb.BuildPlanRequire{
+		{Name: "jvm-application"},
+	}
+
+	if _, ok := cr.Resolve("BP_BOOT_NATIVE_IMAGE"); ok {
+		requires = append(requires, libcnb.BuildPlanRequire{
+			Name:     "jdk",
+			Metadata: map[string]interface{}{"native-image": true},
+		})
+	}
+
 	return libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
-			{
-				Requires: []libcnb.BuildPlanRequire{
-					{Name: "jvm-application"},
-				},
-			},
+			{Requires: requires},
 		},
 	}, nil
 }

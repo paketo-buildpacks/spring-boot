@@ -17,6 +17,14 @@ The buildpack will do the following:
   * Contributes Spring Cloud Data Flow configuration metadata to `org.springframework.cloud.dataflow.spring-configuration-metadata.json` image label
 * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Layers-Index` entry
   * Contributes application slices as defined by the layer's index
+* `$BP_BOOT_NATIVE_IMAGE` is set
+  * Creates a GraalVM native image and removes existing bytecode.
+
+## Configuration
+| Environment Variable | Description
+| -------------------- | -----------
+| `$BP_BOOT_NATIVE_IMAGE` | Whether to build a native image from the application.  Defaults to false.
+| `$BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS` | Configure the arguments to pass to native image build
 
 ## License
 This buildpack is released under version 2.0 of the [Apache License][a].

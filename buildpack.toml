@@ -26,6 +26,28 @@ id = "io.buildpacks.stacks.bionic"
 [[stacks]]
 id = "org.cloudfoundry.stacks.cflinuxfs3"
 
+[[metadata.configurations]]
+name        = "BP_BOOT_NATIVE_IMAGE"
+description = "the build to create a native image (requires GraalVM)"
+build       = true
+
+[[metadata.configurations]]
+name        = "BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS"
+description = "the arguments to pass to the native-image command"
+build       = true
+
+[[metadata.dependencies]]
+id      = "spring-graalvm-native"
+name    = "Spring GraalVM Native Feature"
+version = "0.0.0"
+uri     = "https://repo.spring.io/milestone/org/springframework/experimental/spring-graalvm-native/0.7.0/spring-graalvm-native-0.7.0.jar"
+sha256  = "ddbee73cf4d3eb51f4656f93bd74319f46e1d20422ab5622ec23bb628903e506"
+stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
+
+  [[metadata.dependencies.licenses]]
+  type = "Apache-2.0"
+  uri  = "https://github.com/spring-projects-experimental/spring-graal-native/blob/master/LICENSE.txt"
+
 [metadata]
 pre-package   = "scripts/build.sh"
 include-files = [

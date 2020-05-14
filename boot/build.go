@@ -26,8 +26,9 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type Build struct {
@@ -47,6 +48,19 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
+
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
+
+	dr, err := libpak.NewDependencyResolver(context)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
+	}
+
+	dc := libpak.NewDependencyCache(context.Buildpack)
+	dc.Logger = b.Logger
 
 	lib, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
@@ -122,7 +136,33 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		Metadata: map[string]interface{}{"dependencies": d},
 	})
 
-	if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
+	if _, ok := cr.Resolve("BP_BOOT_NATIVE_IMAGE"); ok {
+		args, _ := cr.Resolve("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS")
+
+		dep, err := dr.Resolve("spring-graalvm-native", "")
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+		}
+
+		n, err := NewNativeImage(context.Application.Path, args, dep, dc, manifest, result.Plan)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to create native image layer\n%w", err)
+		}
+		n.Logger = b.Logger
+		result.Layers = append(result.Layers, n)
+
+		startClass, ok := n.Manifest.Get("Start-Class")
+		if !ok {
+			return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Start-Class")
+		}
+
+		command := filepath.Join(context.Application.Path, startClass)
+		result.Processes = append(result.Processes,
+			libcnb.Process{Type: "native-image", Command: command, Direct: true},
+			libcnb.Process{Type: "task", Command: command, Direct: true},
+			libcnb.Process{Type: "web", Command: command, Direct: true},
+		)
+	} else if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
 		b.Logger.Header("Creating slices from layers index")
 
 		file := filepath.Join(context.Application.Path, index)

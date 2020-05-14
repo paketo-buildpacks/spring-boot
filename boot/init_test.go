@@ -28,5 +28,6 @@ func TestUnit(t *testing.T) {
 	suite("Build", testBuild)
 	suite("ConfigurationMetadata", testConfigurationMetadata)
 	suite("Detect", testDetect)
+	suite("NativeImage", testNativeImage)
 	suite.Run(t)
 }

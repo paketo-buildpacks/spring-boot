@@ -43,6 +43,9 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		ctx.Application.Path, err = ioutil.TempDir("", "build-application")
 		Expect(err).NotTo(HaveOccurred())
 
+		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
+		Expect(err).NotTo(HaveOccurred())
+
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
 	})
 
@@ -85,6 +88,26 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Labels).To(ContainElement(libcnb.Label{
 			Key:   "org.springframework.boot.spring-configuration-metadata.json",
 			Value: `{"groups":[{"name":"alpha"}]}`,
+		}))
+	})
+
+	it("contributes org.springframework.cloud.dataflow.spring-configuration-metadata.json label", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
+			[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644))
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "dataflow-configuration-metadata-whitelist.properties"),
+			[]byte("configuration-properties.classes=alpha"), 0644))
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Labels).To(ContainElement(libcnb.Label{
+			Key:   "org.springframework.cloud.dataflow.spring-configuration-metadata.json",
+			Value: `{"groups":[{"name":"alpha","sourceType":"alpha"}]}`,
 		}))
 	})
 
@@ -147,6 +170,85 @@ Spring-Boot-Lib: BOOT-INF/lib
 				},
 			},
 		}))
+	})
+
+	context("BP_BOOT_NATIVE_IMAGE", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_BOOT_NATIVE_IMAGE", "")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BP_BOOT_NATIVE_IMAGE")).To(Succeed())
+		})
+
+		it("contributes native image layer", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+Spring-Boot-Layers-Index: layers.idx
+Start-Class: test-start-class
+`), 0644)).To(Succeed())
+
+			ctx.Buildpack.Metadata = map[string]interface{}{
+				"dependencies": []map[string]interface{}{
+					{
+						"id":      "spring-graalvm-native",
+						"version": "1.1.1",
+						"stacks":  []interface{}{"test-stack-id"},
+					},
+				},
+			}
+			ctx.StackID = "test-stack-id"
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].(boot.NativeImage).Arguments).To(BeEmpty())
+			Expect(result.Processes).To(ContainElements(
+				libcnb.Process{Type: "native-image", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
+				libcnb.Process{Type: "task", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
+				libcnb.Process{Type: "web", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
+			))
+		})
+
+		context("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS", func() {
+			it.Before(func() {
+				Expect(os.Setenv("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS", "test-native-image-argument")).To(Succeed())
+			})
+
+			it.After(func() {
+				Expect(os.Unsetenv("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS")).To(Succeed())
+			})
+
+			it("contributes native image build arguments", func() {
+				Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+Spring-Boot-Layers-Index: layers.idx
+Start-Class: test-start-class
+`), 0644)).To(Succeed())
+
+				ctx.Buildpack.Metadata = map[string]interface{}{
+					"dependencies": []map[string]interface{}{
+						{
+							"id":      "spring-graalvm-native",
+							"version": "1.1.1",
+							"stacks":  []interface{}{"test-stack-id"},
+						},
+					},
+				}
+				ctx.StackID = "test-stack-id"
+
+				result, err := build.Build(ctx)
+				Expect(err).NotTo(HaveOccurred())
+
+				Expect(result.Layers[0].(boot.NativeImage).Arguments).To(Equal([]string{"test-native-image-argument"}))
+			})
+
+		})
 	})
 
 	it("contributes slices from layers index", func() {
