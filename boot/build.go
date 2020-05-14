@@ -48,10 +48,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
 
-	classes, ok := manifest.Get("Spring-Boot-Classes")
-	if !ok {
-		return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Classes")
-	}
 	lib, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
 		return libcnb.BuildResult{}, fmt.Errorf("manifest does not container Spring-Boot-Lib")
@@ -69,7 +65,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	c, err := NewConfigurationMetadataFromPath(context.Application.Path)
 	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to read configuration metadata from %s\n%w", classes, err)
+		return libcnb.BuildResult{}, fmt.Errorf("unable to read configuration metadata from %s\n%w", context.Application.Path, err)
 	}
 
 	file := filepath.Join(lib, "*.jar")
