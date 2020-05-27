@@ -55,6 +55,8 @@ github.com/paketo-buildpacks/libjvm v1.15.1 h1:XTMY42vylB8vg4hP3q0K6pvd3/l6eouly
 github.com/paketo-buildpacks/libjvm v1.15.1/go.mod h1:kq6hCtQNeKgbGwYQkKXMFaL50od0qJzkdKu+95gVmxY=
 github.com/paketo-buildpacks/libpak v1.33.3 h1:+PlLI0mZyS8aSrPUgE9itzq7ZhSz+aR9KZnMSJva86s=
 github.com/paketo-buildpacks/libpak v1.33.3/go.mod h1:7OMemQqiycftAUWmZtsXN9iJR+f0rOcuUFJnI9Xxq5w=
+github.com/paketo-buildpacks/libpak v1.34.0 h1:Bco6cRy6N+uPIg7SlVOxrHPDe5rAc/HWdZr5aIBH6+A=
+github.com/paketo-buildpacks/libpak v1.34.0/go.mod h1:7OMemQqiycftAUWmZtsXN9iJR+f0rOcuUFJnI9Xxq5w=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible h1:Jd6xfriVlJ6hWPvYOE0Ni0QWcNTLRehfGPFxr3eSL80=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible/go.mod h1:xlUlxe/2ItGlQyMTstqeDv9r3U4obH7xYd26TbDQutY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -97,6 +99,8 @@ golang.org/x/sys v0.0.0-20200223170610-d5e6a3e2c0ae/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 h1:DYfZAGf2WMFjMxbgTjaC+2HC7NkNAQs+6Q8b9WEB/F4=
 golang.org/x/sys v0.0.0-20200519105757-fe76b779f299/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200523222454-059865788121 h1:rITEj+UZHYC927n8GT97eC3zrpzXdb/voyeOuVKS46o=
+golang.org/x/sys v0.0.0-20200523222454-059865788121/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
 golang.org/x/text v0.3.2/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=
