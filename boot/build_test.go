@@ -208,9 +208,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(2))
-		Expect(result.Layers[0].Name()).To(Equal("spring-cloud-bindings"))
-		Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.ID).To(Equal("spring-cloud-bindings"))
-		Expect(result.Layers[0].(boot.SpringCloudBindings).SpringBootLib).To(Equal(filepath.Join(ctx.Application.Path, "BOOT-INF/lib")))
+		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.ID).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[1].(boot.SpringCloudBindings).SpringBootLib).To(Equal(filepath.Join(ctx.Application.Path, "BOOT-INF/lib")))
 	})
 
 	context("BP_BOOT_NATIVE_IMAGE", func() {
@@ -242,8 +242,8 @@ Start-Class: test-start-class
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(2))
-			Expect(result.Layers[1].(boot.NativeImage).Arguments).To(BeEmpty())
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].(boot.NativeImage).Arguments).To(BeEmpty())
 			Expect(result.Processes).To(ContainElements(
 				libcnb.Process{Type: "native-image", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
 				libcnb.Process{Type: "task", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
@@ -280,7 +280,7 @@ Start-Class: test-start-class
 				result, err := build.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(result.Layers[1].(boot.NativeImage).Arguments).To(Equal([]string{"test-native-image-argument"}))
+				Expect(result.Layers[0].(boot.NativeImage).Arguments).To(Equal([]string{"test-native-image-argument"}))
 			})
 
 		})

@@ -31,15 +31,21 @@ func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) 
 		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
-	requires := []libcnb.BuildPlanRequire{
-		{Name: "jvm-application"},
-	}
+	var requires []libcnb.BuildPlanRequire
 
 	if _, ok := cr.Resolve("BP_BOOT_NATIVE_IMAGE"); ok {
-		requires = append(requires, libcnb.BuildPlanRequire{
-			Name:     "jdk",
-			Metadata: map[string]interface{}{"native-image": true},
-		})
+		requires = append(requires,
+			libcnb.BuildPlanRequire{
+				Name:     "jdk",
+				Metadata: map[string]interface{}{"native-image": true},
+			},
+			libcnb.BuildPlanRequire{
+				Name:     "jvm-application",
+				Metadata: map[string]interface{}{"native-image": true},
+			},
+		)
+	} else {
+		requires = append(requires, libcnb.BuildPlanRequire{Name: "jvm-application"})
 	}
 
 	return libcnb.DetectResult{

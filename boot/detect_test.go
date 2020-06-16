@@ -63,9 +63,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Plans: []libcnb.BuildPlan{
 					{
 						Requires: []libcnb.BuildPlanRequire{
-							{Name: "jvm-application"},
 							{
 								Name:     "jdk",
+								Metadata: map[string]interface{}{"native-image": true},
+							},
+							{
+								Name:     "jvm-application",
 								Metadata: map[string]interface{}{"native-image": true},
 							},
 						},

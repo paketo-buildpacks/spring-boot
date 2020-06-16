@@ -112,15 +112,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		})
 	}
 
-	dep, err := dr.Resolve("spring-cloud-bindings", "")
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
-	}
-
-	bindingsLayer := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc, result.Plan)
-	bindingsLayer.Logger = b.Logger
-	result.Layers = append(result.Layers, bindingsLayer)
-
 	c, err = NewDataFlowConfigurationMetadata(context.Application.Path, c)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate data flow configuration metadata\n%w", err)
@@ -169,7 +160,8 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
 		}
 
-		n, err := NewNativeImage(context.Application.Path, args, dep, dc, manifest, entries, result.Plan)
+		n, err := NewNativeImage(context.Application.Path, args, dep, dc, manifest, context.StackID, entries,
+			result.Plan)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create native image layer\n%w", err)
 		}
@@ -201,6 +193,15 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		at := NewWebApplicationType(wr, entries)
 		at.Logger = b.Logger
 		result.Layers = append(result.Layers, at)
+
+		dep, err := dr.Resolve("spring-cloud-bindings", "")
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+		}
+
+		bindingsLayer := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc, result.Plan)
+		bindingsLayer.Logger = b.Logger
+		result.Layers = append(result.Layers, bindingsLayer)
 
 		if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
 			b.Logger.Header("Creating slices from layers index")
