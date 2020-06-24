@@ -155,7 +155,7 @@ func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		return libcnb.Layer{}, fmt.Errorf("unable to contribute native-image layer\n%w", err)
 	}
 
-	n.Logger.Header("Removing source code")
+	n.Logger.Header("Removing bytecode")
 	cs, err := ioutil.ReadDir(n.ApplicationPath)
 	if err != nil {
 		return libcnb.Layer{}, fmt.Errorf("unable to list children of %s\n%w", n.ApplicationPath, err)
