@@ -80,8 +80,10 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "fixture-marker"), []byte{}, 0644)).To(Succeed())
 
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF"), 0755)).To(Succeed())
+		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF", "native-image"), 0755)).To(Succeed())
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "classpath.idx"), []byte(`
 - "test-jar.jar"`), 0644)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "native-image", "reflect-config.json"), []byte(`[]`), 0644)).To(Succeed())
 
 		n, err := boot.NewNativeImage(ctx.Application.Path, "test-argument-1 test-argument-2", dep, dc, m,
 			&libcnb.BuildpackPlan{})
@@ -113,6 +115,7 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 			strings.Join([]string{
 				filepath.Join(ctx.Application.Path, "BOOT-INF", "classes"),
 				filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-jar.jar"),
+				ctx.Application.Path,
 				filepath.Join("testdata", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "stub-spring-graalvm-native.jar"),
 			}, ":"),
 			"test-start-class",

@@ -122,6 +122,9 @@ func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			cp = append(cp, filepath.Join(n.ApplicationPath, s, l))
 		}
 
+		// Pick up /META-INF
+		cp = append(cp, n.ApplicationPath)
+
 		n.Logger.Header(color.BlueString("%s %s", n.Dependency.Name, n.Dependency.Version))
 
 		artifact, err := n.DependencyCache.Artifact(n.Dependency)
