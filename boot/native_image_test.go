@@ -111,6 +111,7 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 			fmt.Sprintf("-H:Name=%s", filepath.Join(layer.Path, "test-start-class")),
 			"-cp",
 			strings.Join([]string{
+				ctx.Application.Path,
 				filepath.Join(ctx.Application.Path, "BOOT-INF", "classes"),
 				filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-jar.jar"),
 				filepath.Join("testdata", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "stub-spring-graalvm-native.jar"),

@@ -88,7 +88,7 @@ func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	}
 
 	layer, err := n.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
-		var cp []string
+		cp := []string{n.Application.Path}
 
 		s, ok := n.Manifest.Get("Spring-Boot-Classes")
 		if !ok {
