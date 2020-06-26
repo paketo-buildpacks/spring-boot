@@ -16,4 +16,4 @@ outputs:
   - name: source
 
 run:
-  path: source/update-spring-generations.sh
+  path: source/scripts/update-spring-generations.sh
