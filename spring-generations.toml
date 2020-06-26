@@ -1,0 +1,549 @@
+[[projects]]
+  name = "Spring IO Platform"
+  slug = "platform"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring AMQP"
+  slug = "spring-amqp"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring for Android"
+  slug = "spring-android"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Batch"
+  slug = "spring-batch"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Boot"
+  slug = "spring-boot"
+  status = "ACTIVE"
+
+  [[projects.generations]]
+    name = "1.5.x"
+    oss = "2019-08-01"
+    commercial = "2019-09-01"
+
+  [[projects.generations]]
+    name = "2.0.x"
+    oss = "2019-04-03"
+    commercial = "2020-04-01"
+
+  [[projects.generations]]
+    name = "2.1.x"
+    oss = "2019-10-01"
+    commercial = "2021-04-01"
+
+  [[projects.generations]]
+    name = "2.2.x"
+    oss = "2020-10-01"
+    commercial = "2021-11-15"
+
+  [[projects.generations]]
+    name = "2.3.x"
+    oss = "2021-05-15"
+    commercial = ""
+
+  [[projects.generations]]
+    name = "2.4.x"
+    oss = "2021-11-15"
+    commercial = ""
+
+[[projects]]
+  name = "Spring Cloud"
+  slug = "spring-cloud"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Alibaba"
+  slug = "spring-cloud-alibaba"
+  status = "COMMUNITY"
+
+[[projects]]
+  name = "Spring Cloud App Broker"
+  slug = "spring-cloud-app-broker"
+  status = "INCUBATING"
+
+[[projects]]
+  name = "Spring Cloud for Amazon Web Services"
+  slug = "spring-cloud-aws"
+  status = "COMMUNITY"
+
+[[projects]]
+  name = "Spring Cloud Azure"
+  slug = "spring-cloud-azure"
+  status = "COMMUNITY"
+
+[[projects]]
+  name = "Spring Cloud Bus"
+  slug = "spring-cloud-bus"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Circuit Breaker"
+  slug = "spring-cloud-circuitbreaker"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud CLI"
+  slug = "spring-cloud-cli"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud for Cloud Foundry"
+  slug = "spring-cloud-cloudfoundry"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud - Cloud Foundry Service Broker"
+  slug = "spring-cloud-cloudfoundry-service-broker"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Cluster"
+  slug = "spring-cloud-cluster"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Cloud Commons"
+  slug = "spring-cloud-commons"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Config"
+  slug = "spring-cloud-config"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Connectors"
+  slug = "spring-cloud-connectors"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Consul"
+  slug = "spring-cloud-consul"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Contract"
+  slug = "spring-cloud-contract"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "spring-cloud-data"
+  slug = "spring-cloud-data"
+  status = "INCUBATING"
+
+[[projects]]
+  name = "Spring Cloud Data Flow"
+  slug = "spring-cloud-dataflow"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Function"
+  slug = "spring-cloud-function"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Gateway"
+  slug = "spring-cloud-gateway"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud GCP"
+  slug = "spring-cloud-gcp"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Kubernetes"
+  slug = "spring-cloud-kubernetes"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Netflix"
+  slug = "spring-cloud-netflix"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Open Service Broker"
+  slug = "spring-cloud-open-service-broker"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud OpenFeign"
+  slug = "spring-cloud-openfeign"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Pipelines"
+  slug = "spring-cloud-pipelines"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Schema Registry"
+  slug = "spring-cloud-schema-registry"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Security"
+  slug = "spring-cloud-security"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Skipper"
+  slug = "spring-cloud-skipper"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Sleuth"
+  slug = "spring-cloud-sleuth"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Stream"
+  slug = "spring-cloud-stream"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Stream App Starters"
+  slug = "spring-cloud-stream-app-starters"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Stream Applications"
+  slug = "spring-cloud-stream-applications"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Stream Kafka Binder"
+  slug = "spring-cloud-stream-binder-kafka"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Stream Rabbit Binder"
+  slug = "spring-cloud-stream-binder-rabbit"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Task"
+  slug = "spring-cloud-task"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Task App Starters"
+  slug = "spring-cloud-task-app-starters"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Vault"
+  slug = "spring-cloud-vault"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Cloud Zookeeper"
+  slug = "spring-cloud-zookeeper"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring CredHub"
+  slug = "spring-credhub"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data"
+  slug = "spring-data"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data for Apache Cassandra"
+  slug = "spring-data-cassandra"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data Couchbase"
+  slug = "spring-data-couchbase"
+  status = "COMMUNITY"
+
+[[projects]]
+  name = "Spring Data Elasticsearch"
+  slug = "spring-data-elasticsearch"
+  status = "COMMUNITY"
+
+  [[projects.generations]]
+    name = "3.1.x"
+    oss = "2021-01-01"
+    commercial = "2021-07-01"
+
+  [[projects.generations]]
+    name = "3.2.x"
+    oss = "2021-01-01"
+    commercial = "2021-07-01"
+
+  [[projects.generations]]
+    name = "4.0.x"
+    oss = "2021-01-01"
+    commercial = ""
+
+[[projects]]
+  name = "Spring Data Envers"
+  slug = "spring-data-envers"
+  status = "COMMUNITY"
+
+[[projects]]
+  name = "Spring Data for Pivotal GemFire"
+  slug = "spring-data-gemfire"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data for Apache Geode"
+  slug = "spring-data-geode"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data JDBC"
+  slug = "spring-data-jdbc"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data JDBC Extensions"
+  slug = "spring-data-jdbc-ext"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Data JPA"
+  slug = "spring-data-jpa"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data LDAP"
+  slug = "spring-data-ldap"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data MongoDB"
+  slug = "spring-data-mongodb"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data Neo4J"
+  slug = "spring-data-neo4j"
+  status = "COMMUNITY"
+
+[[projects]]
+  name = "Spring Data R2DBC"
+  slug = "spring-data-r2dbc"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data Redis"
+  slug = "spring-data-redis"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data REST"
+  slug = "spring-data-rest"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Data for Apache Solr"
+  slug = "spring-data-solr"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Flex"
+  slug = "spring-flex"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Flo"
+  slug = "spring-flo"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Framework"
+  slug = "spring-framework"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring for Apache Hadoop"
+  slug = "spring-hadoop"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring HATEOAS"
+  slug = "spring-hateoas"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Integration"
+  slug = "spring-integration"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Integration Groovy DSL"
+  slug = "spring-integration-dsl-groovy"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Integration Scala DSL"
+  slug = "spring-integration-dsl-scala"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring for Apache Kafka"
+  slug = "spring-kafka"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring LDAP"
+  slug = "spring-ldap"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Mobile"
+  slug = "spring-mobile"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "New Spring Project"
+  slug = "spring-new"
+  status = "INCUBATING"
+
+[[projects]]
+  name = "Spring Plugin"
+  slug = "spring-plugin"
+  status = "INCUBATING"
+
+[[projects]]
+  name = "Spring REST Docs"
+  slug = "spring-restdocs"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Roo"
+  slug = "spring-roo"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Scala"
+  slug = "spring-scala"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Security"
+  slug = "spring-security"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Security Kerberos"
+  slug = "spring-security-kerberos"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Security OAuth"
+  slug = "spring-security-oauth"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Security SAML"
+  slug = "spring-security-saml"
+  status = "INCUBATING"
+
+[[projects]]
+  name = "Spring Session"
+  slug = "spring-session"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Session Core"
+  slug = "spring-session-core"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Session for Apache Geode & Pivotal GemFire"
+  slug = "spring-session-data-geode"
+  status = "INCUBATING"
+
+[[projects]]
+  name = "Spring Session MongoDB"
+  slug = "spring-session-data-mongodb"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Session Data Redis"
+  slug = "spring-session-data-redis"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Session Hazelcast"
+  slug = "spring-session-hazelcast"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Session JDBC"
+  slug = "spring-session-jdbc"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Shell"
+  slug = "spring-shell"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Social"
+  slug = "spring-social"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Social Facebook"
+  slug = "spring-social-facebook"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Social GitHub"
+  slug = "spring-social-github"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Social LinkedIn"
+  slug = "spring-social-linkedin"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Social TripIt"
+  slug = "spring-social-tripit"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Social Twitter"
+  slug = "spring-social-twitter"
+  status = "END_OF_LIFE"
+
+[[projects]]
+  name = "Spring Statemachine"
+  slug = "spring-statemachine"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Vault"
+  slug = "spring-vault"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Web Flow"
+  slug = "spring-webflow"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring Web Services"
+  slug = "spring-ws"
+  status = "ACTIVE"
+
+[[projects]]
+  name = "Spring XD"
+  slug = "spring-xd"
+  status = "END_OF_LIFE"
