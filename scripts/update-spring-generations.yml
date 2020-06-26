@@ -9,8 +9,8 @@ image_resource:
 
 inputs:
   - name: build-common
+  - name: dependency
   - name: source
-  - name: spring-generations
 
 outputs:
   - name: source

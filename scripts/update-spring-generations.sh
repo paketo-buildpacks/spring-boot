@@ -5,9 +5,9 @@ set -euo pipefail
 # shellcheck source=common.sh
 source "$(dirname "$0")"/../../build-common/common.sh
 
-cd "${ROOT}"/source
+cp "${ROOT}"/dependency/spring-generations.toml "${ROOT}"/source
 
-cp "${ROOT}"/spring-generations/spring-generations.toml .
+cd "${ROOT}"/source
 
 git add spring-generations.toml
 git checkout -- .
