@@ -136,6 +136,16 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		Metadata: map[string]interface{}{"dependencies": d},
 	})
 
+	gv, err := NewGenerationValidator(filepath.Join(context.Buildpack.Path, "spring-generations.toml"))
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create generation validator\n%w", err)
+	}
+	gv.Logger = b.Logger
+
+	if err := gv.Validate("spring-boot", version); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to validate spring-boot version\n%w", err)
+	}
+
 	if _, ok := cr.Resolve("BP_BOOT_NATIVE_IMAGE"); ok {
 		args, _ := cr.Resolve("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS")
 

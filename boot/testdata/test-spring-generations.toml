@@ -1,0 +1,34 @@
+[[projects]]
+  name = "Spring Boot"
+  slug = "spring-boot"
+  status = "ACTIVE"
+
+  [[projects.generations]]
+    name = "1.5.x"
+    oss = "2019-08-01"
+    commercial = "2019-09-01"
+
+  [[projects.generations]]
+    name = "2.0.x"
+    oss = "2019-04-03"
+    commercial = "2020-04-01"
+
+  [[projects.generations]]
+    name = "2.1.x"
+    oss = "2019-10-01"
+    commercial = "2021-04-01"
+
+  [[projects.generations]]
+    name = "2.2.x"
+    oss = "2020-10-01"
+    commercial = "2021-11-15"
+
+  [[projects.generations]]
+    name = "2.3.x"
+    oss = "2021-05-15"
+    commercial = ""
+
+  [[projects.generations]]
+    name = "2.4.x"
+    oss = "2021-11-15"
+    commercial = ""
