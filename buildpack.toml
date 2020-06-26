@@ -58,4 +58,5 @@ include-files = [
   "bin/detect",
   "bin/main",
   "buildpack.toml",
+  "spring-generations.toml",
 ]
