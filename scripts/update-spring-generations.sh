@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # shellcheck source=common.sh
-source "$(dirname "$0")"/common.sh
+source "$(dirname "$0")"/../../build-common/common.sh
 
 cd "${ROOT}"/source
 
