@@ -102,9 +102,14 @@ func NewGenerationValidator(path string) (GenerationValidator, error) {
 }
 
 func (v GenerationValidator) Validate(slug string, version string) error {
+	nv := NormalizedVersion.FindString(version)
+	if nv == "" {
+		return nil
+	}
+
 	for _, p := range v.Projects {
 		if slug == p.Slug {
-			ver, err := semver.NewVersion(NormalizedVersion.FindString(version))
+			ver, err := semver.NewVersion(nv)
 			if err != nil {
 				return fmt.Errorf("unable to parse %s to version\n%w", version, err)
 			}
