@@ -19,6 +19,8 @@ The buildpack will do the following:
   * Contributes application slices as defined by the layer's index
 * `$BP_BOOT_NATIVE_IMAGE` is set
   * Creates a GraalVM native image and removes existing bytecode.
+* If the application is a reactive web application
+  * Configures `$BPL_JVM_THREAD_COUNT` to 50
 
 ## Configuration
 | Environment Variable | Description
