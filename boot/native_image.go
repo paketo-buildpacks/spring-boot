@@ -47,7 +47,8 @@ type NativeImage struct {
 }
 
 func NewNativeImage(applicationPath string, arguments string, dependency libpak.BuildpackDependency,
-	cache libpak.DependencyCache, manifest *properties.Properties, plan *libcnb.BuildpackPlan) (NativeImage, error) {
+	cache libpak.DependencyCache, manifest *properties.Properties, files []sherpa.FileEntry,
+	plan *libcnb.BuildpackPlan) (NativeImage, error) {
 
 	var err error
 
@@ -55,11 +56,7 @@ func NewNativeImage(applicationPath string, arguments string, dependency libpak.
 
 	expected := map[string]interface{}{
 		"dependency": dependency,
-	}
-
-	expected["files"], err = sherpa.NewFileListing(applicationPath)
-	if err != nil {
-		return NativeImage{}, fmt.Errorf("unable to create file listing for %s\n%w", applicationPath, err)
+		"files":      files,
 	}
 
 	expected["arguments"], err = shellwords.Parse(arguments)

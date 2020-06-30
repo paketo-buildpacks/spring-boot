@@ -30,6 +30,7 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/effect"
 	"github.com/paketo-buildpacks/libpak/effect/mocks"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"github.com/paketo-buildpacks/spring-boot/boot"
 	"github.com/sclevine/spec"
 	"github.com/stretchr/testify/mock"
@@ -84,7 +85,7 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 - "test-jar.jar"`), 0644)).To(Succeed())
 
 		n, err := boot.NewNativeImage(ctx.Application.Path, "test-argument-1 test-argument-2", dep, dc, m,
-			&libcnb.BuildpackPlan{})
+			[]sherpa.FileEntry{}, &libcnb.BuildpackPlan{})
 		Expect(err).NotTo(HaveOccurred())
 		n.Executor = executor
 

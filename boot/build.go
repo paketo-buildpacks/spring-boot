@@ -28,6 +28,7 @@ import (
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"gopkg.in/yaml.v3"
 )
 
@@ -146,6 +147,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to validate spring-boot version\n%w", err)
 	}
 
+	entries, err := sherpa.NewFileListing(context.Application.Path)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create file listing for %s\n%w", context.Application.Path, err)
+	}
+
 	if _, ok := cr.Resolve("BP_BOOT_NATIVE_IMAGE"); ok {
 		args, _ := cr.Resolve("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS")
 
@@ -154,7 +160,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
 		}
 
-		n, err := NewNativeImage(context.Application.Path, args, dep, dc, manifest, result.Plan)
+		n, err := NewNativeImage(context.Application.Path, args, dep, dc, manifest, entries, result.Plan)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create native image layer\n%w", err)
 		}
@@ -172,25 +178,41 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			libcnb.Process{Type: "task", Command: command, Direct: true},
 			libcnb.Process{Type: "web", Command: command, Direct: true},
 		)
-	} else if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
-		b.Logger.Header("Creating slices from layers index")
+	} else {
+		classes, ok := manifest.Get("Spring-Boot-Classes")
+		if !ok {
+			return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Classes")
+		}
 
-		file := filepath.Join(context.Application.Path, index)
-		in, err := os.Open(file)
+		wr, err := NewWebApplicationResolver(classes, lib)
 		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to open %s\n%w", file, err)
-		}
-		defer in.Close()
-
-		var layers []map[string][]string
-		if err := yaml.NewDecoder(in).Decode(&layers); err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to decode %s\n%w", file, err)
+			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationTypeResolver\n%w", err)
 		}
 
-		for _, layer := range layers {
-			for name, paths := range layer {
-				b.Logger.Body(name)
-				result.Slices = append(result.Slices, libcnb.Slice{Paths: paths})
+		at := NewWebApplicationType(wr, entries)
+		at.Logger = b.Logger
+		result.Layers = append(result.Layers, at)
+
+		if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
+			b.Logger.Header("Creating slices from layers index")
+
+			file := filepath.Join(context.Application.Path, index)
+			in, err := os.Open(file)
+			if err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf("unable to open %s\n%w", file, err)
+			}
+			defer in.Close()
+
+			var layers []map[string][]string
+			if err := yaml.NewDecoder(in).Decode(&layers); err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf("unable to decode %s\n%w", file, err)
+			}
+
+			for _, layer := range layers {
+				for name, paths := range layer {
+					b.Logger.Body(name)
+					result.Slices = append(result.Slices, libcnb.Slice{Paths: paths})
+				}
 			}
 		}
 	}

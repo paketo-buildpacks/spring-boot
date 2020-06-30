@@ -172,6 +172,19 @@ Spring-Boot-Lib: BOOT-INF/lib
 		}))
 	})
 
+	it("adds web-application-type to the result", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Layers).To(HaveLen(1))
+	})
+
 	context("BP_BOOT_NATIVE_IMAGE", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BP_BOOT_NATIVE_IMAGE", "")).To(Succeed())
