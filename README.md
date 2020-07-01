@@ -16,7 +16,7 @@ The buildpack will do the following:
 * If `<APPLICATION_ROOT>/META-INF/dataflow-configuration-metadata-whitelist.properties` exists
   * Contributes Spring Cloud Data Flow configuration metadata to `org.springframework.cloud.dataflow.spring-configuration-metadata.json` image label
 * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Layers-Index` entry
-  * Contributes application slices as defined by the layer's index
+  * Contributes application slices as defined by the layer index
 * `$BP_BOOT_NATIVE_IMAGE` is set
   * Creates a GraalVM native image and removes existing bytecode.
 * If the application is a reactive web application
