@@ -23,8 +23,9 @@ import (
 	"testing"
 
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/spring-boot/boot"
 	"github.com/sclevine/spec"
+
+	"github.com/paketo-buildpacks/spring-boot/boot"
 )
 
 func testConfigurationMetadata(t *testing.T, context spec.G, it spec.S) {

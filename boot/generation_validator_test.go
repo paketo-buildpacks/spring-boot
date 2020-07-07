@@ -25,8 +25,9 @@ import (
 	"github.com/heroku/color"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/spring-boot/boot"
 	"github.com/sclevine/spec"
+
+	"github.com/paketo-buildpacks/spring-boot/boot"
 )
 
 func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {

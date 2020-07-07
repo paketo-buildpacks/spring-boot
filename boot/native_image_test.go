@@ -31,9 +31,10 @@ import (
 	"github.com/paketo-buildpacks/libpak/effect"
 	"github.com/paketo-buildpacks/libpak/effect/mocks"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"github.com/paketo-buildpacks/spring-boot/boot"
 	"github.com/sclevine/spec"
 	"github.com/stretchr/testify/mock"
+
+	"github.com/paketo-buildpacks/spring-boot/boot"
 )
 
 func testNativeImage(t *testing.T, context spec.G, it spec.S) {
