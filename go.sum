@@ -2,10 +2,11 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.1.0 h1:Y2lUDsFKVRSYGojLJ1yLxSXdMmMYTYls0rCvoqmMUQk=
 github.com/Masterminds/semver/v3 v3.1.0/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/buildpacks/libcnb v1.13.0 h1:Wjr2CY1UmgihpUZF+/US8KX9y5dawRJNtCtWebOTggo=
 github.com/buildpacks/libcnb v1.13.0/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
 github.com/buildpacks/libcnb v1.14.0 h1:/6Tbp+IsfKeiAzTXWfZaNxaMycmV6G8gu0cWn5W21yg=
 github.com/buildpacks/libcnb v1.14.0/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
+github.com/buildpacks/libcnb v1.14.1 h1:tYAEa4JsuGY/xdPwm1Edcat2sU0kxkBqBJ7EwI7KlJM=
+github.com/buildpacks/libcnb v1.14.1/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.11 h1:07n33Z8lZxZ2qwegKbObQohDhXDQxiMMz1NOUGYlesw=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
