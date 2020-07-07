@@ -12,6 +12,7 @@ require (
 	github.com/onsi/gomega v1.10.1
 	github.com/paketo-buildpacks/libjvm v1.16.1
 	github.com/paketo-buildpacks/libpak v1.37.1
+	github.com/rakyll/statik v0.1.7
 	github.com/sclevine/spec v1.4.0
 	github.com/stretchr/testify v1.6.1
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776

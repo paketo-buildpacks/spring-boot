@@ -13,6 +13,8 @@ The buildpack will do the following:
 * Contributes `Implementation-Title` manifest entry to `org.opencontainers.image.title` image label
 * Contributes `Implementation-version` manifest entry to `org.opencontainers.image.version` image label
 * Contributes dependency information extracted from Maven naming conventions to the image's BOM
+* Contributes [Spring Cloud Bindings][b] as an application dependency
+  * This enables bindings-aware Spring Boot auto-configuration when [CNB bindings][c] are present during launch
 * If `<APPLICATION_ROOT>/META-INF/dataflow-configuration-metadata-whitelist.properties` exists
   * Contributes Spring Cloud Data Flow configuration metadata to `org.springframework.cloud.dataflow.spring-configuration-metadata.json` image label
 * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Layers-Index` entry
@@ -32,3 +34,5 @@ The buildpack will do the following:
 This buildpack is released under version 2.0 of the [Apache License][a].
 
 [a]: http://www.apache.org/licenses/LICENSE-2.0
+[b]: https://github.com/spring-cloud/spring-cloud-bindings
+[c]: https://github.com/buildpacks/spec/blob/main/extensions/bindings.md

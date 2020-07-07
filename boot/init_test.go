@@ -30,6 +30,7 @@ func TestUnit(t *testing.T) {
 	suite("Detect", testDetect)
 	suite("GenerationValidator", testGenerationValidator)
 	suite("NativeImage", testNativeImage)
+	suite("SpringCloudBindings", testSpringCloudBindings)
 	suite("WebApplicationType", testWebApplicationType)
 	suite("WebApplicationTypeResolver", testWebApplicationTypeResolver)
 	suite.Run(t)
