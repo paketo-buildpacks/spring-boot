@@ -24,15 +24,17 @@ The buildpack will do the following:
 * If the application is a reactive web application
   * Configures `$BPL_JVM_THREAD_COUNT` to 50
 
+[b]: https://github.com/spring-cloud/spring-cloud-bindings
+[c]: https://github.com/buildpacks/spec/blob/main/extensions/bindings.md
+
 ## Configuration
 | Environment Variable | Description
 | -------------------- | -----------
 | `$BP_BOOT_NATIVE_IMAGE` | Whether to build a native image from the application.  Defaults to false.
 | `$BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS` | Configure the arguments to pass to native image build
+| `$BPL_SPRING_CLOUD_BINDINGS_ENABLED` | Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
 
 ## License
 This buildpack is released under version 2.0 of the [Apache License][a].
 
 [a]: http://www.apache.org/licenses/LICENSE-2.0
-[b]: https://github.com/spring-cloud/spring-cloud-bindings
-[c]: https://github.com/buildpacks/spec/blob/main/extensions/bindings.md

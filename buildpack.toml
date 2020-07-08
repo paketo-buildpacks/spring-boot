@@ -27,6 +27,11 @@ id = "io.buildpacks.stacks.bionic"
 id = "org.cloudfoundry.stacks.cflinuxfs3"
 
 [[metadata.configurations]]
+name        = "BPL_SPRING_CLOUD_BINDINGS_ENABLED"
+description = "whether to auto-configure Spring Boot environment properties from bindings"
+launch      = true
+
+[[metadata.configurations]]
 name        = "BP_BOOT_NATIVE_IMAGE"
 description = "the build to create a native image (requires GraalVM)"
 build       = true
