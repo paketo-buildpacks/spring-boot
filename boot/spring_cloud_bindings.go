@@ -30,52 +30,58 @@ import (
 )
 
 type SpringCloudBindings struct {
-	SpringBootLib    string
+	Dependency       libpak.BuildpackDependency
 	LayerContributor libpak.DependencyLayerContributor
 	Logger           bard.Logger
+	SpringBootLib    string
 }
 
-func NewSpringCloudBindings(
-	springBootLib string,
-	dependency libpak.BuildpackDependency,
-	cache libpak.DependencyCache,
+func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDependency, cache libpak.DependencyCache,
 	plan *libcnb.BuildpackPlan) SpringCloudBindings {
-	return SpringCloudBindings{
-		SpringBootLib:    springBootLib,
-		LayerContributor: libpak.NewDependencyLayerContributor(dependency, cache, plan),
-	}
 
+	return SpringCloudBindings{
+		Dependency:       dependency,
+		LayerContributor: libpak.NewDependencyLayerContributor(dependency, cache, plan),
+		SpringBootLib:    springBootLib,
+	}
 }
 
 //go:generate statik -src . -include *.sh
+
 func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 
-	jarName := filepath.Base(s.LayerContributor.Dependency.URI)
-	jarPath := filepath.Join(layer.Path, jarName)
+	file := filepath.Join(layer.Path, filepath.Base(s.Dependency.URI))
 
 	layer, err := s.LayerContributor.Contribute(layer, func(artifact *os.File) (libcnb.Layer, error) {
-		if err := sherpa.CopyFile(artifact, jarPath); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to copy artifact to %s\n%w", jarName, err)
+		s.Logger.Bodyf("Copying to %s", layer.Path)
+
+		if err := sherpa.CopyFile(artifact, file); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("unable to copy artifact to %s\n%w", file, err)
 		}
-		layer.Launch = true
-		profileScript, err := sherpa.StaticFile("/" + ("enable-bindings.sh"))
+
+		s, err := sherpa.StaticFile("/spring-cloud-bindings.sh")
 		if err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to load %s\n%w", "enable-bindings.sh", err)
+			return libcnb.Layer{}, fmt.Errorf("unable to load spring-cloud-bindings.sh\n%w", err)
 		}
-		layer.Profile.Add("enable-bindings.sh", profileScript)
+		layer.Profile.Add("spring-cloud-bindings.sh", s)
+
+		layer.Launch = true
 		return layer, nil
 	})
 	if err != nil {
 		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cloud-bindings layer\n%w", err)
 	}
 
-	if err := os.MkdirAll(s.SpringBootLib, 0777); err != nil {
-		return libcnb.Layer{}, fmt.Errorf("unable to ensure '%s' exists\n%w", s.SpringBootLib, err)
+	if err := os.MkdirAll(s.SpringBootLib, 0755); err != nil {
+		return libcnb.Layer{}, fmt.Errorf("unable to create directory %s\n%w", s.SpringBootLib, err)
 	}
-	if err := os.Symlink(jarPath, filepath.Join(s.SpringBootLib, jarName)); err != nil {
-		return libcnb.Layer{}, fmt.Errorf("unable to link spring cloud bindings into BOOT-INF\n%w", err)
+
+	target := filepath.Join(s.SpringBootLib, filepath.Base(file))
+	if err := os.Symlink(file, target); err != nil {
+		return libcnb.Layer{}, fmt.Errorf("unable to link %s to %s\n%w", file, target, err)
 	}
+
 	return layer, nil
 }
 
