@@ -48,6 +48,17 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
+
+		ctx.Buildpack.Metadata = map[string]interface{}{
+			"dependencies": []map[string]interface{}{
+				{
+					"id":      "spring-cloud-bindings",
+					"version": "1.1.0",
+					"stacks":  []interface{}{"test-stack-id"},
+				},
+			},
+		}
+		ctx.StackID = "test-stack-id"
 	})
 
 	it.After(func() {
@@ -183,7 +194,23 @@ Spring-Boot-Lib: BOOT-INF/lib
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(1))
+		Expect(result.Layers).To(HaveLen(2))
+	})
+
+	it("contributes spring cloud bindings", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Layers).To(HaveLen(2))
+		Expect(result.Layers[0].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.ID).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[0].(boot.SpringCloudBindings).SpringBootLib).To(Equal(filepath.Join(ctx.Application.Path, "BOOT-INF/lib")))
 	})
 
 	context("BP_BOOT_NATIVE_IMAGE", func() {
@@ -204,22 +231,19 @@ Spring-Boot-Layers-Index: layers.idx
 Start-Class: test-start-class
 `), 0644)).To(Succeed())
 
-			ctx.Buildpack.Metadata = map[string]interface{}{
-				"dependencies": []map[string]interface{}{
-					{
-						"id":      "spring-graalvm-native",
-						"version": "1.1.1",
-						"stacks":  []interface{}{"test-stack-id"},
-					},
-				},
-			}
-			ctx.StackID = "test-stack-id"
+			ctx.Buildpack.Metadata["dependencies"] = append(
+				ctx.Buildpack.Metadata["dependencies"].([]map[string]interface{}),
+				map[string]interface{}{
+					"id":      "spring-graalvm-native",
+					"version": "1.1.1",
+					"stacks":  []interface{}{"test-stack-id"},
+				})
 
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(1))
-			Expect(result.Layers[0].(boot.NativeImage).Arguments).To(BeEmpty())
+			Expect(result.Layers).To(HaveLen(2))
+			Expect(result.Layers[1].(boot.NativeImage).Arguments).To(BeEmpty())
 			Expect(result.Processes).To(ContainElements(
 				libcnb.Process{Type: "native-image", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
 				libcnb.Process{Type: "task", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
@@ -245,21 +269,18 @@ Spring-Boot-Layers-Index: layers.idx
 Start-Class: test-start-class
 `), 0644)).To(Succeed())
 
-				ctx.Buildpack.Metadata = map[string]interface{}{
-					"dependencies": []map[string]interface{}{
-						{
-							"id":      "spring-graalvm-native",
-							"version": "1.1.1",
-							"stacks":  []interface{}{"test-stack-id"},
-						},
-					},
-				}
-				ctx.StackID = "test-stack-id"
+				ctx.Buildpack.Metadata["dependencies"] = append(
+					ctx.Buildpack.Metadata["dependencies"].([]map[string]interface{}),
+					map[string]interface{}{
+						"id":      "spring-graalvm-native",
+						"version": "1.1.1",
+						"stacks":  []interface{}{"test-stack-id"},
+					})
 
 				result, err := build.Build(ctx)
 				Expect(err).NotTo(HaveOccurred())
 
-				Expect(result.Layers[0].(boot.NativeImage).Arguments).To(Equal([]string{"test-native-image-argument"}))
+				Expect(result.Layers[1].(boot.NativeImage).Arguments).To(Equal([]string{"test-native-image-argument"}))
 			})
 
 		})
