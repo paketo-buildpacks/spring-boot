@@ -56,7 +56,7 @@ stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" 
 [[metadata.dependencies]]
 id      = "spring-cloud-bindings"
 name    = "Spring Cloud Bindings"
-version = "0.0.0"
+version = "1.1.0"
 uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.1.0/spring-cloud-bindings-1.1.0.jar"
 sha256  = "7014dba521a9f302a6ad30057babc2618438a941b66bc969b2d11dbf016783a0"
 stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
