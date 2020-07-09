@@ -24,6 +24,9 @@ homepage = "https://github.com/paketo-buildpacks/spring-boot"
 id = "io.buildpacks.stacks.bionic"
 
 [[stacks]]
+id = "io.paketo.stacks.tiny"
+
+[[stacks]]
 id = "org.cloudfoundry.stacks.cflinuxfs3"
 
 [[metadata.configurations]]
@@ -47,7 +50,7 @@ name    = "Spring GraalVM Native Feature"
 version = "0.7.1"
 uri     = "https://repo.spring.io/milestone/org/springframework/experimental/spring-graalvm-native/0.7.1/spring-graalvm-native-0.7.1.jar"
 sha256  = "af5792294734e26620bcd13868a2e6f53c20008c0232dac42669f826efd2d3f2"
-stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
+stacks  = [ "io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "org.cloudfoundry.stacks.cflinuxfs3" ]
 
   [[metadata.dependencies.licenses]]
   type = "Apache-2.0"
@@ -56,7 +59,7 @@ stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" 
 [[metadata.dependencies]]
 id      = "spring-cloud-bindings"
 name    = "Spring Cloud Bindings"
-version = "0.0.0"
+version = "1.1.0"
 uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.1.0/spring-cloud-bindings-1.1.0.jar"
 sha256  = "7014dba521a9f302a6ad30057babc2618438a941b66bc969b2d11dbf016783a0"
 stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]

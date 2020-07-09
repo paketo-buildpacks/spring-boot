@@ -44,10 +44,11 @@ type NativeImage struct {
 	LayerContributor libpak.LayerContributor
 	Logger           bard.Logger
 	Manifest         *properties.Properties
+	StackID          string
 }
 
 func NewNativeImage(applicationPath string, arguments string, dependency libpak.BuildpackDependency,
-	cache libpak.DependencyCache, manifest *properties.Properties, files []sherpa.FileEntry,
+	cache libpak.DependencyCache, manifest *properties.Properties, stackID string, files []sherpa.FileEntry,
 	plan *libcnb.BuildpackPlan) (NativeImage, error) {
 
 	var err error
@@ -72,6 +73,7 @@ func NewNativeImage(applicationPath string, arguments string, dependency libpak.
 		Executor:         effect.NewExecutor(),
 		LayerContributor: libpak.NewLayerContributor("Native Image", expected),
 		Manifest:         manifest,
+		StackID:          stackID,
 	}, nil
 
 }
@@ -128,7 +130,13 @@ func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		defer artifact.Close()
 		cp = append(cp, artifact.Name())
 
-		arguments := append(n.Arguments,
+		arguments := n.Arguments
+
+		if n.StackID == libpak.TinyStackID {
+			arguments = append(arguments, "-H:+StaticExecutableWithDynamicLibC")
+		}
+
+		arguments = append(arguments,
 			fmt.Sprintf("-H:Name=%s", filepath.Join(layer.Path, startClass)),
 			"-cp", strings.Join(cp, ":"),
 			startClass,
