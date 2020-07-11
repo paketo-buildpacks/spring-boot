@@ -273,21 +273,6 @@
   slug = "spring-data-elasticsearch"
   status = "COMMUNITY"
 
-  [[projects.generations]]
-    name = "3.1.x"
-    oss = "2021-01-01"
-    commercial = "2021-07-01"
-
-  [[projects.generations]]
-    name = "3.2.x"
-    oss = "2021-01-01"
-    commercial = "2021-07-01"
-
-  [[projects.generations]]
-    name = "4.0.x"
-    oss = "2021-01-01"
-    commercial = ""
-
 [[projects]]
   name = "Spring Data Envers"
   slug = "spring-data-envers"
