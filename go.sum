@@ -2,8 +2,6 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.1.0 h1:Y2lUDsFKVRSYGojLJ1yLxSXdMmMYTYls0rCvoqmMUQk=
 github.com/Masterminds/semver/v3 v3.1.0/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/buildpacks/libcnb v1.14.1 h1:tYAEa4JsuGY/xdPwm1Edcat2sU0kxkBqBJ7EwI7KlJM=
-github.com/buildpacks/libcnb v1.14.1/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
 github.com/buildpacks/libcnb v1.15.1 h1:AXTxZkHh7868Prx6CnYoE/lJoglkI+H83BX1XX8XB0c=
 github.com/buildpacks/libcnb v1.15.1/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
@@ -56,9 +54,8 @@ github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.10.1 h1:o0+MgICZLuZ7xjH7Vx6zS/zcu93/BEp1VwkIW1mEXCE=
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
-github.com/paketo-buildpacks/libjvm v1.16.2 h1:5ybjViygriHYCBONh/aGNE6uQtHlxKDbKII079daMRM=
-github.com/paketo-buildpacks/libjvm v1.16.2/go.mod h1:78/gKjuIlrC4gziTxYiF46hhO4gxwyRBw+PECr2EkJ0=
-github.com/paketo-buildpacks/libpak v1.37.1/go.mod h1:Iccb0vqNkvbNhMEsy6YrFrcKOrcAE34xSW2MA0izmAg=
+github.com/paketo-buildpacks/libjvm v1.16.3 h1:c7/ixgTPC9CrsJhWDO0GSoQ2g8MmWI3+badyJuxE6FA=
+github.com/paketo-buildpacks/libjvm v1.16.3/go.mod h1:FondQVw8iQ5P5G1/+QcZ48CBS/gY/6vwmq1mdp4GWWY=
 github.com/paketo-buildpacks/libpak v1.38.0 h1:kzvONCQySmthbiwORiy9F6wxGMGk+dgV1KOp677L5PE=
 github.com/paketo-buildpacks/libpak v1.38.0/go.mod h1:JUx7gJUOJLjchYmsoWMEEM5UULzwdybF101eg8eDD+E=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible h1:Jd6xfriVlJ6hWPvYOE0Ni0QWcNTLRehfGPFxr3eSL80=
@@ -81,6 +78,7 @@ github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8/go.mod h1:HUYIGzjTL3rfEspMx
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
+golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/mod v0.1.1-0.20191105210325-c90efee705ee/go.mod h1:QqPTAvyqsEbceGzBzNggFXnrqF1CaUcvgkdR5Ot7KZg=
 golang.org/x/net v0.0.0-20180906233101-161cd47e91fd/go.mod h1:mL1N/T3taQHkDXs73rZJwtUhF3w3ftmwwsq0BUmARs4=
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
