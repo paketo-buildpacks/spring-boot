@@ -54,8 +54,8 @@ github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.10.1 h1:o0+MgICZLuZ7xjH7Vx6zS/zcu93/BEp1VwkIW1mEXCE=
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
-github.com/paketo-buildpacks/libjvm v1.16.3 h1:c7/ixgTPC9CrsJhWDO0GSoQ2g8MmWI3+badyJuxE6FA=
-github.com/paketo-buildpacks/libjvm v1.16.3/go.mod h1:FondQVw8iQ5P5G1/+QcZ48CBS/gY/6vwmq1mdp4GWWY=
+github.com/paketo-buildpacks/libjvm v1.16.4 h1:EaXAMXw8DCo20Jk7P2DpRDbL3M+S5De4aNtPPkQ40ic=
+github.com/paketo-buildpacks/libjvm v1.16.4/go.mod h1:FondQVw8iQ5P5G1/+QcZ48CBS/gY/6vwmq1mdp4GWWY=
 github.com/paketo-buildpacks/libpak v1.38.0 h1:kzvONCQySmthbiwORiy9F6wxGMGk+dgV1KOp677L5PE=
 github.com/paketo-buildpacks/libpak v1.38.0/go.mod h1:JUx7gJUOJLjchYmsoWMEEM5UULzwdybF101eg8eDD+E=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible h1:Jd6xfriVlJ6hWPvYOE0Ni0QWcNTLRehfGPFxr3eSL80=
