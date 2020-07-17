@@ -59,9 +59,9 @@ stacks  = [ "io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "org.cloudfo
 [[metadata.dependencies]]
 id      = "spring-cloud-bindings"
 name    = "Spring Cloud Bindings"
-version = "1.3.0"
-uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.3.0/spring-cloud-bindings-1.3.0.jar"
-sha256  = "17beaa8cd5f99a9a3b90c67584bd3cfcec71d12ed478e49d2bba900db8650745"
+version = "1.4.0"
+uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.4.0/spring-cloud-bindings-1.4.0.jar"
+sha256  = "acbe55965db87e36bb267debe1c97f43985303cd5b6d43a2c9648eaccaa5fae9"
 stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
 
   [[metadata.dependencies.licenses]]
