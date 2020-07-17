@@ -4,6 +4,8 @@ github.com/Masterminds/semver/v3 v3.1.0 h1:Y2lUDsFKVRSYGojLJ1yLxSXdMmMYTYls0rCvo
 github.com/Masterminds/semver/v3 v3.1.0/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/buildpacks/libcnb v1.15.1 h1:AXTxZkHh7868Prx6CnYoE/lJoglkI+H83BX1XX8XB0c=
 github.com/buildpacks/libcnb v1.15.1/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
+github.com/buildpacks/libcnb v1.15.2 h1:f1b2LGqc0PXBSMHJyGFDepDn13YtiiXx2/JewQp9HWw=
+github.com/buildpacks/libcnb v1.15.2/go.mod h1:WTlY7cneYfP2+SNY/Bqywnx/+gMSbJkiZSjxZ34zoaU=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.11 h1:07n33Z8lZxZ2qwegKbObQohDhXDQxiMMz1NOUGYlesw=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
