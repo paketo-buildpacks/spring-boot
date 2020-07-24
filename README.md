@@ -34,6 +34,14 @@ The buildpack will do the following:
 | `$BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS` | Configure the arguments to pass to native image build
 | `$BPL_SPRING_CLOUD_BINDINGS_ENABLED` | Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
 
+## Bindings
+The buildpack optionally accepts the following bindings:
+
+### Type: `dependency-mapping`
+|Key                   | Value   | Description
+|----------------------|---------|------------
+|`<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>`
+
 ## License
 This buildpack is released under version 2.0 of the [Apache License][a].
 
