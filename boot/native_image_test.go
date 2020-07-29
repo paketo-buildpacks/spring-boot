@@ -123,6 +123,55 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 		Expect(execution.Dir).To(Equal(layer.Path))
 	})
 
+	it("does not contribute spring-graalvm-native JAR if it already exists in application", func() {
+		dep := libpak.BuildpackDependency{
+			URI:    "https://localhost/stub-spring-graalvm-native.jar",
+			SHA256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+		}
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+
+		m := properties.NewProperties()
+		_, _, err := m.Set("Start-Class", "test-start-class")
+		Expect(err).NotTo(HaveOccurred())
+		_, _, err = m.Set("Spring-Boot-Classes", "BOOT-INF/classes/")
+		Expect(err).NotTo(HaveOccurred())
+		_, _, err = m.Set("Spring-Boot-Classpath-Index", "BOOT-INF/classpath.idx")
+		Expect(err).NotTo(HaveOccurred())
+		_, _, err = m.Set("Spring-Boot-Lib", "BOOT-INF/lib/")
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "fixture-marker"), []byte{}, 0644)).To(Succeed())
+
+		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF"), 0755)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "classpath.idx"), []byte(`
+- "test-jar.jar"
+- "spring-graalvm-native-0.8.0-20200729.130845-95.jar"
+`), 0644)).To(Succeed())
+
+		n, err := boot.NewNativeImage(ctx.Application.Path, "test-argument-1 test-argument-2", dep, dc, m,
+			ctx.StackID, []sherpa.FileEntry{}, &libcnb.BuildpackPlan{})
+		Expect(err).NotTo(HaveOccurred())
+		n.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
+			Expect(ioutil.WriteFile(filepath.Join(layer.Path, "test-start-class"), []byte{}, 0644)).To(Succeed())
+		}).Return(nil)
+
+		layer, err = n.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		execution := executor.Calls[0].Arguments[0].(effect.Execution)
+		Expect(execution.Args[4]).To(Equal(strings.Join([]string{
+			ctx.Application.Path,
+			filepath.Join(ctx.Application.Path, "BOOT-INF", "classes"),
+			filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-jar.jar"),
+			filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "spring-graalvm-native-0.8.0-20200729.130845-95.jar"),
+		}, ":")))
+	})
+
 	context("tiny stack", func() {
 		it.Before(func() {
 			ctx.StackID = libpak.TinyStackID

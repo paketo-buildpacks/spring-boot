@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -121,14 +122,16 @@ func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			cp = append(cp, filepath.Join(n.ApplicationPath, s, l))
 		}
 
-		n.Logger.Header(color.BlueString("%s %s", n.Dependency.Name, n.Dependency.Version))
+		if !n.hasSpringGraalVMNative(libs) {
+			n.Logger.Header(color.BlueString("%s %s", n.Dependency.Name, n.Dependency.Version))
 
-		artifact, err := n.DependencyCache.Artifact(n.Dependency)
-		if err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to get dependency %s\n%w", n.Dependency.ID, err)
+			artifact, err := n.DependencyCache.Artifact(n.Dependency)
+			if err != nil {
+				return libcnb.Layer{}, fmt.Errorf("unable to get dependency %s\n%w", n.Dependency.ID, err)
+			}
+			defer artifact.Close()
+			cp = append(cp, artifact.Name())
 		}
-		defer artifact.Close()
-		cp = append(cp, artifact.Name())
 
 		arguments := n.Arguments
 
@@ -195,4 +198,16 @@ func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 func (NativeImage) Name() string {
 	return "native-image"
+}
+
+func (NativeImage) hasSpringGraalVMNative(libs []string) bool {
+	re := regexp.MustCompile(`spring-graalvm-native-.+\.jar`)
+
+	for _, l := range libs {
+		if re.MatchString(l) {
+			return true
+		}
+	}
+
+	return false
 }
