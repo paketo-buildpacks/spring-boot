@@ -54,19 +54,16 @@ func NewNativeImage(applicationPath string, arguments string, dependency libpak.
 
 	var err error
 
-	plan.Entries = append(plan.Entries, dependency.AsBuildpackPlanEntry())
-
 	expected := map[string]interface{}{
 		"dependency": dependency,
 		"files":      files,
 	}
-
 	expected["arguments"], err = shellwords.Parse(arguments)
 	if err != nil {
 		return NativeImage{}, fmt.Errorf("unable to parse arguments from %s\n%w", arguments, err)
 	}
 
-	return NativeImage{
+	n := NativeImage{
 		ApplicationPath:  applicationPath,
 		Arguments:        expected["arguments"].([]string),
 		Dependency:       dependency,
@@ -75,8 +72,13 @@ func NewNativeImage(applicationPath string, arguments string, dependency libpak.
 		LayerContributor: libpak.NewLayerContributor("Native Image", expected),
 		Manifest:         manifest,
 		StackID:          stackID,
-	}, nil
+	}
 
+	entry := dependency.AsBuildpackPlanEntry()
+	entry.Metadata["launch"] = n.Name()
+	plan.Entries = append(plan.Entries, entry)
+
+	return n, nil
 }
 
 func (n NativeImage) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
