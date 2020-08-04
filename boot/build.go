@@ -137,7 +137,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 	result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{
 		Name:     "dependencies",
-		Metadata: map[string]interface{}{"dependencies": d},
+		Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
 	})
 
 	gv, err := NewGenerationValidator(filepath.Join(context.Buildpack.Path, "spring-generations.toml"))

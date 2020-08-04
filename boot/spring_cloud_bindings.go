@@ -86,5 +86,5 @@ func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error
 }
 
 func (s SpringCloudBindings) Name() string {
-	return "spring-cloud-bindings"
+	return s.LayerContributor.LayerName()
 }

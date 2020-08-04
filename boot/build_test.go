@@ -173,6 +173,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Plan.Entries).To(ContainElement(libcnb.BuildpackPlanEntry{
 			Name: "dependencies",
 			Metadata: map[string]interface{}{
+				"layer": "application",
 				"dependencies": []libjvm.MavenJAR{
 					{
 						Name:    "test-file",
