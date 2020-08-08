@@ -123,10 +123,16 @@ func NewConfigurationMetadataFromJAR(jar string) (ConfigurationMetadata, error) 
 }
 
 func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadata) (ConfigurationMetadata, error) {
-	file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties")
+	file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata.properties")
 	b, err := ioutil.ReadFile(file)
 	if os.IsNotExist(err) {
-		return ConfigurationMetadata{}, nil
+		file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties")
+		b, err = ioutil.ReadFile(file)
+		if os.IsNotExist(err) {
+			return ConfigurationMetadata{}, nil
+		} else if err != nil {
+			return ConfigurationMetadata{}, fmt.Errorf("unable to open %s\n%w", file, err)
+		}
 	} else if err != nil {
 		return ConfigurationMetadata{}, fmt.Errorf("unable to open %s\n%w", file, err)
 	}

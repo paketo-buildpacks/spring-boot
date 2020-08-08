@@ -61,6 +61,36 @@ func testConfigurationMetadata(t *testing.T, context spec.G, it spec.S) {
 				Groups: []boot.Group{{Name: "alpha"}},
 			}))
 		})
+
+		it("returns dataflow decoded contents", func() {
+			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "spring-configuration-metadata.json"),
+				[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644))
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "dataflow-configuration-metadata.properties"),
+				[]byte("configuration-properties.classes=alpha"), 0644))
+
+			cm, err := boot.NewConfigurationMetadataFromPath(path)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(boot.NewDataFlowConfigurationMetadata(path, cm)).To(Equal(boot.ConfigurationMetadata{
+				Groups: []boot.Group{{Name: "alpha", SourceType: "alpha"}},
+			}))
+		})
+
+		it("returns dataflow decoded contents", func() {
+			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "spring-configuration-metadata.json"),
+				[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644))
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties"),
+				[]byte("configuration-properties.classes=alpha"), 0644))
+
+			cm, err := boot.NewConfigurationMetadataFromPath(path)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(boot.NewDataFlowConfigurationMetadata(path, cm)).To(Equal(boot.ConfigurationMetadata{
+				Groups: []boot.Group{{Name: "alpha", SourceType: "alpha"}},
+			}))
+		})
 	})
 
 	context("from JAR", func() {
