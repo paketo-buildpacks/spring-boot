@@ -111,7 +111,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
 			[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644))
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "dataflow-configuration-metadata-whitelist.properties"),
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "dataflow-configuration-metadata.properties"),
 			[]byte("configuration-properties.classes=alpha"), 0644))
 
 		result, err := build.Build(ctx)
