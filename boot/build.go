@@ -28,7 +28,6 @@ import (
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,10 +49,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Title(context.Buildpack)
 	result := libcnb.NewBuildResult()
 
-	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
-	}
+	pr := libpak.PlanEntryResolver{Plan: context.Plan}
 
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
@@ -150,39 +146,16 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to validate spring-boot version\n%w", err)
 	}
 
-	entries, err := sherpa.NewFileListing(context.Application.Path)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create file listing for %s\n%w", context.Application.Path, err)
+	ni := false
+	if n, ok, err := pr.Resolve("spring-boot"); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve spring-boot plan entry\n%w", err)
+	} else if ok {
+		if v, ok := n.Metadata["native-image"].(bool); ok {
+			ni = v
+		}
 	}
 
-	if _, ok := cr.Resolve("BP_BOOT_NATIVE_IMAGE"); ok {
-		args, _ := cr.Resolve("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS")
-
-		dep, err := dr.Resolve("spring-graalvm-native", "")
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
-		}
-
-		n, err := NewNativeImage(context.Application.Path, args, dep, dc, manifest, context.StackID, entries,
-			result.Plan)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create native image layer\n%w", err)
-		}
-		n.Logger = b.Logger
-		result.Layers = append(result.Layers, n)
-
-		startClass, ok := n.Manifest.Get("Start-Class")
-		if !ok {
-			return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Start-Class")
-		}
-
-		command := filepath.Join(context.Application.Path, startClass)
-		result.Processes = append(result.Processes,
-			libcnb.Process{Type: "native-image", Command: command, Direct: true},
-			libcnb.Process{Type: "task", Command: command, Direct: true},
-			libcnb.Process{Type: "web", Command: command, Direct: true},
-		)
-	} else {
+	if !ni {
 		classes, ok := manifest.Get("Spring-Boot-Classes")
 		if !ok {
 			return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Classes")
@@ -193,7 +166,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationTypeResolver\n%w", err)
 		}
 
-		at := NewWebApplicationType(wr, entries)
+		at, err := NewWebApplicationType(context.Application.Path, wr)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationType\n%w", err)
+		}
 		at.Logger = b.Logger
 		result.Layers = append(result.Layers, at)
 

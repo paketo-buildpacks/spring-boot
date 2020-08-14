@@ -34,28 +34,6 @@ name        = "BPL_SPRING_CLOUD_BINDINGS_ENABLED"
 description = "whether to auto-configure Spring Boot environment properties from bindings"
 launch      = true
 
-[[metadata.configurations]]
-name        = "BP_BOOT_NATIVE_IMAGE"
-description = "the build to create a native image (requires GraalVM)"
-build       = true
-
-[[metadata.configurations]]
-name        = "BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS"
-description = "the arguments to pass to the native-image command"
-build       = true
-
-[[metadata.dependencies]]
-id      = "spring-graalvm-native"
-name    = "Spring GraalVM Native Feature"
-version = "0.7.1"
-uri     = "https://repo.spring.io/milestone/org/springframework/experimental/spring-graalvm-native/0.7.1/spring-graalvm-native-0.7.1.jar"
-sha256  = "af5792294734e26620bcd13868a2e6f53c20008c0232dac42669f826efd2d3f2"
-stacks  = [ "io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "org.cloudfoundry.stacks.cflinuxfs3" ]
-
-  [[metadata.dependencies.licenses]]
-  type = "Apache-2.0"
-  uri  = "https://github.com/spring-projects-experimental/spring-graal-native/blob/master/LICENSE.txt"
-
 [[metadata.dependencies]]
 id      = "spring-cloud-bindings"
 name    = "Spring Cloud Bindings"

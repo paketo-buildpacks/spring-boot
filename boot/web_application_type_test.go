@@ -23,7 +23,6 @@ import (
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 	"github.com/sclevine/spec"
 
 	"github.com/paketo-buildpacks/spring-boot/boot"
@@ -45,7 +44,8 @@ func testWebApplicationType(t *testing.T, context spec.G, it spec.S) {
 
 		wr := boot.WebApplicationTypeResolver{Classes: map[string]interface{}{}}
 
-		w = boot.NewWebApplicationType(wr, []sherpa.FileEntry{})
+		w, err = boot.NewWebApplicationType(ctx.Layers.Path, wr)
+		Expect(err).NotTo(HaveOccurred())
 	})
 
 	it.After(func() {

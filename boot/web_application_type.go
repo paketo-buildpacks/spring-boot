@@ -17,6 +17,8 @@
 package boot
 
 import (
+	"fmt"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -29,13 +31,19 @@ type WebApplicationType struct {
 	Resolver         WebApplicationTypeResolver
 }
 
-func NewWebApplicationType(resolver WebApplicationTypeResolver, files []sherpa.FileEntry) WebApplicationType {
-	return WebApplicationType{
-		LayerContributor: libpak.NewLayerContributor("Web Application Type", map[string]interface{}{
-			"files": files,
-		}),
-		Resolver: resolver,
+func NewWebApplicationType(applicationPath string, resolver WebApplicationTypeResolver) (WebApplicationType, error) {
+	var err error
+
+	expected := make(map[string]interface{}, 1)
+	expected["files"], err = sherpa.NewFileListing(applicationPath)
+	if err != nil {
+		return WebApplicationType{}, fmt.Errorf("unable to create file listing for %s\n%w", applicationPath, err)
 	}
+
+	return WebApplicationType{
+		LayerContributor: libpak.NewLayerContributor("Web Application Type", expected),
+		Resolver:         resolver,
+	}, nil
 }
 
 func (w WebApplicationType) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {

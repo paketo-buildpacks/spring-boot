@@ -29,7 +29,6 @@ func TestUnit(t *testing.T) {
 	suite("ConfigurationMetadata", testConfigurationMetadata)
 	suite("Detect", testDetect)
 	suite("GenerationValidator", testGenerationValidator)
-	suite("NativeImage", testNativeImage)
 	suite("SpringCloudBindings", testSpringCloudBindings)
 	suite("WebApplicationType", testWebApplicationType)
 	suite("WebApplicationTypeResolver", testWebApplicationTypeResolver)

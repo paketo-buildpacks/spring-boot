@@ -63,6 +63,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	it.After(func() {
 		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
+		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
 	})
 
 	it("does nothing without Spring-Boot-Version", func() {
@@ -214,79 +215,6 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Layers[1].(boot.SpringCloudBindings).SpringBootLib).To(Equal(filepath.Join(ctx.Application.Path, "BOOT-INF/lib")))
 	})
 
-	context("BP_BOOT_NATIVE_IMAGE", func() {
-		it.Before(func() {
-			Expect(os.Setenv("BP_BOOT_NATIVE_IMAGE", "")).To(Succeed())
-		})
-
-		it.After(func() {
-			Expect(os.Unsetenv("BP_BOOT_NATIVE_IMAGE")).To(Succeed())
-		})
-
-		it("contributes native image layer", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
-Spring-Boot-Version: 1.1.1
-Spring-Boot-Classes: BOOT-INF/classes
-Spring-Boot-Lib: BOOT-INF/lib
-Spring-Boot-Layers-Index: layers.idx
-Start-Class: test-start-class
-`), 0644)).To(Succeed())
-
-			ctx.Buildpack.Metadata["dependencies"] = append(
-				ctx.Buildpack.Metadata["dependencies"].([]map[string]interface{}),
-				map[string]interface{}{
-					"id":      "spring-graalvm-native",
-					"version": "1.1.1",
-					"stacks":  []interface{}{"test-stack-id"},
-				})
-
-			result, err := build.Build(ctx)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(result.Layers).To(HaveLen(1))
-			Expect(result.Layers[0].(boot.NativeImage).Arguments).To(BeEmpty())
-			Expect(result.Processes).To(ContainElements(
-				libcnb.Process{Type: "native-image", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
-				libcnb.Process{Type: "task", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
-				libcnb.Process{Type: "web", Command: filepath.Join(ctx.Application.Path, "test-start-class"), Direct: true},
-			))
-		})
-
-		context("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS", func() {
-			it.Before(func() {
-				Expect(os.Setenv("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS", "test-native-image-argument")).To(Succeed())
-			})
-
-			it.After(func() {
-				Expect(os.Unsetenv("BP_BOOT_NATIVE_IMAGE_BUILD_ARGUMENTS")).To(Succeed())
-			})
-
-			it("contributes native image build arguments", func() {
-				Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
-Spring-Boot-Version: 1.1.1
-Spring-Boot-Classes: BOOT-INF/classes
-Spring-Boot-Lib: BOOT-INF/lib
-Spring-Boot-Layers-Index: layers.idx
-Start-Class: test-start-class
-`), 0644)).To(Succeed())
-
-				ctx.Buildpack.Metadata["dependencies"] = append(
-					ctx.Buildpack.Metadata["dependencies"].([]map[string]interface{}),
-					map[string]interface{}{
-						"id":      "spring-graalvm-native",
-						"version": "1.1.1",
-						"stacks":  []interface{}{"test-stack-id"},
-					})
-
-				result, err := build.Build(ctx)
-				Expect(err).NotTo(HaveOccurred())
-
-				Expect(result.Layers[0].(boot.NativeImage).Arguments).To(Equal([]string{"test-native-image-argument"}))
-			})
-
-		})
-	})
-
 	it("contributes slices from layers index", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
@@ -310,5 +238,41 @@ Spring-Boot-Layers-Index: layers.idx
 			libcnb.Slice{Paths: []string{"alpha-1", "alpha-2"}},
 			libcnb.Slice{Paths: []string{"bravo-1", "bravo-2"}},
 		))
+	})
+
+	context("when building a native image", func() {
+		it.Before(func() {
+			ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{
+				Name: "spring-boot",
+				Metadata: map[string]interface{}{"native-image": true},
+			})
+		})
+
+		it("adds no layers to the result", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(0))
+		})
+
+		it("adds no slices to the result", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Slices).To(HaveLen(0))
+		})
+
 	})
 }
