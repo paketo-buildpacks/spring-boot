@@ -17,7 +17,9 @@
 package helper
 
 import (
+	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -28,7 +30,17 @@ type SpringCloudBindings struct {
 }
 
 func (s SpringCloudBindings) Execute() (map[string]string, error) {
-	if _, ok := os.LookupEnv("BPL_SPRING_CLOUD_BINDINGS_ENABLED"); !ok {
+	var err error
+
+	enabled := true
+	if s, ok := os.LookupEnv("BPL_SPRING_CLOUD_BINDINGS_ENABLED"); ok {
+		enabled, err = strconv.ParseBool(s)
+		if err != nil {
+			return nil, fmt.Errorf("unable to parse $BPL_SPRING_CLOUD_BINDINGS_ENABLED\n%w", err)
+		}
+	}
+
+	if !enabled {
 		return nil, nil
 	}
 

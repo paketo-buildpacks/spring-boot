@@ -33,41 +33,40 @@ func testSpringCloudBindings(t *testing.T, context spec.G, it spec.S) {
 		s = helper.SpringCloudBindings{}
 	)
 
-	it("returns if $BPL_SPRING_CLOUD_BINDINGS_ENABLED is not set", func() {
-		Expect(s.Execute()).To(BeNil())
-	})
-
 	context("$BPL_SPRING_CLOUD_BINDINGS_ENABLED", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BPL_SPRING_CLOUD_BINDINGS_ENABLED", "")).To(Succeed())
+			Expect(os.Setenv("BPL_SPRING_CLOUD_BINDINGS_ENABLED", "false")).To(Succeed())
 		})
 
 		it.After(func() {
 			Expect(os.Unsetenv("BPL_SPRING_CLOUD_BINDINGS_ENABLED")).To(Succeed())
 		})
 
-		it("contributes configuration", func() {
-			Expect(s.Execute()).To(Equal(map[string]string{
-				"JAVA_TOOL_OPTIONS": "-Dorg.springframework.cloud.bindings.boot.enable=true",
-			}))
+		it("returns if $BPL_SPRING_CLOUD_BINDINGS_ENABLED is set to false", func() {
+			Expect(s.Execute()).To(BeNil())
+		})
+	})
+
+	it("contributes configuration", func() {
+		Expect(s.Execute()).To(Equal(map[string]string{
+			"JAVA_TOOL_OPTIONS": "-Dorg.springframework.cloud.bindings.boot.enable=true",
+		}))
+	})
+
+	context("$JAVA_TOOL_OPTIONS", func() {
+		it.Before(func() {
+			Expect(os.Setenv("JAVA_TOOL_OPTIONS", "test-java-tool-options")).To(Succeed())
 		})
 
-		context("$JAVA_TOOL_OPTIONS", func() {
-			it.Before(func() {
-				Expect(os.Setenv("JAVA_TOOL_OPTIONS", "test-java-tool-options")).To(Succeed())
-			})
+		it.After(func() {
+			Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
+		})
 
-			it.After(func() {
-				Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
-			})
-
-			it("contributes configuration appended to existing $JAVA_TOOL_OPTIONS", func() {
-				Expect(s.Execute()).To(Equal(map[string]string{
-					"JAVA_TOOL_OPTIONS": "test-java-tool-options -Dorg.springframework.cloud.bindings.boot.enable=true",
-				}))
-			})
+		it("contributes configuration appended to existing $JAVA_TOOL_OPTIONS", func() {
+			Expect(s.Execute()).To(Equal(map[string]string{
+				"JAVA_TOOL_OPTIONS": "test-java-tool-options -Dorg.springframework.cloud.bindings.boot.enable=true",
+			}))
 		})
 	})
 
 }
-

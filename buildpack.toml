@@ -32,6 +32,7 @@ id = "org.cloudfoundry.stacks.cflinuxfs3"
 [[metadata.configurations]]
 name        = "BPL_SPRING_CLOUD_BINDINGS_ENABLED"
 description = "whether to auto-configure Spring Boot environment properties from bindings"
+default     = "true"
 launch      = true
 
 [[metadata.dependencies]]
