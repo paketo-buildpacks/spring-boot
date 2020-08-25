@@ -53,9 +53,8 @@ github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108
 github.com/onsi/gomega v1.7.1/go.mod h1:XdKZgCCFLUoM/7CFJVPcG8C1xQ1AJ0vpAezJrB7JYyY=
 github.com/onsi/gomega v1.10.1 h1:o0+MgICZLuZ7xjH7Vx6zS/zcu93/BEp1VwkIW1mEXCE=
 github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1ybHNo=
-github.com/paketo-buildpacks/libjvm v1.21.0 h1:zta8vtXXzAo997rLfqNhu36NKEcVFq+wwYmmx92Wkq4=
-github.com/paketo-buildpacks/libjvm v1.21.0/go.mod h1:vMtrcF4dPn6XOgJVsk6KUXHmxtX3+1UZ189kI1PR4+s=
-github.com/paketo-buildpacks/libpak v1.43.0/go.mod h1:mmjvlpYuJgsmrt4n33JhOtLZeOZ/o5y559lrHNat8Fc=
+github.com/paketo-buildpacks/libjvm v1.22.0 h1:5EURE+QIPcXnfCiFKosai8v13HFFF8X2mvFQhn0PGFY=
+github.com/paketo-buildpacks/libjvm v1.22.0/go.mod h1:dmRAeGZRwSRD6UyYsHT+a5YP7fFYh8KO5h2mx6/rzMo=
 github.com/paketo-buildpacks/libpak v1.45.0 h1:L2L/e9WhzaiFOCsvDvW85UW0hx2jxVNtlIJJ754qFzk=
 github.com/paketo-buildpacks/libpak v1.45.0/go.mod h1:mmjvlpYuJgsmrt4n33JhOtLZeOZ/o5y559lrHNat8Fc=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible h1:Jd6xfriVlJ6hWPvYOE0Ni0QWcNTLRehfGPFxr3eSL80=
