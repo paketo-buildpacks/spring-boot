@@ -56,9 +56,8 @@ func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error
 			return libcnb.Layer{}, fmt.Errorf("unable to copy artifact to %s\n%w", file, err)
 		}
 
-		layer.Launch = true
 		return layer, nil
-	})
+	}, libpak.LaunchLayer)
 	if err != nil {
 		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cloud-bindings layer\n%w", err)
 	}

@@ -62,9 +62,8 @@ func (w WebApplicationType) Contribute(layer libcnb.Layer) (libcnb.Layer, error)
 			layer.LaunchEnvironment.Default("BPL_JVM_THREAD_COUNT", "250")
 		}
 
-		layer.Launch = true
 		return layer, nil
-	})
+	}, libpak.LaunchLayer)
 }
 
 func (WebApplicationType) Name() string {
