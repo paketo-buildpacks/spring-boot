@@ -25,8 +25,6 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-
-	_ "github.com/paketo-buildpacks/spring-boot/boot/statik"
 )
 
 type SpringCloudBindings struct {
@@ -46,8 +44,6 @@ func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDep
 	}
 }
 
-//go:generate statik -src . -include *.sh
-
 func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 
@@ -59,12 +55,6 @@ func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error
 		if err := sherpa.CopyFile(artifact, file); err != nil {
 			return libcnb.Layer{}, fmt.Errorf("unable to copy artifact to %s\n%w", file, err)
 		}
-
-		s, err := sherpa.StaticFile("/spring-cloud-bindings.sh")
-		if err != nil {
-			return libcnb.Layer{}, fmt.Errorf("unable to load spring-cloud-bindings.sh\n%w", err)
-		}
-		layer.Profile.Add("spring-cloud-bindings.sh", s)
 
 		layer.Launch = true
 		return layer, nil

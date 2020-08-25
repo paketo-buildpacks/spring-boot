@@ -54,6 +54,7 @@ include-files = [
   "README.md",
   "bin/build",
   "bin/detect",
+  "bin/helper",
   "bin/main",
   "buildpack.toml",
   "spring-generations.toml",

@@ -25,6 +25,7 @@ import (
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak"
 	"github.com/sclevine/spec"
 
 	"github.com/paketo-buildpacks/spring-boot/boot"
@@ -186,7 +187,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		}))
 	})
 
-	it("adds web-application-type to the result", func() {
+	it("contributes to the result", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
@@ -196,23 +197,11 @@ Spring-Boot-Lib: BOOT-INF/lib
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Layers).To(HaveLen(2))
-	})
-
-	it("contributes spring cloud bindings", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
-Spring-Boot-Version: 1.1.1
-Spring-Boot-Classes: BOOT-INF/classes
-Spring-Boot-Lib: BOOT-INF/lib
-`), 0644)).To(Succeed())
-
-		result, err := build.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
-
-		Expect(result.Layers).To(HaveLen(2))
-		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
-		Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.ID).To(Equal("spring-cloud-bindings"))
-		Expect(result.Layers[1].(boot.SpringCloudBindings).SpringBootLib).To(Equal(filepath.Join(ctx.Application.Path, "BOOT-INF/lib")))
+		Expect(result.Layers).To(HaveLen(3))
+		Expect(result.Layers[0].Name()).To(Equal("helper"))
+		Expect(result.Layers[0].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
+		Expect(result.Layers[1].Name()).To(Equal("web-application-type"))
+		Expect(result.Layers[2].Name()).To(Equal("spring-cloud-bindings"))
 	})
 
 	it("contributes slices from layers index", func() {
@@ -243,7 +232,7 @@ Spring-Boot-Layers-Index: layers.idx
 	context("when building a native image", func() {
 		it.Before(func() {
 			ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{
-				Name: "spring-boot",
+				Name:     "spring-boot",
 				Metadata: map[string]interface{}{"native-image": true},
 			})
 		})

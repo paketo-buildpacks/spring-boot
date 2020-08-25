@@ -68,11 +68,6 @@ func testSpringCloudBindings(t *testing.T, context spec.G, it spec.S) {
 
 		Expect(layer.Launch).To(BeTrue())
 		Expect(filepath.Join(layer.Path, "stub-spring-cloud-bindings.jar")).To(BeARegularFile())
-		Expect(layer.Profile["spring-cloud-bindings.sh"]).To(Equal(`if [[ "${BPL_SPRING_CLOUD_BINDINGS_ENABLED:=y}" == "y" ]]; then
-    printf "Spring Cloud Bindings Boot Auto-Configuration Enabled\n"
-    export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Dorg.springframework.cloud.bindings.boot.enable=true"
-fi
-`))
 		Expect(os.Readlink(filepath.Join(ctx.Application.Path, "test-lib", "stub-spring-cloud-bindings.jar"))).
 			To(Equal(filepath.Join(layer.Path, "stub-spring-cloud-bindings.jar")))
 	})
