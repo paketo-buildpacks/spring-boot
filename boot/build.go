@@ -166,6 +166,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationTypeResolver\n%w", err)
 		}
 
+		h := libpak.NewHelperLayerContributor(context.Buildpack, result.Plan, "spring-cloud-bindings")
+		h.Logger = b.Logger
+		result.Layers = append(result.Layers, h)
+
 		at, err := NewWebApplicationType(context.Application.Path, wr)
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationType\n%w", err)
