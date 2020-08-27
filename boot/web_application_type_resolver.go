@@ -126,7 +126,7 @@ func NewWebApplicationResolver(classes string, lib string) (WebApplicationTypeRe
 			return WebApplicationTypeResolver{}, fmt.Errorf("unable to list classes\n%w", err)
 		}
 		for _, class := range r.value {
-			w.Classes[class] = nil
+			w.Classes[class] = class
 		}
 	}
 
