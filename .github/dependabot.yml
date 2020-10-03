@@ -1,0 +1,16 @@
+version: 2
+updates:
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+        interval: daily
+      labels:
+        - semver:patch
+        - type:dependency-upgrade
+    - package-ecosystem: gomod
+      directory: /
+      schedule:
+        interval: daily
+      labels:
+        - semver:patch
+        - type:dependency-upgrade
