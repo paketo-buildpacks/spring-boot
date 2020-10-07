@@ -1,0 +1,39 @@
+name: Update Spring Generations
+"on":
+    schedule:
+        - cron: 30 * * * *
+    workflow_dispatch: {}
+jobs:
+    update:
+        name: Update Buildpack Dependency
+        runs-on:
+            - ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - id: generations
+              uses: docker://ghcr.io/paketo-buildpacks/actions/spring-generations:main
+              with:
+                url: https://spring.io/api
+            - id: buildpack
+              name: Update Buildpack Dependency
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                echo "${CONTENT} > spring-generations.toml
+
+                git add spring-generations.toml
+                git checkout -- .
+              env:
+                CONTENT: ${{ steps.generations.outputs.content }}
+            - uses: peter-evans/create-pull-request@v3
+              with:
+                body: Bumps Spring Generations
+                branch: update/buildpack/spring-generations
+                commit-message: Bump Spring Generations
+                delete-branch: true
+                labels: semver:minor, type:dependency-upgrade
+                signoff: true
+                title: Bump Spring Generations
+                token: ${{ secrets.GITHUB_TOKEN }}

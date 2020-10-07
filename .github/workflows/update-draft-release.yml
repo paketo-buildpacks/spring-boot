@@ -13,6 +13,12 @@ jobs:
               uses: release-drafter/release-drafter@v5
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Docker login gcr.io
+              uses: docker/login-action@v1
+              with:
+                password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
+                registry: gcr.io
+                username: _json_key
             - uses: actions/checkout@v2
             - name: Install yj
               run: |
@@ -21,14 +27,14 @@ jobs:
                 set -euo pipefail
 
                 mkdir -p "${HOME}"/bin
-                echo "::add-path::${HOME}/bin"
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
 
                 curl \
-                	--location \
-                	--show-error \
-                	--silent \
-                	--output "${HOME}"/bin/yj \
-                	"https://github.com/sclevine/yj/releases/download/v${YJ_VERSION}/yj-linux"
+                  --location \
+                  --show-error \
+                  --silent \
+                  --output "${HOME}"/bin/yj \
+                  "https://github.com/sclevine/yj/releases/download/v${YJ_VERSION}/yj-linux"
 
                 chmod +x "${HOME}"/bin/yj
               env:

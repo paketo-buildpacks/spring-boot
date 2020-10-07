@@ -9,7 +9,55 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
+            - name: Docker login gcr.io
+              uses: docker/login-action@v1
+              with:
+                password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
+                registry: gcr.io
+                username: _json_key
             - uses: actions/checkout@v2
+            - if: ${{ false }}
+              uses: actions/cache@v2
+              with:
+                key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
+                path: |-
+                    ${{ env.HOME }}/.pack
+                    ${{ env.HOME }}/carton-cache
+                restore-keys: ${{ runner.os }}-go-
+            - uses: actions/setup-go@v2
+              with:
+                go-version: "1.15"
+            - name: Install crane
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                GO111MODULE=on go get -u -ldflags="-s -w" github.com/google/go-containerregistry/cmd/crane
+            - name: Install create-package
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package
+            - name: Install pack
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl \
+                  --location \
+                  --show-error \
+                  --silent \
+                  "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
+                  | tar -C "${HOME}"/bin/ -xzv pack
+              env:
+                PACK_VERSION: 0.14.1
             - id: version
               name: Compute Version
               run: |
@@ -17,28 +65,19 @@ jobs:
 
                 set -euo pipefail
 
-                PATTERN="refs/tags/v([0-9]+\.[0-9]+\.[0-9]+)"
-                if [[ ${GITHUB_REF} =~ ${PATTERN} ]]; then
+                if [[ ${GITHUB_REF} =~ refs/tags/v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+                  VERSION=${BASH_REMATCH[1]}
+                elif [[ ${GITHUB_REF} =~ refs/heads/(.+) ]]; then
                   VERSION=${BASH_REMATCH[1]}
                 else
                   VERSION=$(git rev-parse --short HEAD)
                 fi
 
                 echo "::set-output name=version::${VERSION}"
-                printf "Selected %s from
-                  * ref: %s
-                  * sha: %s
-                " "${VERSION}" "${GITHUB_REF}" "${GITHUB_SHA}"
-            - uses: actions/setup-go@v2
-              with:
-                go-version: "1.15"
-            - name: Install Create Package
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package
+                echo "Selected ${VERSION} from
+                  * ref: ${GITHUB_REF}
+                  * sha: ${GITHUB_SHA}
+                "
             - name: Create Package
               run: |
                 #!/usr/bin/env bash
@@ -47,49 +86,21 @@ jobs:
 
                 if [[ -n "${INCLUDE_DEPENDENCIES+x}" ]]; then
                   create-package \
-                  	--cache-location "${HOME}"/carton-cache \
-                  	--destination "${HOME}"/buildpack \
-                  	--include-dependencies \
-                  	--version "${VERSION}"
+                    --cache-location "${HOME}"/carton-cache \
+                    --destination "${HOME}"/buildpack \
+                    --include-dependencies \
+                    --version "${VERSION}"
                 else
                   create-package \
-                  	--destination "${HOME}"/buildpack \
-                  	--version "${VERSION}"
+                    --destination "${HOME}"/buildpack \
+                    --version "${VERSION}"
                 fi
 
                 [[ -e package.toml ]] && cp package.toml "${HOME}"/package.toml
                 printf '[buildpack]\nuri = "%s"' "${HOME}"/buildpack >> "${HOME}"/package.toml
               env:
+                INCLUDE_DEPENDENCIES: "false"
                 VERSION: ${{ steps.version.outputs.version }}
-            - name: Install Crane
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                GO111MODULE=on go get -u -ldflags="-s -w" github.com/google/go-containerregistry/cmd/crane
-            - name: Install pack
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                mkdir -p "${HOME}"/bin
-                echo "::add-path::${HOME}/bin"
-
-                curl \
-                	--location \
-                	--show-error \
-                	--silent \
-                	"https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
-                	| tar -C "${HOME}"/bin/ -xzv pack
-              env:
-                PACK_VERSION: 0.13.1
-            - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
-              with:
-                service_account_key: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
-            - name: Configure gcloud docker credentials
-              run: gcloud auth configure-docker
             - id: package
               name: Package Buildpack
               run: |
