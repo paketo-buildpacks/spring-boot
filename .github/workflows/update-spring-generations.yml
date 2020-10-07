@@ -21,7 +21,7 @@ jobs:
 
                 set -euo pipefail
 
-                echo "${CONTENT} > spring-generations.toml
+                echo "${CONTENT}" > spring-generations.toml
 
                 git add spring-generations.toml
                 git checkout -- .
