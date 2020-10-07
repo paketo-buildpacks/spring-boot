@@ -1,0 +1,92 @@
+name: Update spring-cloud-bindings
+"on":
+    schedule:
+        - cron: 30 * * * *
+    workflow_dispatch: {}
+jobs:
+    update:
+        name: Update Buildpack Dependency
+        runs-on:
+            - ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-go@v2
+              with:
+                go-version: "1.15"
+            - name: Install update-buildpack-dependency
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/update-buildpack-dependency
+            - name: Install yj
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl \
+                  --location \
+                  --show-error \
+                  --silent \
+                  --output "${HOME}"/bin/yj \
+                  "https://github.com/sclevine/yj/releases/download/v${YJ_VERSION}/yj-linux"
+
+                chmod +x "${HOME}"/bin/yj
+              env:
+                YJ_VERSION: 5.0.0
+            - id: dependency
+              uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+              with:
+                artifact_id: spring-cloud-bindings
+                group_id: org.springframework.cloud
+                uri: https://repo.spring.io/release
+            - id: buildpack
+              name: Update Buildpack Dependency
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                OLD_VERSION=$(yj -tj < buildpack.toml | jq -r "
+                  .metadata.dependencies[] |
+                  select( .id == env.ID ) |
+                  select( .version | test( env.VERSION_PATTERN ) ) |
+                  .version")
+
+                update-buildpack-dependency \
+                  --buildpack-toml buildpack.toml \
+                  --id "${ID}" \
+                  --version-pattern "${VERSION_PATTERN}" \
+                  --version "${VERSION}" \
+                  --uri "${URI}" \
+                  --sha256 "${SHA256}"
+
+                git add buildpack.toml
+                git checkout -- .
+
+                echo "::set-output name=old-version::${OLD_VERSION}"
+                echo "::set-output name=new-version::${VERSION}"
+              env:
+                ID: spring-cloud-bindings
+                SHA256: ${{ steps.dependency.outputs.sha256 }}
+                URI: ${{ steps.dependency.outputs.uri }}
+                VERSION: ${{ steps.dependency.outputs.version }}
+                VERSION_PATTERN: '[\d]+\.[\d]+\.[\d]+'
+            - uses: peter-evans/create-pull-request@v3
+              with:
+                body: Bumps `spring-cloud-bindings` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.
+                branch: update/buildpack/spring-cloud-bindings
+                commit-message: |-
+                    Bump spring-cloud-bindings from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
+
+                    Bumps spring-cloud-bindings from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}.
+                delete-branch: true
+                labels: semver:minor, type:dependency-upgrade
+                signoff: true
+                title: Bump spring-cloud-bindings from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
+                token: ${{ secrets.GITHUB_TOKEN }}
