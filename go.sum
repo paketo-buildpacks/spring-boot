@@ -61,6 +61,7 @@ github.com/paketo-buildpacks/libjvm v1.22.2 h1:os9IQf7QX70SPPSdIfI4vZ/BiBb+sC7rU
 github.com/paketo-buildpacks/libjvm v1.22.2/go.mod h1:Q//eRzQ8+ZXSYUHjaYBs3ODocYqduPru8y5OlIkcqMU=
 github.com/paketo-buildpacks/libpak v1.45.1 h1:3CjTf+Bzju+iMl+5HqF7+EaW9cZdE/jCE9dwGRFOoPs=
 github.com/paketo-buildpacks/libpak v1.45.1/go.mod h1:0diWLeplKzv/iRaZnLyAo1zoKdmuC4zlJuRNqe6lprA=
+github.com/paketo-buildpacks/libpak v1.46.0/go.mod h1:SEcsqgVo5Ly3YcBQOaJBkbIiXYYjoOastlGL6ozo97g=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible h1:Jd6xfriVlJ6hWPvYOE0Ni0QWcNTLRehfGPFxr3eSL80=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible/go.mod h1:xlUlxe/2ItGlQyMTstqeDv9r3U4obH7xYd26TbDQutY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
