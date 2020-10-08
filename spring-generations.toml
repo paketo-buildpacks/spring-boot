@@ -306,7 +306,7 @@
 [[Projects]]
   Name = "Spring Data for Apache Solr"
   Slug = "spring-data-solr"
-  Status = "ACTIVE"
+  Status = "COMMUNITY"
 
 [[Projects]]
   Name = "Spring Flex"
