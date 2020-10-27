@@ -18,14 +18,15 @@ package boot
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"regexp"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"github.com/Masterminds/semver/v3"
 	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/pelletier/go-toml"
 )
 
 const DatePattern = "2006-01-02"
@@ -92,9 +93,13 @@ type GenerationValidator struct {
 }
 
 func NewGenerationValidator(path string) (GenerationValidator, error) {
-	var p Projects
+	b, err := ioutil.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return GenerationValidator{}, fmt.Errorf("unable to read %s\n%w", path, err)
+	}
 
-	if _, err := toml.DecodeFile(path, &p); err != nil && !os.IsNotExist(err) {
+	var p Projects
+	if err := toml.Unmarshal(b, &p); err != nil {
 		return GenerationValidator{}, fmt.Errorf("unable to decode %s\n%w", path, err)
 	}
 
