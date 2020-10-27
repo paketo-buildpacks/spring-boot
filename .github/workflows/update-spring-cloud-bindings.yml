@@ -1,7 +1,7 @@
 name: Update spring-cloud-bindings
 "on":
     schedule:
-        - cron: 30 * * * *
+        - cron: 0 5 * * 1-5
     workflow_dispatch: {}
 jobs:
     update:
