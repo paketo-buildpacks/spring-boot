@@ -147,3 +147,9 @@ jobs:
               env:
                 DIGEST: ${{ steps.package.outputs.digest }}
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - uses: docker://ghcr.io/buildpacks/actions/registry:main
+              with:
+                address: gcr.io/paketo-buildpacks/spring-boot@${{ steps.package.outputs.digest }}
+                id: paketo-buildpacks/spring-boot
+                token: ${{ secrets.JAVA_BUILDPACK_REGISTRY_TOKEN }}
+                version: ${{ steps.version.outputs.version }}
