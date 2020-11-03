@@ -49,6 +49,8 @@ github.com/paketo-buildpacks/libjvm v1.24.0 h1:OWQvAQDB73O2JvkJzTaZCdFXlTMEDl/mW
 github.com/paketo-buildpacks/libjvm v1.24.0/go.mod h1:rT0L8Rd1zU0JzibwZ+r5t4PCyAZshKWOG7oDbDMNNqU=
 github.com/paketo-buildpacks/libpak v1.48.0 h1:8p+hyjZbbWExag6WxyCnNJrEOmjvbK6LBzzRxa6HKpA=
 github.com/paketo-buildpacks/libpak v1.48.0/go.mod h1:gx1On0u2+Ihyy4sw3nwnawsb+Mkby1FBB/7DQReXdxs=
+github.com/paketo-buildpacks/libpak v1.49.0 h1:Yf3wt1RBb5Psjmc1X7joMal/tL15kSl8lz07Rfh48m4=
+github.com/paketo-buildpacks/libpak v1.49.0/go.mod h1:8vMe0mZNZj1vqngvtH6KCrs98mL+KW9mTymOb5PE6pw=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible h1:Jd6xfriVlJ6hWPvYOE0Ni0QWcNTLRehfGPFxr3eSL80=
 github.com/pavel-v-chernykh/keystore-go v2.1.0+incompatible/go.mod h1:xlUlxe/2ItGlQyMTstqeDv9r3U4obH7xYd26TbDQutY=
 github.com/pelletier/go-toml v1.8.1 h1:1Nf83orprkJyknT6h7zbuEGUEjcyVlCxSUGTENmNCRM=
