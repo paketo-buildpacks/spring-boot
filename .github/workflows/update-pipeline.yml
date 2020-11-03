@@ -9,7 +9,6 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
             - uses: actions/setup-go@v2
               with:
                 go-version: "1.15"
@@ -20,6 +19,7 @@ jobs:
                 set -euo pipefail
 
                 GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/pipeline-builder/cmd/octo
+            - uses: actions/checkout@v2
             - id: pipeline
               name: Update Pipeline
               run: |
@@ -56,7 +56,7 @@ jobs:
                 echo "::set-output name=release-notes::${RELEASE_NOTES//$'\n'/%0A}"
               env:
                 DESCRIPTOR: .github/pipeline-descriptor.yml
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
             - uses: peter-evans/create-pull-request@v3
               with:
                 body: |-
@@ -75,4 +75,4 @@ jobs:
                 labels: semver:patch, type:task
                 signoff: true
                 title: Bump pipeline from ${{ steps.pipeline.outputs.old-version }} to ${{ steps.pipeline.outputs.new-version }}
-                token: ${{ secrets.GITHUB_TOKEN }}
+                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
