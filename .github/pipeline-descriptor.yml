@@ -1,3 +1,5 @@
+github_token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+
 codeowners:
 - path:  "*"
   owner: "@paketo-buildpacks/java-buildpacks"
