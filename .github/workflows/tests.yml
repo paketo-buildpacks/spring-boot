@@ -17,17 +17,6 @@ jobs:
                 password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
                 registry: gcr.io
                 username: _json_key
-            - uses: actions/checkout@v2
-            - uses: actions/cache@v2
-              with:
-                key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
-                path: |-
-                    ${{ env.HOME }}/.pack
-                    ${{ env.HOME }}/carton-cache
-                restore-keys: ${{ runner.os }}-go-
-            - uses: actions/setup-go@v2
-              with:
-                go-version: "1.15"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -41,6 +30,8 @@ jobs:
 
                 set -euo pipefail
 
+                echo "Installing pack ${PACK_VERSION}"
+
                 mkdir -p "${HOME}"/bin
                 echo "${HOME}/bin" >> "${GITHUB_PATH}"
 
@@ -49,9 +40,20 @@ jobs:
                   --show-error \
                   --silent \
                   "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
-                  | tar -C "${HOME}"/bin/ -xzv pack
+                | tar -C "${HOME}"/bin -xz pack
               env:
-                PACK_VERSION: 0.14.1
+                PACK_VERSION: 0.14.2
+            - uses: actions/setup-go@v2
+              with:
+                go-version: "1.15"
+            - uses: actions/checkout@v2
+            - uses: actions/cache@v2
+              with:
+                key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
+                path: |-
+                    ${{ env.HOME }}/.pack
+                    ${{ env.HOME }}/carton-cache
+                restore-keys: ${{ runner.os }}-go-
             - id: version
               name: Compute Version
               run: |
@@ -107,6 +109,7 @@ jobs:
                     --config "${HOME}"/package.toml \
                     --publish
 
+                  crane tag "${PACKAGE}:${VERSION}" latest
                   echo "::set-output name=digest::$(crane digest "${PACKAGE}:${VERSION}")"
                 else
                   pack package-buildpack \
@@ -136,7 +139,19 @@ jobs:
 
                 set -euo pipefail
 
-                GO111MODULE=on go get -u -ldflags="-s -w" github.com/kyoh86/richgo
+                echo "Installing richgo ${RICHGO_VERSION}"
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl \
+                  --location \
+                  --show-error \
+                  --silent \
+                  "https://github.com/kyoh86/richgo/releases/download/v${RICHGO_VERSION}/richgo_${RICHGO_VERSION}_linux_amd64.tar.gz" \
+                | tar -C "${HOME}"/bin -xz richgo
+              env:
+                RICHGO_VERSION: 0.3.3
             - name: Run Tests
               run: |
                 #!/usr/bin/env bash
