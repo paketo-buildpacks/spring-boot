@@ -7,7 +7,7 @@ codeowners:
 package:
   repository:     gcr.io/paketo-buildpacks/spring-boot
   register:       true
-  registry_token: ${{ secrets.JAVA_BUILDPACK_REGISTRY_TOKEN }}
+  registry_token: ${{ secrets.JAVA_GITHUB_TOKEN }}
 
 docker_credentials:
 - registry: gcr.io
