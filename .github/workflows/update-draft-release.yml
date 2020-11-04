@@ -12,13 +12,14 @@ jobs:
             - id: release-drafter
               uses: release-drafter/release-drafter@v5
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - uses: actions/checkout@v2
+                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
             - name: Install yj
               run: |
                 #!/usr/bin/env bash
 
                 set -euo pipefail
+
+                echo "Installing yj ${YJ_VERSION}"
 
                 mkdir -p "${HOME}"/bin
                 echo "${HOME}/bin" >> "${GITHUB_PATH}"
@@ -33,6 +34,7 @@ jobs:
                 chmod +x "${HOME}"/bin/yj
               env:
                 YJ_VERSION: 5.0.0
+            - uses: actions/checkout@v2
             - name: Update draft release with buildpack information
               run: |
                 #!/usr/bin/env bash
@@ -69,12 +71,14 @@ jobs:
                   done
                 fi
 
-                while IFS= read -r -d '' FILE; do
-                  PAYLOAD=$(jq -n -r \
-                    --argjson PAYLOAD "${PAYLOAD}" \
-                    --argjson BUILDPACK "$(yj -tj < "${FILE}")" \
-                    '$PAYLOAD | .buildpacks += [ $BUILDPACK ]')
-                done < <(find buildpacks -name buildpack.toml -print0)
+                if [[ -d buildpacks ]]; then
+                  while IFS= read -r -d '' FILE; do
+                    PAYLOAD=$(jq -n -r \
+                      --argjson PAYLOAD "${PAYLOAD}" \
+                      --argjson BUILDPACK "$(yj -tj < "${FILE}")" \
+                      '$PAYLOAD | .buildpacks += [ $BUILDPACK ]')
+                  done < <(find buildpacks -name buildpack.toml -print0)
+                fi
 
                 jq -n -r \
                   --argjson PAYLOAD "${PAYLOAD}" \
@@ -180,7 +184,7 @@ jobs:
                   --field "name=@${HOME}/name" \
                   --field "body=@${HOME}/body"
               env:
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
                 RELEASE_BODY: ${{ steps.release-drafter.outputs.body }}
                 RELEASE_ID: ${{ steps.release-drafter.outputs.id }}
                 RELEASE_NAME: ${{ steps.release-drafter.outputs.name }}

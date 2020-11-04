@@ -16,25 +16,9 @@ jobs:
                 password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
                 registry: gcr.io
                 username: _json_key
-            - uses: actions/checkout@v2
-            - if: ${{ false }}
-              uses: actions/cache@v2
-              with:
-                key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
-                path: |-
-                    ${{ env.HOME }}/.pack
-                    ${{ env.HOME }}/carton-cache
-                restore-keys: ${{ runner.os }}-go-
             - uses: actions/setup-go@v2
               with:
                 go-version: "1.15"
-            - name: Install crane
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                GO111MODULE=on go get -u -ldflags="-s -w" github.com/google/go-containerregistry/cmd/crane
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -42,11 +26,32 @@ jobs:
                 set -euo pipefail
 
                 GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package
+            - name: Install crane
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                echo "Installing crane ${CRANE_VERSION}"
+
+                mkdir -p "${HOME}"/bin
+                echo "${HOME}/bin" >> "${GITHUB_PATH}"
+
+                curl \
+                  --show-error \
+                  --silent \
+                  --location \
+                  "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" \
+                | tar -C "${HOME}/bin" -xz crane
+              env:
+                CRANE_VERSION: 0.1.4
             - name: Install pack
               run: |
                 #!/usr/bin/env bash
 
                 set -euo pipefail
+
+                echo "Installing pack ${PACK_VERSION}"
 
                 mkdir -p "${HOME}"/bin
                 echo "${HOME}/bin" >> "${GITHUB_PATH}"
@@ -56,9 +61,18 @@ jobs:
                   --show-error \
                   --silent \
                   "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
-                  | tar -C "${HOME}"/bin/ -xzv pack
+                | tar -C "${HOME}"/bin -xz pack
               env:
-                PACK_VERSION: 0.14.1
+                PACK_VERSION: 0.14.2
+            - uses: actions/checkout@v2
+            - if: ${{ false }}
+              uses: actions/cache@v2
+              with:
+                key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
+                path: |-
+                    ${{ env.HOME }}/.pack
+                    ${{ env.HOME }}/carton-cache
+                restore-keys: ${{ runner.os }}-go-
             - id: version
               name: Compute Version
               run: |
@@ -115,6 +129,7 @@ jobs:
                     --config "${HOME}"/package.toml \
                     --publish
 
+                  crane tag "${PACKAGE}:${VERSION}" latest
                   echo "::set-output name=digest::$(crane digest "${PACKAGE}:${VERSION}")"
                 else
                   pack package-buildpack \
@@ -146,7 +161,7 @@ jobs:
                   --field "body=${RELEASE_BODY//<!-- DIGEST PLACEHOLDER -->/\`${DIGEST}\`}"
               env:
                 DIGEST: ${{ steps.package.outputs.digest }}
-                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
             - uses: docker://ghcr.io/buildpacks/actions/registry:main
               with:
                 address: gcr.io/paketo-buildpacks/spring-boot@${{ steps.package.outputs.digest }}
