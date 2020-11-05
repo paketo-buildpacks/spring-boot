@@ -1,4 +1,6 @@
-github_token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+github:
+  username: ${{ secrets.JAVA_GITHUB_USERNAME }}
+  token:    ${{ secrets.JAVA_GITHUB_TOKEN }}
 
 codeowners:
 - path:  "*"
