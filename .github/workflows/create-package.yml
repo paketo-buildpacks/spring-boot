@@ -166,5 +166,5 @@ jobs:
               with:
                 address: gcr.io/paketo-buildpacks/spring-boot@${{ steps.package.outputs.digest }}
                 id: paketo-buildpacks/spring-boot
-                token: ${{ secrets.JAVA_BUILDPACK_REGISTRY_TOKEN }}
+                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
                 version: ${{ steps.version.outputs.version }}
