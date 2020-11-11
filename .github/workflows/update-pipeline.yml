@@ -1,5 +1,10 @@
 name: Update Pipeline
 "on":
+    push:
+        branches:
+            - main
+        paths:
+            - .github/pipeline-descriptor.yml
     schedule:
         - cron: 0 5 * * 1-5
     workflow_dispatch: {}
