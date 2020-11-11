@@ -63,7 +63,7 @@ jobs:
                   "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
                 | tar -C "${HOME}"/bin -xz pack
               env:
-                PACK_VERSION: 0.14.2
+                PACK_VERSION: 0.15.0
             - uses: actions/checkout@v2
             - if: ${{ false }}
               uses: actions/cache@v2
