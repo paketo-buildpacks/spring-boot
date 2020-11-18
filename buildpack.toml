@@ -38,9 +38,9 @@ launch      = true
 [[metadata.dependencies]]
 id      = "spring-cloud-bindings"
 name    = "Spring Cloud Bindings"
-version = "1.6.0"
-uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.6.0/spring-cloud-bindings-1.6.0.jar"
-sha256  = "be27df8838a6d069a2212de5f46da4e39f33f087f2e77c8a725d0f7ec8b5273e"
+version = "1.7.0"
+uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.7.0/spring-cloud-bindings-1.7.0.jar"
+sha256  = "e3c18bf1a3c2e52743f9ff2fa46af59e5eee0a7f0683ff562eb35aa866e4a9e9"
 stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
 
   [[metadata.dependencies.licenses]]
