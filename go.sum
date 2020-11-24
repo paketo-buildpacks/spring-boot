@@ -2,6 +2,8 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Masterminds/semver/v3 v3.1.0 h1:Y2lUDsFKVRSYGojLJ1yLxSXdMmMYTYls0rCvoqmMUQk=
 github.com/Masterminds/semver/v3 v3.1.0/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
+github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
+github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/buildpacks/libcnb v1.18.0 h1:Q7I+HjQ1Cq02/AqhTOrzecuNESip9xE2axckxnymYLQ=
 github.com/buildpacks/libcnb v1.18.0/go.mod h1:yzAQd//jyUXVx6Z/F0cKk/hrl49QZq1OE/hP5+/ZPuQ=
 github.com/buildpacks/libcnb v1.18.1 h1:NcAqtyLmSkpcgIOl83GOHY5Mk2ltBFiAI8mmAvavvEs=
