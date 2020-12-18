@@ -43,6 +43,17 @@ jobs:
                 | tar -C "${HOME}"/bin -xz pack
               env:
                 PACK_VERSION: 0.15.0
+            - if: ${{ false }}
+              name: Enable pack Experimental
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                echo "Enabling pack experimental features"
+
+                mkdir -p "${HOME}"/.pack
+                echo "experimental = true" >> "${HOME}"/.pack/config.toml
             - uses: actions/setup-go@v2
               with:
                 go-version: "1.15"
@@ -93,9 +104,10 @@ jobs:
                 fi
 
                 [[ -e package.toml ]] && cp package.toml "${HOME}"/package.toml
-                printf '[buildpack]\nuri = "%s"' "${HOME}"/buildpack >> "${HOME}"/package.toml
+                printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}"/buildpack "${OS}" >> "${HOME}"/package.toml
               env:
                 INCLUDE_DEPENDENCIES: "true"
+                OS: linux
                 VERSION: ${{ steps.version.outputs.version }}
             - name: Package Buildpack
               run: |
@@ -114,9 +126,11 @@ jobs:
                 else
                   pack package-buildpack \
                     "${PACKAGE}:${VERSION}" \
-                    --config "${HOME}"/package.toml
+                    --config "${HOME}"/package.toml \
+                    --format "${FORMAT}"
                 fi
               env:
+                FORMAT: image
                 PACKAGE: test
                 VERSION: ${{ steps.version.outputs.version }}
     unit:

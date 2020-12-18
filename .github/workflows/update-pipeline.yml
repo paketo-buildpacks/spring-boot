@@ -64,6 +64,7 @@ jobs:
                 GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
             - uses: peter-evans/create-pull-request@v3
               with:
+                author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
                 body: |-
                     Bumps pipeline from `${{ steps.pipeline.outputs.old-version }}` to `${{ steps.pipeline.outputs.new-version }}`.
 
