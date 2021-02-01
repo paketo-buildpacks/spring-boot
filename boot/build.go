@@ -131,9 +131,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}
-	result.Plan.Entries = append(result.Plan.Entries, libcnb.BuildpackPlanEntry{
+	result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{
 		Name:     "dependencies",
 		Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
+		Launch:   true,
 	})
 
 	gv, err := NewGenerationValidator(filepath.Join(context.Buildpack.Path, "spring-generations.toml"))
@@ -166,9 +167,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationTypeResolver\n%w", err)
 		}
 
-		h := libpak.NewHelperLayerContributor(context.Buildpack, result.Plan, "spring-cloud-bindings")
+		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
 		h.Logger = b.Logger
 		result.Layers = append(result.Layers, h)
+		result.BOM.Entries = append(result.BOM.Entries, be)
 
 		at, err := NewWebApplicationType(context.Application.Path, wr)
 		if err != nil {
@@ -182,9 +184,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
 		}
 
-		bindingsLayer := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc, result.Plan)
+		bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
 		bindingsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, bindingsLayer)
+		result.BOM.Entries = append(result.BOM.Entries, be)
 
 		if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
 			b.Logger.Header("Creating slices from layers index")
