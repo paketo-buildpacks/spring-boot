@@ -7,7 +7,7 @@ require (
 	github.com/buildpacks/libcnb v1.18.1
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.4
-	github.com/onsi/gomega v1.10.4
+	github.com/onsi/gomega v1.10.5
 	github.com/paketo-buildpacks/libjvm v1.25.0
 	github.com/paketo-buildpacks/libpak v1.50.1
 	github.com/pelletier/go-toml v1.8.1
