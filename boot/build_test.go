@@ -159,7 +159,7 @@ Implementation-Version: 2.2.2
 		}))
 	})
 
-	it("contributes dependencies plan entry", func() {
+	it("contributes dependencies bom entry", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
@@ -172,7 +172,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Plan.Entries).To(ContainElement(libcnb.BuildpackPlanEntry{
+		Expect(result.BOM.Entries).To(ContainElement(libcnb.BOMEntry{
 			Name: "dependencies",
 			Metadata: map[string]interface{}{
 				"layer": "application",
@@ -184,6 +184,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 					},
 				},
 			},
+			Build:  false,
+			Launch: true,
 		}))
 	})
 
@@ -202,6 +204,15 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Layers[0].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
 		Expect(result.Layers[1].Name()).To(Equal("web-application-type"))
 		Expect(result.Layers[2].Name()).To(Equal("spring-cloud-bindings"))
+
+		Expect(result.BOM.Entries).To(HaveLen(3))
+		Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		Expect(result.BOM.Entries[1].Name).To(Equal("helper"))
+		Expect(result.BOM.Entries[1].Launch).To(BeTrue())
+		Expect(result.BOM.Entries[1].Build).To(BeFalse())
+		Expect(result.BOM.Entries[2].Name).To(Equal("spring-cloud-bindings"))
+		Expect(result.BOM.Entries[2].Launch).To(BeTrue())
+		Expect(result.BOM.Entries[2].Build).To(BeFalse())
 	})
 
 	it("contributes slices from layers index", func() {

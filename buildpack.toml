@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-api = "0.4"
+api = "0.5"
 
 [buildpack]
 id       = "paketo-buildpacks/spring-boot"

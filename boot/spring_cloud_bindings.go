@@ -34,14 +34,15 @@ type SpringCloudBindings struct {
 	SpringBootLib    string
 }
 
-func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDependency, cache libpak.DependencyCache,
-	plan *libcnb.BuildpackPlan) SpringCloudBindings {
-
+func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDependency, cache libpak.DependencyCache) (SpringCloudBindings, libcnb.BOMEntry) {
+	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
+		Launch: true,
+	})
 	return SpringCloudBindings{
 		Dependency:       dependency,
-		LayerContributor: libpak.NewDependencyLayerContributor(dependency, cache, plan),
+		LayerContributor: contributor,
 		SpringBootLib:    springBootLib,
-	}
+	}, entry
 }
 
 func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
@@ -57,7 +58,7 @@ func (s SpringCloudBindings) Contribute(layer libcnb.Layer) (libcnb.Layer, error
 		}
 
 		return layer, nil
-	}, libpak.LaunchLayer)
+	})
 	if err != nil {
 		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cloud-bindings layer\n%w", err)
 	}

@@ -40,8 +40,15 @@ func NewWebApplicationType(applicationPath string, resolver WebApplicationTypeRe
 		return WebApplicationType{}, fmt.Errorf("unable to create file listing for %s\n%w", applicationPath, err)
 	}
 
+	contributor := libpak.NewLayerContributor(
+		"Web Application Type",
+		expected,
+		libcnb.LayerTypes{
+			Launch: true,
+		},
+	)
 	return WebApplicationType{
-		LayerContributor: libpak.NewLayerContributor("Web Application Type", expected),
+		LayerContributor: contributor,
 		Resolver:         resolver,
 	}, nil
 }
@@ -63,7 +70,7 @@ func (w WebApplicationType) Contribute(layer libcnb.Layer) (libcnb.Layer, error)
 		}
 
 		return layer, nil
-	}, libpak.LaunchLayer)
+	})
 }
 
 func (WebApplicationType) Name() string {
