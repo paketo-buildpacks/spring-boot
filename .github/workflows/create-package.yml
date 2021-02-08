@@ -77,7 +77,7 @@ jobs:
                 echo "experimental = true" >> "${HOME}"/.pack/config.toml
             - uses: actions/checkout@v2
             - if: ${{ false }}
-              uses: actions/cache@v2
+              uses: actions/cache@v2.1.4
               with:
                 key: ${{ runner.os }}-go-${{ hashFiles('**/buildpack.toml', '**/package.toml') }}
                 path: |-
