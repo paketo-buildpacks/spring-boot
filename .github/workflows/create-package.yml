@@ -176,7 +176,7 @@ jobs:
                 DIGEST: ${{ steps.package.outputs.digest }}
                 GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
             - if: ${{ true }}
-              uses: docker://ghcr.io/buildpacks/actions/registry:main
+              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:4.0.1
               with:
                 address: gcr.io/paketo-buildpacks/spring-boot@${{ steps.package.outputs.digest }}
                 id: paketo-buildpacks/spring-boot
