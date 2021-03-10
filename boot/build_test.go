@@ -202,8 +202,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Layers).To(HaveLen(3))
 		Expect(result.Layers[0].Name()).To(Equal("helper"))
 		Expect(result.Layers[0].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
-		Expect(result.Layers[1].Name()).To(Equal("web-application-type"))
-		Expect(result.Layers[2].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[2].Name()).To(Equal("web-application-type"))
 
 		Expect(result.BOM.Entries).To(HaveLen(3))
 		Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
@@ -248,7 +248,7 @@ Spring-Boot-Layers-Index: layers.idx
 			})
 		})
 
-		it("adds no layers to the result", func() {
+		it("sets the CLASSPATH for the native image build", func() {
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
@@ -258,7 +258,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(result.Layers).To(HaveLen(0))
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("Class Path"))
 		})
 
 		it("adds no slices to the result", func() {
@@ -273,6 +274,5 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 			Expect(result.Slices).To(HaveLen(0))
 		})
-
 	})
 }

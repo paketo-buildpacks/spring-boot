@@ -20,6 +20,11 @@ import (
 	"github.com/buildpacks/libcnb"
 )
 
+const (
+	PlanEntrySpringBoot     = "spring-boot"
+	PlanEntryJVMApplication = "jvm-application"
+)
+
 type Detect struct{}
 
 func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
