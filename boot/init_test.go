@@ -32,5 +32,6 @@ func TestUnit(t *testing.T) {
 	suite("SpringCloudBindings", testSpringCloudBindings)
 	suite("WebApplicationType", testWebApplicationType)
 	suite("WebApplicationTypeResolver", testWebApplicationTypeResolver)
+	suite("NativeImage", testNativeImage)
 	suite.Run(t)
 }
