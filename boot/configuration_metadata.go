@@ -37,7 +37,7 @@ type Group struct {
 }
 
 type Deprecation struct {
-	Level       string `json:"level"`
+	Level       string `json:"level,omitempty"`
 	Reason      string `json:"reason,omitempty"`
 	Replacement string `json:"replacement,omitempty"`
 }
@@ -58,7 +58,7 @@ type ValueHint struct {
 
 type ValueProvider struct {
 	Name       string                 `json:"name"`
-	Parameters map[string]interface{} `json:"parameters"`
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
 }
 
 type Hint struct {
