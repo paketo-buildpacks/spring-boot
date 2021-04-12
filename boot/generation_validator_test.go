@@ -80,9 +80,11 @@ func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("logs open source warning", func() {
-		Expect(gv.Validate("spring-boot", "2.1.0.RELEASE")).NotTo(HaveOccurred())
+		// implementation of Validate uses `time.Now()` and will eventually need to be updated
+		// `boot/testdata/test-spring-generations.toml has the defined generations for this test
+		Expect(gv.Validate("spring-boot", "2.2.0.RELEASE")).NotTo(HaveOccurred())
 		Expect(b.String()).To(Equal(fmt.Sprintf("  %s\n", color.New(color.FgYellow, color.Bold, color.Faint).Sprint(
-			"This application uses Spring Boot 2.1.0.RELEASE. Open Source updates for 2.1.x ended on 2019-10-01."))))
+			"This application uses Spring Boot 2.2.0.RELEASE. Open Source updates for 2.2.x ended on 2020-10-01."))))
 	})
 
 }
