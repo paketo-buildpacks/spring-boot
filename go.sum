@@ -3,8 +3,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/buildpacks/libcnb v1.19.0/go.mod h1:slnOsywO4mNdkShkwX1GYR+kQF1tH2F9Urfr66lWGQs=
-github.com/buildpacks/libcnb v1.20.0 h1:BpqAgWLmSbu2/IHMsO+BdqwDejP8jw3EDTx4vN1INvA=
-github.com/buildpacks/libcnb v1.20.0/go.mod h1:q+nl2Cg76musVOM5CRFeasdbY23FNEz4kvOkZeEUyaM=
+github.com/buildpacks/libcnb v1.21.0 h1:GBK02W22lm1ie8E4hBGStNfShLa/CWbjoBD1kfqAKT4=
+github.com/buildpacks/libcnb v1.21.0/go.mod h1:q+nl2Cg76musVOM5CRFeasdbY23FNEz4kvOkZeEUyaM=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
