@@ -12,7 +12,7 @@
 [[Projects]]
   Name = "Spring for Android"
   Slug = "spring-android"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
 [[Projects]]
   Name = "Spring Batch"
@@ -362,7 +362,7 @@
 [[Projects]]
   Name = "Spring Mobile"
   Slug = "spring-mobile"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
 [[Projects]]
   Name = "New Spring Project"
