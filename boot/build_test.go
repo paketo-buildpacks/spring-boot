@@ -87,7 +87,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Labels).To(ContainElement(libcnb.Label{Key: "org.springframework.boot.version", Value: "1.1.1"}))
 	})
 
-	it("contributes org.springframework.boot.spring-configuration-metadata.json label", func() {
+	it("skips org.springframework.boot.spring-configuration-metadata.json label when DataFlow is not present", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
@@ -99,7 +99,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(result.Labels).To(ContainElement(libcnb.Label{
+		Expect(result.Labels).ToNot(ContainElement(libcnb.Label{
 			Key:   "org.springframework.boot.spring-configuration-metadata.json",
 			Value: `{"groups":[{"name":"alpha"}]}`,
 		}))

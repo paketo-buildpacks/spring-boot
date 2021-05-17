@@ -9,8 +9,8 @@ This buildpack will participate if all the following conditions are met
 The buildpack will do the following:
 
 * Contributes Spring Boot version to `org.springframework.boot.version` image label
-* Contributes Spring Boot configuration metadata to `org.springframework.boot.spring-configuration-metadata.json` image label
 * If `<APPLICATION_ROOT>/META-INF/dataflow-configuration-metadata.properties` exists
+  * Contributes Spring Boot configuration metadata to `org.springframework.boot.spring-configuration-metadata.json` image label
   * Contributes Spring Cloud Data Flow configuration metadata to `org.springframework.cloud.dataflow.spring-configuration-metadata.json` image label
 * Contributes `Implementation-Title` manifest entry to `org.opencontainers.image.title` image label
 * Contributes `Implementation-version` manifest entry to `org.opencontainers.image.version` image label

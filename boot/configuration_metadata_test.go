@@ -80,9 +80,9 @@ func testConfigurationMetadata(t *testing.T, context spec.G, it spec.S) {
 		it("returns dataflow decoded contents", func() {
 			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "spring-configuration-metadata.json"),
-				[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644))
+				[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties"),
-				[]byte("configuration-properties.classes=alpha"), 0644))
+				[]byte("configuration-properties.classes=alpha"), 0644)).To(Succeed())
 
 			cm, err := boot.NewConfigurationMetadataFromPath(path)
 			Expect(err).NotTo(HaveOccurred())
@@ -107,6 +107,32 @@ func testConfigurationMetadata(t *testing.T, context spec.G, it spec.S) {
 			Expect(boot.NewConfigurationMetadataFromJAR(file)).To(Equal(boot.ConfigurationMetadata{
 				Groups: []boot.Group{{Name: "alpha"}},
 			}))
+		})
+	})
+
+	context("detects Dataflow", func() {
+		it("returns false if file does not exist", func() {
+			Expect(boot.DataFlowConfigurationExists(path)).To(BeFalse())
+		})
+
+		it("returns true if the file does exist", func() {
+			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties"),
+				[]byte("configuration-properties.classes=alpha"), 0644)).To(Succeed())
+			Expect(boot.DataFlowConfigurationExists(path)).To(BeFalse())
+		})
+
+		it("return false and the error if the file cannot be read", func() {
+			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties"),
+				[]byte("configuration-properties.classes=alpha"), 0644)).To(Succeed())
+
+			Expect(os.Chmod(filepath.Join(path, "META-INF"), 0000)).To(Succeed())
+			ok, err := boot.DataFlowConfigurationExists(path)
+			Expect(os.Chmod(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
+
+			Expect(ok).To(BeFalse())
+			Expect(err).To(MatchError(HaveSuffix("permission denied")))
 		})
 	})
 

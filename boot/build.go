@@ -210,8 +210,11 @@ func labels(context libcnb.BuildContext, manifest *properties.Properties) ([]lib
 }
 
 func configurationMetadataLabels(appDir string, manifest *properties.Properties) ([]libcnb.Label, error) {
-	var labels []libcnb.Label
+	if ok, err := DataFlowConfigurationExists(appDir); !ok || err != nil {
+		return []libcnb.Label{}, err
+	}
 
+	var labels []libcnb.Label
 	md, err := NewConfigurationMetadataFromPath(appDir)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read configuration metadata from %s\n%w", appDir, err)

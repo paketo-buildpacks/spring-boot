@@ -17,8 +17,9 @@
 package boot
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
@@ -32,13 +33,13 @@ type WebApplicationType struct {
 }
 
 func NewWebApplicationType(applicationPath string, resolver WebApplicationTypeResolver) (WebApplicationType, error) {
-	var err error
-
-	expected := make(map[string]interface{}, 1)
-	expected["files"], err = sherpa.NewFileListing(applicationPath)
+	files, err := sherpa.NewFileListing(applicationPath)
 	if err != nil {
 		return WebApplicationType{}, fmt.Errorf("unable to create file listing for %s\n%w", applicationPath, err)
 	}
+
+	expected := make(map[string]interface{}, 1)
+	expected["files"] = calculateHash(files)
 
 	contributor := libpak.NewLayerContributor(
 		"Web Application Type",
@@ -51,6 +52,16 @@ func NewWebApplicationType(applicationPath string, resolver WebApplicationTypeRe
 		LayerContributor: contributor,
 		Resolver:         resolver,
 	}, nil
+}
+
+func calculateHash(files []sherpa.FileEntry) string {
+	hash := sha256.New()
+
+	for _, file := range files {
+		hash.Write([]byte(file.Path + file.Mode + file.SHA256 + "\n"))
+	}
+
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 func (w WebApplicationType) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
