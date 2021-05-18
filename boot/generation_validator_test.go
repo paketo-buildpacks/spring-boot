@@ -69,7 +69,7 @@ func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("does not log warning", func() {
-		Expect(gv.Validate("spring-boot", "2.3.0.RELEASE")).NotTo(HaveOccurred())
+		Expect(gv.Validate("spring-boot", "2.4.0.RELEASE")).NotTo(HaveOccurred())
 		Expect(b.Len()).To(BeZero())
 	})
 

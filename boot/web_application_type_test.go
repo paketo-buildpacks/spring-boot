@@ -19,6 +19,7 @@ package boot_test
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/buildpacks/libcnb"
@@ -42,10 +43,17 @@ func testWebApplicationType(t *testing.T, context spec.G, it spec.S) {
 		ctx.Layers.Path, err = ioutil.TempDir("", "web-application-type")
 		Expect(err).NotTo(HaveOccurred())
 
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Layers.Path, "app-file-1"), []byte("some contents"), 0644)).To(Succeed())
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Layers.Path, "app-file-2"), []byte("some more contents"), 0400)).To(Succeed())
+
 		wr := boot.WebApplicationTypeResolver{Classes: map[string]interface{}{}}
 
 		w, err = boot.NewWebApplicationType(ctx.Layers.Path, wr)
 		Expect(err).NotTo(HaveOccurred())
+
+		val, ok := w.LayerContributor.ExpectedMetadata.(map[string]interface{})
+		Expect(ok).To(BeTrue())
+		Expect(val["files"]).To(HaveLen(64))
 	})
 
 	it.After(func() {

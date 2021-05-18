@@ -122,6 +122,17 @@ func NewConfigurationMetadataFromJAR(jar string) (ConfigurationMetadata, error) 
 	return c, nil
 }
 
+func DataFlowConfigurationExists(path string) (bool, error) {
+	_, err := os.Stat(filepath.Join(path, "META-INF", "dataflow-configuration-metadata.properties"))
+	if err != nil && os.IsNotExist(err) {
+		return false, nil
+	}
+	if err != nil && !os.IsNotExist(err) {
+		return false, err
+	}
+	return true, nil
+}
+
 func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadata) (ConfigurationMetadata, error) {
 	file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata.properties")
 	b, err := ioutil.ReadFile(file)
