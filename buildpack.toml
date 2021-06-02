@@ -12,13 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-api = "0.5"
+api = "0.6"
 
 [buildpack]
 id       = "paketo-buildpacks/spring-boot"
 name     = "Paketo Spring Boot Buildpack"
 version  = "{{.version}}"
 homepage = "https://github.com/paketo-buildpacks/spring-boot"
+description = "A Cloud Native Buildpack that contributes Spring Boot dependency information and slices an application into multiple layers"
+keywords    = ["java", "spring", "spring-boot"]
+
+[[buildpack.licenses]]
+type = "Apache-2.0"
+uri  = "https://github.com/paketo-buildpacks/spring-boot/blob/main/LICENSE"
 
 [[stacks]]
 id = "io.buildpacks.stacks.bionic"
