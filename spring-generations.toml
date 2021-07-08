@@ -325,6 +325,11 @@
   Status = "ACTIVE"
 
 [[Projects]]
+  Name = "Spring GraphQL"
+  Slug = "spring-graphql"
+  Status = "ACTIVE"
+
+[[Projects]]
   Name = "Spring for Apache Hadoop"
   Slug = "spring-hadoop"
   Status = "END_OF_LIFE"
