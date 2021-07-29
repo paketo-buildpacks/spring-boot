@@ -33,7 +33,7 @@ id = "io.buildpacks.stacks.bionic"
 id = "io.paketo.stacks.tiny"
 
 [[stacks]]
-id = "org.cloudfoundry.stacks.cflinuxfs3"
+id = "*"
 
 [[metadata.configurations]]
 name        = "BPL_SPRING_CLOUD_BINDINGS_ENABLED"
@@ -47,7 +47,7 @@ name    = "Spring Cloud Bindings"
 version = "1.7.1"
 uri     = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.7.1/spring-cloud-bindings-1.7.1.jar"
 sha256  = "a52c2592d58555b6d70a3b0128be70852c83a0c58b70a7b23c07ebd9631ec47a"
-stacks  = [ "io.buildpacks.stacks.bionic", "org.cloudfoundry.stacks.cflinuxfs3" ]
+stacks  = [ "io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*" ]
 
   [[metadata.dependencies.licenses]]
   type = "Apache-2.0"
