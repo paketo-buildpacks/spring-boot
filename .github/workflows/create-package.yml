@@ -9,7 +9,7 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
-            - if: ${{ github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork }}
+            - if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
               name: Docker login gcr.io
               uses: docker/login-action@v1
               with:
