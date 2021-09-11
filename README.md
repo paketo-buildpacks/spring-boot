@@ -2,7 +2,10 @@
 The Paketo Spring Boot Buildpack is a Cloud Native Buildpack that contributes Spring Boot dependency information and slices an application into multiple layers.
 
 ## Behavior
-This buildpack will participate if all the following conditions are met
+
+This buildpack will always detect.
+
+This buildpack will participate at build time if all the following conditions are met:
 
 * `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Version` entry
 
