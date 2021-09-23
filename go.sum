@@ -55,14 +55,12 @@ github.com/onsi/gomega v1.10.1/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.13.0/go.mod h1:lRk9szgn8TxENtWd0Tp4c3wjlRfMTMH27I+3Je41yGY=
 github.com/onsi/gomega v1.16.0 h1:6gjqkI8iiRHMvdccRJM8rVKjCWk6ZIm6FTm3ddIe4/c=
 github.com/onsi/gomega v1.16.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
-github.com/paketo-buildpacks/libjvm v1.30.0 h1:X/ypFzHqubz13zQGapwEhrVl9JgaSWr/Ba6oqB/MbDI=
-github.com/paketo-buildpacks/libjvm v1.30.0/go.mod h1:8GxPNrAfA6/4xc9cV/cA29A7R+n0K3N9h8nz7nh9vLA=
-github.com/paketo-buildpacks/libpak v1.53.0/go.mod h1:sLXHeMVBlZGs1gXSpmXqvOLULfqJkSy+UlvHY8uP6Bs=
+github.com/paketo-buildpacks/libjvm v1.31.0 h1:nz8W3FebQylc4O1xEArtRjpKaeJfV1XmiPncfDn9FR8=
+github.com/paketo-buildpacks/libjvm v1.31.0/go.mod h1:auLhSZJvLf9fUHApbUYgp9yN2X1Bgw3g1E1VeMopqtw=
 github.com/paketo-buildpacks/libpak v1.54.0 h1:jCAkIodm0hoJZoxq/Pnd6UwP1pObiwiqW13mdnePECc=
 github.com/paketo-buildpacks/libpak v1.54.0/go.mod h1:Q7A+Fc3aBGy4pLnp+LJHYA9oAmRyD43+ZHaFdXjI08g=
 github.com/pavel-v-chernykh/keystore-go/v4 v4.1.0 h1:xKxUVGoB9VJU+lgQLPN0KURjw+XCVVSpHfQEeyxk3zo=
 github.com/pavel-v-chernykh/keystore-go/v4 v4.1.0/go.mod h1:2ejgys4qY+iNVW1IittZhyRYA6MNv8TgM6VHqojbB9g=
-github.com/pelletier/go-toml v1.9.3/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pelletier/go-toml v1.9.4 h1:tjENF6MfZAg8e4ZmZTeWaWiT2vXtsoO6+iuOjFhECwM=
 github.com/pelletier/go-toml v1.9.4/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
