@@ -9,8 +9,8 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
-            - if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
-              name: Docker login gcr.io
+            - name: Docker login gcr.io
+              if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
               uses: docker/login-action@v1
               with:
                 password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
@@ -64,8 +64,8 @@ jobs:
                 | tar -C "${HOME}"/bin -xz pack
               env:
                 PACK_VERSION: 0.18.1
-            - if: ${{ false }}
-              name: Enable pack Experimental
+            - name: Enable pack Experimental
+              if: ${{ false }}
               run: |
                 #!/usr/bin/env bash
 
@@ -84,8 +84,8 @@ jobs:
                     ${{ env.HOME }}/.pack
                     ${{ env.HOME }}/carton-cache
                 restore-keys: ${{ runner.os }}-go-
-            - id: version
-              name: Compute Version
+            - name: Compute Version
+              id: version
               run: |
                 #!/usr/bin/env bash
 
@@ -128,15 +128,15 @@ jobs:
                 INCLUDE_DEPENDENCIES: "false"
                 OS: linux
                 VERSION: ${{ steps.version.outputs.version }}
-            - id: package
-              name: Package Buildpack
+            - name: Package Buildpack
+              id: package
               run: |
                 #!/usr/bin/env bash
 
                 set -euo pipefail
 
                 if [[ -n "${PUBLISH+x}" ]]; then
-                  pack package-buildpack \
+                  pack buildpack package \
                     "${PACKAGE}:${VERSION}" \
                     --config "${HOME}"/package.toml \
                     --publish
@@ -144,7 +144,7 @@ jobs:
                   crane tag "${PACKAGE}:${VERSION}" latest
                   echo "::set-output name=digest::$(crane digest "${PACKAGE}:${VERSION}")"
                 else
-                  pack package-buildpack \
+                  pack buildpack package \
                     "${PACKAGE}:${VERSION}" \
                     --config "${HOME}"/package.toml \
                     --format "${FORMAT}"
