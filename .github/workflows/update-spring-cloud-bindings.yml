@@ -49,7 +49,7 @@ jobs:
                 uri: https://repo.spring.io/release
             - name: Update Buildpack Dependency
               id: buildpack
-              run: |
+              run: |-
                 #!/usr/bin/env bash
 
                 set -euo pipefail
@@ -71,8 +71,17 @@ jobs:
                 git add buildpack.toml
                 git checkout -- .
 
+                if [ "$(echo "$OLD_VERSION" | awk -F '.' '{print $1}')" != "$(echo "$VERSION" | awk -F '.' '{print $1}')" ]; then
+                  LABEL="semver:major"
+                elif [ "$(echo "$OLD_VERSION" | awk -F '.' '{print $2}')" != "$(echo "$VERSION" | awk -F '.' '{print $2}')" ]; then
+                  LABEL="semver:minor"
+                else
+                  LABEL="semver:patch"
+                fi
+
                 echo "::set-output name=old-version::${OLD_VERSION}"
                 echo "::set-output name=new-version::${VERSION}"
+                echo "::set-output name=version-label::${LABEL}"
               env:
                 ID: spring-cloud-bindings
                 SHA256: ${{ steps.dependency.outputs.sha256 }}
@@ -89,7 +98,7 @@ jobs:
 
                     Bumps spring-cloud-bindings from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}.
                 delete-branch: true
-                labels: semver:minor, type:dependency-upgrade
+                labels: ${{ steps.buildpack.outputs.version-label }}, type:dependency-upgrade
                 signoff: true
                 title: Bump spring-cloud-bindings from ${{ steps.buildpack.outputs.old-version }} to ${{ steps.buildpack.outputs.new-version }}
                 token: ${{ secrets.JAVA_GITHUB_TOKEN }}
