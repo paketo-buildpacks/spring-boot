@@ -44,7 +44,7 @@ jobs:
                   "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" \
                 | tar -C "${HOME}/bin" -xz crane
               env:
-                CRANE_VERSION: 0.5.1
+                CRANE_VERSION: 0.6.0
             - name: Install pack
               run: |
                 #!/usr/bin/env bash
@@ -63,7 +63,7 @@ jobs:
                   "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
                 | tar -C "${HOME}"/bin -xz pack
               env:
-                PACK_VERSION: 0.18.1
+                PACK_VERSION: 0.21.1
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
