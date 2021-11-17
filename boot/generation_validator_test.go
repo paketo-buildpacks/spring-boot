@@ -59,7 +59,7 @@ func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("ignores unknown version", func() {
-		Expect(gv.Validate("spring-boot", "2.4.0.RELEASE")).NotTo(HaveOccurred())
+		Expect(gv.Validate("spring-boot", "2.7.0.RELEASE")).NotTo(HaveOccurred())
 		Expect(b.Len()).To(BeZero())
 	})
 
@@ -69,7 +69,7 @@ func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("does not log warning", func() {
-		Expect(gv.Validate("spring-boot", "2.4.0.RELEASE")).NotTo(HaveOccurred())
+		Expect(gv.Validate("spring-boot", "2.5.0.RELEASE")).NotTo(HaveOccurred())
 		Expect(b.Len()).To(BeZero())
 	})
 
@@ -84,7 +84,7 @@ func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {
 		// `boot/testdata/test-spring-generations.toml has the defined generations for this test
 		Expect(gv.Validate("spring-boot", "2.2.0.RELEASE")).NotTo(HaveOccurred())
 		Expect(b.String()).To(Equal(fmt.Sprintf("  %s\n", color.New(color.FgYellow, color.Bold, color.Faint).Sprint(
-			"This application uses Spring Boot 2.2.0.RELEASE. Open Source updates for 2.2.x ended on 2020-10-01."))))
+			"This application uses Spring Boot 2.2.0.RELEASE. Open Source updates for 2.2.x ended on 2021-10-01."))))
 	})
 
 }
