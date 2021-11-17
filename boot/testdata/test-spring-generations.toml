@@ -20,8 +20,8 @@
 
   [[projects.generations]]
     name = "2.2.x"
-    oss = "2020-10-01"
-    commercial = "2021-11-15"
+    oss = "2021-10-01"
+    commercial = "2032-11-15"
 
   [[projects.generations]]
     name = "2.3.x"
