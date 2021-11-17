@@ -210,7 +210,7 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2022-11-30"
+    Commercial = "2022-03-26"
     Name = "2.2.x"
     OSS = "2020-11-26"
 
