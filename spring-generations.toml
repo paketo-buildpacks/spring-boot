@@ -174,6 +174,11 @@
   Slug = "spring-cloud-connectors"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-12-01"
+    Name = "2.0.x"
+    OSS = "2018-10-27"
+
 [[Projects]]
   Name = "Spring Cloud Consul"
   Slug = "spring-cloud-consul"
@@ -183,6 +188,16 @@
   Name = "Spring Cloud Contract"
   Slug = "spring-cloud-contract"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-22"
+    Name = "3.0.x"
+    OSS = "2021-12-22"
 
 [[Projects]]
   Name = "spring-cloud-data"
@@ -245,7 +260,7 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2022-11-30"
+    Commercial = "2022-03-26"
     Name = "2.2.x"
     OSS = "2020-11-26"
 
@@ -284,6 +299,16 @@
   Slug = "spring-cloud-sleuth"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-22"
+    Name = "3.0.x"
+    OSS = "2021-12-22"
+
 [[Projects]]
   Name = "Spring Cloud Stream"
   Slug = "spring-cloud-stream"
@@ -314,6 +339,26 @@
   Slug = "spring-cloud-task"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2020-09-03"
+    Name = "2.0.x"
+    OSS = "2019-05-03"
+
+  [[Projects.Generations]]
+    Commercial = "2021-05-22"
+    Name = "2.1.x"
+    OSS = "2020-01-22"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-22"
+    Name = "2.2.x"
+    OSS = "2020-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "2.3.x"
+    OSS = "2021-12-21"
+
 [[Projects]]
   Name = "Spring Cloud Task App Starters"
   Slug = "spring-cloud-task-app-starters"
@@ -334,25 +379,75 @@
   Slug = "spring-credhub"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2020-07-26"
+    Name = "1.0.x"
+    OSS = "2019-03-26"
+
+  [[Projects.Generations]]
+    Commercial = "2021-05-09"
+    Name = "2.0.x"
+    OSS = "2020-01-09"
+
+  [[Projects.Generations]]
+    Commercial = "2022-12-03"
+    Name = "2.1.x"
+    OSS = "2021-03-31"
+
+  [[Projects.Generations]]
+    Commercial = "2024-04-03"
+    Name = "2.2.x"
+    OSS = "2022-12-03"
+
 [[Projects]]
   Name = "Spring Data"
   Slug = "spring-data"
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-02-08"
-    Name = "2020.0.x"
-    OSS = "2021-10-08"
+    Commercial = "2019-05-26"
+    Name = "Ingalls.x"
+    OSS = "2018-01-26"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-01"
+    Commercial = "2020-02-02"
+    Name = "Kay.x"
+    OSS = "2018-10-02"
+
+  [[Projects.Generations]]
+    Commercial = "2021-01-21"
+    Name = "Lovelace.x"
+    OSS = "2019-09-21"
+
+  [[Projects.Generations]]
+    Commercial = "2022-01-30"
+    Name = "Moore.x"
+    OSS = "2020-09-30"
+
+  [[Projects.Generations]]
+    Commercial = "2022-09-12"
+    Name = "Neumann.x"
+    OSS = "2021-05-12"
+
+  [[Projects.Generations]]
+    Commercial = "2023-02-28"
+    Name = "2020.0.x"
+    OSS = "2021-10-28"
+
+  [[Projects.Generations]]
+    Commercial = "2023-08-14"
     Name = "2021.0.x"
-    OSS = "2022-05-01"
+    OSS = "2022-04-14"
 
   [[Projects.Generations]]
     Commercial = "2024-03-12"
     Name = "2021.1.x"
     OSS = "2022-11-12"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-13"
+    Name = "2022.0.x"
+    OSS = "2023-05-13"
 
 [[Projects]]
   Name = "Spring Data for Apache Cassandra"
@@ -450,17 +545,17 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2021-01-21"
+    Commercial = "2022-12-31"
     Name = "5.1.x"
     OSS = "2020-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2022-01-30"
+    Commercial = "2023-12-31"
     Name = "5.2.x"
     OSS = "2021-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2023-02-27"
+    Commercial = "2026-12-31"
     Name = "5.3.x"
     OSS = "2024-12-31"
 
@@ -579,6 +674,36 @@
   Slug = "spring-ldap"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2018-06-05"
+    Name = "1.x"
+    OSS = "2017-02-05"
+
+  [[Projects.Generations]]
+    Commercial = "2018-06-05"
+    Name = "2.0.x"
+    OSS = "2017-02-05"
+
+  [[Projects.Generations]]
+    Commercial = "2018-09-16"
+    Name = "2.1.x"
+    OSS = "2017-05-16"
+
+  [[Projects.Generations]]
+    Commercial = "2019-04-22"
+    Name = "2.2.x"
+    OSS = "2017-12-22"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-12"
+    Name = "2.3.x"
+    OSS = "2022-11-12"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-12"
+    Name = "2.4.x"
+    OSS = "2023-05-12"
+
 [[Projects]]
   Name = "Spring Mobile"
   Slug = "spring-mobile"
@@ -624,6 +749,31 @@
   Slug = "spring-security"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-04-30"
+    Name = "5.2.x"
+    OSS = "2021-12-31"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-30"
+    Name = "5.3.x"
+    OSS = "2021-12-31"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-30"
+    Name = "5.4.x"
+    OSS = "2021-12-31"
+
+  [[Projects.Generations]]
+    Commercial = "2023-09-18"
+    Name = "5.5.x"
+    OSS = "2022-05-18"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-15"
+    Name = "5.6.x"
+    OSS = "2022-11-15"
+
 [[Projects]]
   Name = "Spring Security Kerberos"
   Slug = "spring-security-kerberos"
@@ -637,17 +787,52 @@
 [[Projects]]
   Name = "Spring Security SAML"
   Slug = "spring-security-saml"
-  Status = "INCUBATING"
+  Status = "END_OF_LIFE"
+
+  [[Projects.Generations]]
+    Commercial = "2021-10-06"
+    Name = "1.0.x"
+    OSS = "2019-11-08"
 
 [[Projects]]
   Name = "Spring Session"
   Slug = "spring-session"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-02-28"
+    Name = "2020.0.x"
+    OSS = "2021-10-29"
+
+  [[Projects.Generations]]
+    Commercial = "2023-09-19"
+    Name = "2021.0.x"
+    OSS = "2022-05-19"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-17"
+    Name = "2021.1.x"
+    OSS = "2022-11-17"
+
 [[Projects]]
   Name = "Spring Session Core"
   Slug = "spring-session-core"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2023-02-28"
+    Name = "2.4.x"
+    OSS = "2021-10-29"
+
+  [[Projects.Generations]]
+    Commercial = "2023-09-19"
+    Name = "2.5.x"
+    OSS = "2022-05-19"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-17"
+    Name = "2.6.x"
+    OSS = "2022-11-17"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
@@ -679,15 +864,60 @@
   Slug = "spring-session-data-redis"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-02-28"
+    Name = "2.4.x"
+    OSS = "2021-10-29"
+
+  [[Projects.Generations]]
+    Commercial = "2023-09-19"
+    Name = "2.5.x"
+    OSS = "2022-05-19"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-17"
+    Name = "2.6.x"
+    OSS = "2022-11-17"
+
 [[Projects]]
   Name = "Spring Session Hazelcast"
   Slug = "spring-session-hazelcast"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-02-28"
+    Name = "2.4.x"
+    OSS = "2021-10-29"
+
+  [[Projects.Generations]]
+    Commercial = "2023-09-19"
+    Name = "2.5.x"
+    OSS = "2022-05-19"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-17"
+    Name = "2.6.x"
+    OSS = "2022-11-17"
+
 [[Projects]]
   Name = "Spring Session JDBC"
   Slug = "spring-session-jdbc"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2023-02-28"
+    Name = "2.4.x"
+    OSS = "2021-10-29"
+
+  [[Projects.Generations]]
+    Commercial = "2023-09-19"
+    Name = "2.5.x"
+    OSS = "2022-05-19"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-17"
+    Name = "2.6.x"
+    OSS = "2022-11-17"
 
 [[Projects]]
   Name = "Spring Shell"
