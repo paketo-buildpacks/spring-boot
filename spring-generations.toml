@@ -199,6 +199,11 @@
     Name = "3.0.x"
     OSS = "2021-12-22"
 
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
+
 [[Projects]]
   Name = "spring-cloud-data"
   Slug = "spring-cloud-data"
@@ -308,6 +313,11 @@
     Commercial = "2023-04-22"
     Name = "3.0.x"
     OSS = "2021-12-22"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Stream"
