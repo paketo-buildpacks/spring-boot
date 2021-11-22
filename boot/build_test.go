@@ -195,6 +195,7 @@ Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
+		ctx.Buildpack.API = "0.6"
 
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
