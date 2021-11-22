@@ -20,8 +20,8 @@ api = "0.7"
   id = "paketo-buildpacks/spring-boot"
   keywords = ["java", "spring", "spring-boot"]
   name = "Paketo Spring Boot Buildpack"
-  version = "{{.version}}"
   sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
+  version = "{{.version}}"
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
@@ -38,16 +38,14 @@ api = "0.7"
     name = "BPL_SPRING_CLOUD_BINDINGS_ENABLED"
 
   [[metadata.dependencies]]
+    cpes = ["cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"]
     id = "spring-cloud-bindings"
     name = "Spring Cloud Bindings"
+    purl = "pkg:generic/springframework/spring-cloud-bindings@1.8.0"
     sha256 = "c75ef3152817c28c7049d7e0052dfba3ed461a7151984e594b656c0be927888e"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
     uri = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.8.0/spring-cloud-bindings-1.8.0.jar"
     version = "1.8.0"
-    purl = "pkg:generic/springframework/spring-cloud-bindings@1.8.0"
-    cpes = [
-      "cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"
-    ]
 
     [[metadata.dependencies.licenses]]
       type = "Apache-2.0"
