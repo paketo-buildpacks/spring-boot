@@ -22,7 +22,6 @@ api = "0.7"
   name = "Paketo Spring Boot Buildpack"
   sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
   version = "{{.version}}"
-  sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
 
   [[buildpack.licenses]]
     type = "Apache-2.0"
