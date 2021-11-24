@@ -159,7 +159,7 @@ Implementation-Version: 2.2.2
 		}))
 	})
 
-	it("contributes dependencies bom entry", func() {
+	it("contributes dependencies bom entry for API <= 0.6", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
@@ -168,6 +168,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib"), 0755)).To(Succeed())
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-file-2.2.2.jar"),
 			[]byte{}, 0644)).To(Succeed())
+		ctx.Buildpack.API = "0.6"
 
 		result, err := build.Build(ctx)
 		Expect(err).NotTo(HaveOccurred())
@@ -189,12 +190,44 @@ Spring-Boot-Lib: BOOT-INF/lib
 		}))
 	})
 
-	it("contributes to the result", func() {
+	it("contributes to the result for API 0.7+", func() {
 		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
+		ctx.Buildpack.API = "0.7"
+		ctx.Buildpack.Metadata = map[string]interface{}{
+			"dependencies": []map[string]interface{}{
+				{
+					"id":      "spring-cloud-bindings",
+					"version": "1.1.0",
+					"stacks":  []interface{}{"test-stack-id"},
+					"cpes":    []string{"cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"},
+					"purl":    "pkg:generic/springframework/spring-cloud-bindings@1.8.0",
+				},
+			},
+		}
+
+		result, err := build.Build(ctx)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(result.Layers).To(HaveLen(3))
+		Expect(result.Layers[0].Name()).To(Equal("helper"))
+		Expect(result.Layers[0].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
+		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[2].Name()).To(Equal("web-application-type"))
+
+		Expect(result.BOM.Entries).To(HaveLen(0))
+	})
+
+	it("contributes to the result for API <= 0.6", func() {
+		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
 		ctx.Buildpack.API = "0.6"
 
 		result, err := build.Build(ctx)
