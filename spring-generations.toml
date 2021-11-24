@@ -10,24 +10,24 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2021-10-28"
+    Commercial = "2021-02-15"
     Name = "2.1.x"
     OSS = "2019-10-15"
 
   [[Projects.Generations]]
-    Commercial = "2022-02-15"
+    Commercial = "2022-08-19"
     Name = "2.2.x"
-    OSS = "2021-05-20"
+    OSS = "2020-10-01"
 
   [[Projects.Generations]]
-    Commercial = "2023-02-28"
+    Commercial = "2023-08-24"
     Name = "2.3.x"
-    OSS = "2022-05-31"
+    OSS = "2021-10-28"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-15"
+    Commercial = "2026-12-31"
     Name = "2.4.x"
-    OSS = "2022-11-15"
+    OSS = "2024-12-31"
 
 [[Projects]]
   Name = "Spring for Android"
@@ -119,10 +119,40 @@
   Slug = "spring-cloud-bus"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
+
 [[Projects]]
   Name = "Spring Cloud Circuit Breaker"
   Slug = "spring-cloud-circuitbreaker"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "1.0.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "2.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "2.1.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud CLI"
@@ -133,6 +163,21 @@
   Name = "Spring Cloud for Cloud Foundry"
   Slug = "spring-cloud-cloudfoundry"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud - Cloud Foundry Service Broker"
@@ -169,6 +214,21 @@
   Slug = "spring-cloud-config"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
+
 [[Projects]]
   Name = "Spring Cloud Connectors"
   Slug = "spring-cloud-connectors"
@@ -183,6 +243,21 @@
   Name = "Spring Cloud Consul"
   Slug = "spring-cloud-consul"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Contract"
@@ -214,6 +289,21 @@
   Slug = "spring-cloud-dataflow"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-11-30"
+    Name = "2.7.x"
+    OSS = "2021-11-30"
+
+  [[Projects.Generations]]
+    Commercial = "2023-06-11"
+    Name = "2.8.x"
+    OSS = "2022-06-11"
+
+  [[Projects.Generations]]
+    Commercial = "2023-10-12"
+    Name = "2.9.x"
+    OSS = "2022-10-12"
+
 [[Projects]]
   Name = "Spring Cloud Function"
   Slug = "spring-cloud-function"
@@ -224,6 +314,21 @@
   Slug = "spring-cloud-gateway"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
+
 [[Projects]]
   Name = "Spring Cloud GCP"
   Slug = "spring-cloud-gcp"
@@ -233,6 +338,21 @@
   Name = "Spring Cloud Kubernetes"
   Slug = "spring-cloud-kubernetes"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "1.1.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "2.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "2.1.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Netflix"
@@ -294,6 +414,11 @@
   Slug = "spring-cloud-security"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
 [[Projects]]
   Name = "Spring Cloud Skipper"
   Slug = "spring-cloud-skipper"
@@ -324,6 +449,11 @@
   Slug = "spring-cloud-stream"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-03-21"
+    Name = "3.1.x"
+    OSS = "2021-11-21"
+
 [[Projects]]
   Name = "Spring Cloud Stream App Starters"
   Slug = "spring-cloud-stream-app-starters"
@@ -334,10 +464,25 @@
   Slug = "spring-cloud-stream-applications"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-04-16"
+    Name = "2020.0.x"
+    OSS = "2021-12-16"
+
+  [[Projects.Generations]]
+    Commercial = "2024-02-11"
+    Name = "2021.0.x"
+    OSS = "2022-10-11"
+
 [[Projects]]
   Name = "Spring Cloud Stream Kafka Binder"
   Slug = "spring-cloud-stream-binder-kafka"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.1.x"
+    OSS = "2021-12-21"
 
 [[Projects]]
   Name = "Spring Cloud Stream Rabbit Binder"
@@ -369,6 +514,11 @@
     Name = "2.3.x"
     OSS = "2021-12-21"
 
+  [[Projects.Generations]]
+    Commercial = "2024-03-29"
+    Name = "2.4.x"
+    OSS = "2022-11-29"
+
 [[Projects]]
   Name = "Spring Cloud Task App Starters"
   Slug = "spring-cloud-task-app-starters"
@@ -379,10 +529,40 @@
   Slug = "spring-cloud-vault"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
+
 [[Projects]]
   Name = "Spring Cloud Zookeeper"
   Slug = "spring-cloud-zookeeper"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-26"
+    Name = "2.2.x"
+    OSS = "2020-11-26"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.0.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.1.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring CredHub"
