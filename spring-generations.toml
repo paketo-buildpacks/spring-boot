@@ -39,6 +39,21 @@
   Slug = "spring-batch"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2021-02-28"
+    Name = "4.1.x"
+    OSS = "2019-10-29"
+
+  [[Projects.Generations]]
+    Commercial = "2022-09-20"
+    Name = "4.2.x"
+    OSS = "2021-05-20"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-18"
+    Name = "4.3.x"
+    OSS = "2023-05-18"
+
 [[Projects]]
   Name = "Spring Boot"
   Slug = "spring-boot"
@@ -309,6 +324,21 @@
   Slug = "spring-cloud-function"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-03-22"
+    Name = "3.0.x"
+    OSS = "2020-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.1.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.2.x"
+    OSS = "2022-11-30"
+
 [[Projects]]
   Name = "Spring Cloud Gateway"
   Slug = "spring-cloud-gateway"
@@ -450,9 +480,19 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-03-21"
+    Commercial = "2022-03-22"
+    Name = "3.0.x"
+    OSS = "2020-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
     Name = "3.1.x"
-    OSS = "2021-11-21"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.2.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Stream App Starters"
@@ -480,14 +520,39 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2022-03-22"
+    Name = "3.0.x"
+    OSS = "2020-11-22"
+
+  [[Projects.Generations]]
     Commercial = "2023-04-21"
     Name = "3.1.x"
     OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.2.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Stream Rabbit Binder"
   Slug = "spring-cloud-stream-binder-rabbit"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2022-03-22"
+    Name = "3.0.x"
+    OSS = "2020-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2023-04-21"
+    Name = "3.1.x"
+    OSS = "2021-12-21"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-30"
+    Name = "3.2.x"
+    OSS = "2022-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Task"
@@ -662,7 +727,7 @@
 [[Projects]]
   Name = "Spring Data for Pivotal GemFire"
   Slug = "spring-data-gemfire"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
 [[Projects]]
   Name = "Spring Data for Apache Geode"
