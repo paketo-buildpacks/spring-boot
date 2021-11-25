@@ -6,8 +6,9 @@ github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030I
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
 github.com/bradleyjkemp/cupaloy/v2 v2.6.0 h1:knToPYa2xtfg42U3I6punFEjaGFKWQRXJwj0JTv4mTs=
 github.com/bradleyjkemp/cupaloy/v2 v2.6.0/go.mod h1:bm7JXdkRd4BHJk9HpwqAI8BoAY1lps46Enkdqw6aRX0=
-github.com/buildpacks/libcnb v1.25.0 h1:f0UWYUbXQ/vTX6SztGn+sP/F6cVSAbBQO4B5/R1LEP8=
 github.com/buildpacks/libcnb v1.25.0/go.mod h1:XX0+zHW8CNLNwiiwowgydAgWWfyDt8Lj1NcuWtkkBJQ=
+github.com/buildpacks/libcnb v1.25.1 h1:fIMkksmGQHzRuqbxRst/Z3y6L8/6PJWT7H1jIVEpkqQ=
+github.com/buildpacks/libcnb v1.25.1/go.mod h1:XX0+zHW8CNLNwiiwowgydAgWWfyDt8Lj1NcuWtkkBJQ=
 github.com/creack/pty v1.1.17 h1:QeVUsEDNrLBW4tMgZHvxy18sKtr6VI492kBhUfhDJNI=
 github.com/creack/pty v1.1.17/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
