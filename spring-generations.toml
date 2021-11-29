@@ -1039,6 +1039,11 @@
   Slug = "spring-security-oauth"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-05-28"
+    Name = "2.5.x"
+    OSS = "2022-05-28"
+
 [[Projects]]
   Name = "Spring Security SAML"
   Slug = "spring-security-saml"
