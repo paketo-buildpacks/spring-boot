@@ -36,4 +36,4 @@ jobs:
                 labels: semver:minor, type:dependency-upgrade
                 signoff: true
                 title: Bump Spring Generations
-                token: ${{ secrets.GITHUB_TOKEN }}
+                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
