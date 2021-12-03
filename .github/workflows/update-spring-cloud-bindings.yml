@@ -65,6 +65,10 @@ jobs:
                   --id "${ID}" \
                   --version-pattern "${VERSION_PATTERN}" \
                   --version "${VERSION}" \
+                  --cpe-pattern "${CPE_PATTERN:-}" \
+                  --cpe "${CPE:-}" \
+                  --purl-pattern "${PURL_PATTERN:-}" \
+                  --purl "${PURL:-}" \
                   --uri "${URI}" \
                   --sha256 "${SHA256}"
 
@@ -83,7 +87,11 @@ jobs:
                 echo "::set-output name=new-version::${VERSION}"
                 echo "::set-output name=version-label::${LABEL}"
               env:
+                CPE: ${{ steps.dependency.outputs.cpe }}
+                CPE_PATTERN: ""
                 ID: spring-cloud-bindings
+                PURL: ${{ steps.dependency.outputs.purl }}
+                PURL_PATTERN: ""
                 SHA256: ${{ steps.dependency.outputs.sha256 }}
                 URI: ${{ steps.dependency.outputs.uri }}
                 VERSION: ${{ steps.dependency.outputs.version }}
