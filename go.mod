@@ -9,7 +9,7 @@ require (
 	github.com/magiconair/properties v1.8.5
 	github.com/onsi/gomega v1.17.0
 	github.com/paketo-buildpacks/libjvm v1.33.0
-	github.com/paketo-buildpacks/libpak v1.56.2
+	github.com/paketo-buildpacks/libpak v1.57.0
 	github.com/pelletier/go-toml v1.9.4
 	github.com/sclevine/spec v1.4.0
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776
