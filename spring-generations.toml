@@ -65,7 +65,7 @@
     OSS = "2023-05-18"
 
   [[Projects.Generations]]
-    Commercial = "2024-02-22"
+    Commercial = "2024-02-24"
     Name = "2.6.x"
     OSS = "2022-11-24"
 
@@ -80,7 +80,7 @@
     OSS = "2021-11-18"
 
   [[Projects.Generations]]
-    Commercial = "2022-08-19"
+    Commercial = "2022-08-20"
     Name = "2.3.x"
     OSS = "2021-05-20"
 
