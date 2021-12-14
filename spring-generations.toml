@@ -1215,34 +1215,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2026-12-31"
     Name = "2.4.x"
-    OSS = "2023-05-12"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
     Commercial = "2024-03-12"
     Name = "2.3.x"
     OSS = "2022-11-12"
-
-  [[Projects.Generations]]
-    Commercial = "2019-04-22"
-    Name = "2.2.x"
-    OSS = "2017-12-22"
-
-  [[Projects.Generations]]
-    Commercial = "2018-09-16"
-    Name = "2.1.x"
-    OSS = "2017-05-16"
-
-  [[Projects.Generations]]
-    Commercial = "2018-06-05"
-    Name = "2.0.x"
-    OSS = "2017-02-05"
-
-  [[Projects.Generations]]
-    Commercial = "2018-06-05"
-    Name = "1.x"
-    OSS = "2017-02-05"
 
 [[Projects]]
   Name = "Spring Mobile"
