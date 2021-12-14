@@ -1464,6 +1464,21 @@
   Slug = "spring-statemachine"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2023-11-11"
+    Name = "2.5.x"
+    OSS = "2022-07-11"
+
+  [[Projects.Generations]]
+    Commercial = "2023-07-19"
+    Name = "3.0.x"
+    OSS = "2022-03-19"
+
+  [[Projects.Generations]]
+    Commercial = "2023-05-18"
+    Name = "2.4.x"
+    OSS = "2022-01-18"
+
 [[Projects]]
   Name = "Spring Vault"
   Slug = "spring-vault"
