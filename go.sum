@@ -1,10 +1,8 @@
 github.com/BurntSushi/toml v0.4.1 h1:GaI7EiDXDRfa8VshkTj7Fym7ha+y8/XxIgD2okUIjLw=
 github.com/BurntSushi/toml v0.4.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/CycloneDX/cyclonedx-go v0.4.0 h1:Wz4QZ9B4RXGWIWTypVLEOVJgOdFfy5mcS5PGNzUkZxU=
 github.com/CycloneDX/cyclonedx-go v0.4.0/go.mod h1:rmRcf//gT7PIzovatusbWi377xqCg1FS4jyST0GH20E=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/Masterminds/semver/v3 v3.1.1/go.mod h1:VPu/7SZ7ePZ3QOrcuXROw5FAcLl4a0cBrbBpGY/8hQs=
-github.com/bradleyjkemp/cupaloy/v2 v2.6.0 h1:knToPYa2xtfg42U3I6punFEjaGFKWQRXJwj0JTv4mTs=
 github.com/bradleyjkemp/cupaloy/v2 v2.6.0/go.mod h1:bm7JXdkRd4BHJk9HpwqAI8BoAY1lps46Enkdqw6aRX0=
 github.com/buildpacks/libcnb v1.25.0/go.mod h1:XX0+zHW8CNLNwiiwowgydAgWWfyDt8Lj1NcuWtkkBJQ=
 github.com/buildpacks/libcnb v1.25.2 h1:gjP4e1ns7GYXAuxb58hSDhlK9ksbzG0ErpBJJmp2gDA=
@@ -64,8 +62,8 @@ github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAl
 github.com/paketo-buildpacks/libjvm v1.33.0 h1:n5ksrBMZcuHriYsYTc+sOMgUXzvez4QK/vdb64mMENg=
 github.com/paketo-buildpacks/libjvm v1.33.0/go.mod h1:xta70r4G7MUpT1gHEKBurVqSoCxTlAK2WvtkY/DED2o=
 github.com/paketo-buildpacks/libpak v1.56.0/go.mod h1:3NpygR31G34ss20iC6Gw4W/ZOFZck+xXajk6TUFdnfo=
-github.com/paketo-buildpacks/libpak v1.57.0 h1:VJC0a/5qCIViUIdWNXZb0v9JTWlzLa+2n7+dj2yw0Vg=
-github.com/paketo-buildpacks/libpak v1.57.0/go.mod h1:L3eLfgxcT6oAaBzn0J5hsF6WfQQdGTQQbUuD//T8bK4=
+github.com/paketo-buildpacks/libpak v1.57.1 h1:Rqq25boRl95WWW10Au8/krEQqZyU8KT4AZocTQxCwBA=
+github.com/paketo-buildpacks/libpak v1.57.1/go.mod h1:RqGprj975LOMoH00DjbHcOabU7fOpyVVtOTI+3jhWrU=
 github.com/pavel-v-chernykh/keystore-go/v4 v4.2.0 h1:SeA1Gyj3Uxl0vuNFYxN5RaIZ2AMPfCvW4HB2Ki0bYT8=
 github.com/pavel-v-chernykh/keystore-go/v4 v4.2.0/go.mod h1:VxOBKEAW8/EJjil9qwfvVDSljDW0DCoZMD4ezsq9n8U=
 github.com/pelletier/go-toml v1.9.4 h1:tjENF6MfZAg8e4ZmZTeWaWiT2vXtsoO6+iuOjFhECwM=
