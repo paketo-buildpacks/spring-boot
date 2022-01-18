@@ -17,7 +17,7 @@
   [[Projects.Generations]]
     Commercial = "2023-08-24"
     Name = "2.3.x"
-    OSS = "2021-10-28"
+    OSS = "2022-05-19"
 
   [[Projects.Generations]]
     Commercial = "2022-08-19"
@@ -1100,7 +1100,7 @@
     OSS = "2020-12-31"
 
 [[Projects]]
-  Name = "Spring GraphQL"
+  Name = "Spring for GraphQL"
   Slug = "spring-graphql"
   Status = "ACTIVE"
 
@@ -1180,9 +1180,9 @@
     OSS = "2022-11-15"
 
   [[Projects.Generations]]
-    Commercial = "2023-08-14"
+    Commercial = "2023-09-19"
     Name = "2.7.x"
-    OSS = "2022-04-14"
+    OSS = "2022-05-19"
 
   [[Projects.Generations]]
     Commercial = "2023-01-08"
@@ -1240,7 +1240,7 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-02-17"
+    Commercial = "2024-03-17"
     Name = "2.0.x"
     OSS = "2022-11-17"
 
