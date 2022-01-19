@@ -117,7 +117,7 @@
 [[Projects]]
   Name = "Spring Cloud App Broker"
   Slug = "spring-cloud-app-broker"
-  Status = "INCUBATING"
+  Status = "ACTIVE"
 
 [[Projects]]
   Name = "Spring Cloud for Amazon Web Services"
@@ -497,7 +497,7 @@
 [[Projects]]
   Name = "Spring Cloud Stream App Starters"
   Slug = "spring-cloud-stream-app-starters"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
 [[Projects]]
   Name = "Spring Cloud Stream Applications"
