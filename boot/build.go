@@ -88,14 +88,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}
-	if context.Buildpack.API == "0.6" || context.Buildpack.API == "0.5" || context.Buildpack.API == "0.4" || context.Buildpack.API == "0.3" || context.Buildpack.API == "0.2" || context.Buildpack.API == "0.1" {
 
-		result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{
-			Name:     "dependencies",
-			Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
-			Launch:   true,
-		})
-	}
+	result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{
+		Name:     "dependencies",
+		Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
+		Launch:   true,
+	})
 
 	// validate generations
 	gv, err := NewGenerationValidator(filepath.Join(context.Buildpack.Path, "spring-generations.toml"))
@@ -130,9 +128,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
 		h.Logger = b.Logger
 		result.Layers = append(result.Layers, h)
-		if be.Name != "" {
-			result.BOM.Entries = append(result.BOM.Entries, be)
-		}
+		result.BOM.Entries = append(result.BOM.Entries, be)
 
 		dep, err := dr.Resolve("spring-cloud-bindings", "")
 		if err != nil {
@@ -142,9 +138,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
 		bindingsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, bindingsLayer)
-		if be.Name != "" {
-			result.BOM.Entries = append(result.BOM.Entries, be)
-		}
+		result.BOM.Entries = append(result.BOM.Entries, be)
 
 		// configure JVM for application type
 		classes, ok := manifest.Get("Spring-Boot-Classes")
