@@ -495,11 +495,6 @@
     OSS = "2020-11-22"
 
 [[Projects]]
-  Name = "Spring Cloud Stream App Starters"
-  Slug = "spring-cloud-stream-app-starters"
-  Status = "END_OF_LIFE"
-
-[[Projects]]
   Name = "Spring Cloud Stream Applications"
   Slug = "spring-cloud-stream-applications"
   Status = "ACTIVE"
