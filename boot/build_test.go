@@ -218,7 +218,14 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
 		Expect(result.Layers[2].Name()).To(Equal("web-application-type"))
 
-		Expect(result.BOM.Entries).To(HaveLen(0))
+		Expect(result.BOM.Entries).To(HaveLen(3))
+		Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		Expect(result.BOM.Entries[1].Name).To(Equal("helper"))
+		Expect(result.BOM.Entries[1].Launch).To(BeTrue())
+		Expect(result.BOM.Entries[1].Build).To(BeFalse())
+		Expect(result.BOM.Entries[2].Name).To(Equal("spring-cloud-bindings"))
+		Expect(result.BOM.Entries[2].Launch).To(BeTrue())
+		Expect(result.BOM.Entries[2].Build).To(BeFalse())
 	})
 
 	it("contributes to the result for API <= 0.6", func() {
