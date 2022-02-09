@@ -92,17 +92,20 @@ jobs:
 
                 if [[ "${INCLUDE_DEPENDENCIES}" == "true" ]]; then
                   create-package \
+                    --source ${SOURCE_PATH:-.} \
                     --cache-location "${HOME}"/carton-cache \
                     --destination "${HOME}"/buildpack \
                     --include-dependencies \
                     --version "${VERSION}"
                 else
                   create-package \
+                    --source ${SOURCE_PATH:-.} \
                     --destination "${HOME}"/buildpack \
                     --version "${VERSION}"
                 fi
 
-                [[ -e package.toml ]] && cp package.toml "${HOME}"/package.toml
+                PACKAGE_FILE=${SOURCE_PATH:-.}/package.toml
+                [[ -e ${PACKAGE_FILE} ]] && cp ${PACKAGE_FILE} "${HOME}"/package.toml
                 printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}"/buildpack "${OS}" >> "${HOME}"/package.toml
               env:
                 INCLUDE_DEPENDENCIES: "true"
@@ -114,13 +117,13 @@ jobs:
 
                 set -euo pipefail
 
-                if [[ -n "${PUBLISH+x}" ]]; then
+                if [[ "${PUBLISH:-x}" == "true" ]]; then
                   pack buildpack package \
                     "${PACKAGE}:${VERSION}" \
                     --config "${HOME}"/package.toml \
                     --publish
 
-                  if [ ! -z ${VERSION_MINOR} ] && [ ! -z ${VERSION_MAJOR} ]; then
+                  if [[ -n ${VERSION_MINOR:-} && -n ${VERSION_MAJOR:-} ]]; then
                     crane tag "${PACKAGE}:${VERSION}" "${VERSION_MINOR}"
                     crane tag "${PACKAGE}:${VERSION}" "${VERSION_MAJOR}"
                   fi
