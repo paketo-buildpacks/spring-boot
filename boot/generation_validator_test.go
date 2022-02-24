@@ -27,7 +27,7 @@ import (
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/spring-boot/boot"
+	"github.com/paketo-buildpacks/spring-boot/v5/boot"
 )
 
 func testGenerationValidator(t *testing.T, context spec.G, it spec.S) {

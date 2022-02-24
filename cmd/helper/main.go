@@ -22,7 +22,7 @@ import (
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 
-	"github.com/paketo-buildpacks/spring-boot/helper"
+	"github.com/paketo-buildpacks/spring-boot/v5/helper"
 )
 
 func main() {
