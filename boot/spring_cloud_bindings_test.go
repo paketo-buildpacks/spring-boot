@@ -27,7 +27,7 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/sclevine/spec"
 
-	"github.com/paketo-buildpacks/spring-boot/boot"
+	"github.com/paketo-buildpacks/spring-boot/v5/boot"
 )
 
 func testSpringCloudBindings(t *testing.T, context spec.G, it spec.S) {
