@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -124,21 +125,36 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		classpathLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, classpathLayer)
 	} else {
-		// contribute Spring Cloud Bindings
-		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
-		h.Logger = b.Logger
-		result.Layers = append(result.Layers, h)
-		result.BOM.Entries = append(result.BOM.Entries, be)
-
-		dep, err := dr.Resolve("spring-cloud-bindings", "")
+		cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
 		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+			return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 		}
 
-		bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
-		bindingsLayer.Logger = b.Logger
-		result.Layers = append(result.Layers, bindingsLayer)
-		result.BOM.Entries = append(result.BOM.Entries, be)
+		enabled := true
+		if s, ok := cr.Resolve("BP_SPRING_CLOUD_BINDINGS_ENABLED"); ok {
+			enabled, err = strconv.ParseBool(s)
+			if err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf("unable to parse $BP_SPRING_CLOUD_BINDINGS_ENABLED\n%w", err)
+			}
+		}
+
+		// contribute Spring Cloud Bindings
+		if enabled {
+			h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
+			h.Logger = b.Logger
+			result.Layers = append(result.Layers, h)
+			result.BOM.Entries = append(result.BOM.Entries, be)
+
+			dep, err := dr.Resolve("spring-cloud-bindings", "")
+			if err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+			}
+
+			bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
+			bindingsLayer.Logger = b.Logger
+			result.Layers = append(result.Layers, bindingsLayer)
+			result.BOM.Entries = append(result.BOM.Entries, be)
+		}
 
 		// configure JVM for application type
 		classes, ok := manifest.Get("Spring-Boot-Classes")
