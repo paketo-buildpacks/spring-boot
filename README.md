@@ -34,8 +34,9 @@ The buildpack will do the following:
 ## Configuration
 | Environment Variable | Description
 | -------------------- | -----------
-| `$BP_SPRING_CLOUD_BINDINGS_ENABLED` | Whether to contribute Spring Boot cloud bindings support.  Defaults to y.
-| `$BPL_SPRING_CLOUD_BINDINGS_ENABLED` | Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
+| `$BP_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to contribute Spring Boot cloud bindings support.  Defaults to y.
+| `$BPL_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
+| `$BPL_SPRING_CLOUD_BINDINGS_ENABLED` | Deprecated in favour of `$BPL_SPRING_CLOUD_BINDINGS_DISABLED`. Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
 
 ## Bindings
 The buildpack optionally accepts the following bindings:

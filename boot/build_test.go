@@ -317,13 +317,13 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 	})
 
-	context("set BP_SPRING_CLOUD_BINDINGS_ENABLED to false", func() {
+	context("set BP_SPRING_CLOUD_BINDINGS_DISABLED to true", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_SPRING_CLOUD_BINDINGS_ENABLED", "false")).To(Succeed())
+			Expect(os.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")).To(Succeed())
 		})
 
 		it.After(func() {
-			Expect(os.Unsetenv(("BP_SPRING_CLOUD_BINDINGS_ENABLED"))).To(Succeed())
+			Expect(os.Unsetenv(("BP_SPRING_CLOUD_BINDINGS_DISABLED"))).To(Succeed())
 		})
 
 		it("contributes to the result for API 0.7+", func() {

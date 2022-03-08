@@ -22,6 +22,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/paketo-buildpacks/libpak/sherpa"
+
+	"github.com/heroku/color"
+
 	"github.com/paketo-buildpacks/libpak/bard"
 )
 
@@ -33,14 +37,16 @@ func (s SpringCloudBindings) Execute() (map[string]string, error) {
 	var err error
 
 	enabled := true
-	if s, ok := os.LookupEnv("BPL_SPRING_CLOUD_BINDINGS_ENABLED"); ok {
-		enabled, err = strconv.ParseBool(s)
+	if val, ok := os.LookupEnv("BPL_SPRING_CLOUD_BINDINGS_ENABLED"); ok {
+		s.Logger.Infof(color.YellowString("WARNING: BPL_SPRING_CLOUD_BINDINGS_ENABLED is deprecated, support will be removed in a coming release. Use BPL_SPRING_CLOUD_BINDINGS_DISABLED instead"))
+		enabled, err = strconv.ParseBool(val)
 		if err != nil {
 			return nil, fmt.Errorf("unable to parse $BPL_SPRING_CLOUD_BINDINGS_ENABLED\n%w", err)
 		}
 	}
 
-	if !enabled {
+	// Switching from "BPL_SPRING_CLOUD_BINDINGS_ENABLED" to "BPL_SPRING_CLOUD_BINDINGS_DISABLED" which defaults to 'false' to follow convention
+	if sherpa.ResolveBool("BPL_SPRING_CLOUD_BINDINGS_DISABLED") || !enabled {
 		return nil, nil
 	}
 

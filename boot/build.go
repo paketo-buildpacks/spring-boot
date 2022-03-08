@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	"github.com/buildpacks/libcnb"
@@ -66,6 +65,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
+	}
+
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
 	dc, err := libpak.NewDependencyCache(context)
@@ -125,21 +129,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		classpathLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, classpathLayer)
 	} else {
-		cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
-		}
 
-		enabled := true
-		if s, ok := cr.Resolve("BP_SPRING_CLOUD_BINDINGS_ENABLED"); ok {
-			enabled, err = strconv.ParseBool(s)
-			if err != nil {
-				return libcnb.BuildResult{}, fmt.Errorf("unable to parse $BP_SPRING_CLOUD_BINDINGS_ENABLED\n%w", err)
-			}
-		}
-
-		// contribute Spring Cloud Bindings
-		if enabled {
+		// contribute Spring Cloud Bindings - false by default
+		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") {
 			h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
 			h.Logger = b.Logger
 			result.Layers = append(result.Layers, h)
