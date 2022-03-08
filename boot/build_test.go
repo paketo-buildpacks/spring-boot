@@ -316,4 +316,62 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Slices).To(HaveLen(0))
 		})
 	})
+
+	context("set BP_SPRING_CLOUD_BINDINGS_ENABLED to false", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BP_SPRING_CLOUD_BINDINGS_ENABLED", "false")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv(("BP_SPRING_CLOUD_BINDINGS_ENABLED"))).To(Succeed())
+		})
+
+		it("contributes to the result for API 0.7+", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+			ctx.Buildpack.API = "0.7"
+			ctx.Buildpack.Metadata = map[string]interface{}{
+				"dependencies": []map[string]interface{}{
+					{
+						"id":      "spring-cloud-bindings",
+						"version": "1.1.0",
+						"stacks":  []interface{}{"test-stack-id"},
+						"cpes":    []string{"cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"},
+						"purl":    "pkg:generic/springframework/spring-cloud-bindings@1.8.0",
+					},
+				},
+			}
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
+
+			Expect(result.BOM.Entries).To(HaveLen(1))
+			Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		})
+
+		it("contributes to the result for API <= 0.6", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			ctx.Buildpack.API = "0.6"
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
+
+			Expect(result.BOM.Entries).To(HaveLen(1))
+			Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		})
+	})
 }
