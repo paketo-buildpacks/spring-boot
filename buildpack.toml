@@ -32,10 +32,11 @@ api = "0.7"
   pre-package = "scripts/build.sh"
 
   [[metadata.configurations]]
-    name        = "BP_SPRING_CLOUD_BINDINGS_DISABLED"
+    build = true
+    default = "true"
     description = "whether to contribute Spring Boot cloud bindings support"
-    default     = "false"
-    build       = true
+    name = "BP_SPRING_CLOUD_BINDINGS_ENABLED"
+
 
   [[metadata.configurations]]
     default = "true"
