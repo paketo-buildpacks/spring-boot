@@ -24,7 +24,7 @@ jobs:
                 set -euo pipefail
 
                 GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/pipeline-builder/cmd/octo
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Update Pipeline
               id: pipeline
               run: |

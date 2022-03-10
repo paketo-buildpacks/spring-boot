@@ -34,7 +34,7 @@ jobs:
                 chmod +x "${HOME}"/bin/yj
               env:
                 YJ_VERSION: 5.0.0
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - name: Update draft release with buildpack information
               run: |
                 #!/usr/bin/env bash
