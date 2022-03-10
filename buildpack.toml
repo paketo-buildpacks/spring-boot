@@ -37,7 +37,6 @@ api = "0.7"
     description = "whether to contribute Spring Boot cloud bindings support"
     name = "BP_SPRING_CLOUD_BINDINGS_ENABLED"
 
-
   [[metadata.configurations]]
     default = "true"
     description = "Deprecated - whether to auto-configure Spring Boot environment properties from bindings"
