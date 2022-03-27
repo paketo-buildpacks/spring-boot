@@ -33,9 +33,9 @@ api = "0.7"
 
   [[metadata.configurations]]
     build = true
-    default = "true"
+    default = "false"
     description = "whether to contribute Spring Boot cloud bindings support"
-    name = "BP_SPRING_CLOUD_BINDINGS_ENABLED"
+    name = "BP_SPRING_CLOUD_BINDINGS_DISABLED"
 
   [[metadata.configurations]]
     default = "true"
