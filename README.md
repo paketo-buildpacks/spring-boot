@@ -32,19 +32,19 @@ The buildpack will do the following:
 [c]: https://github.com/buildpacks/spec/blob/main/extensions/bindings.md
 
 ## Configuration
-| Environment Variable | Description
-| -------------------- | -----------
-| `$BP_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to contribute Spring Boot cloud bindings support.  Defaults to y.
-| `$BPL_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
-| `$BPL_SPRING_CLOUD_BINDINGS_ENABLED` | Deprecated in favour of `$BPL_SPRING_CLOUD_BINDINGS_DISABLED`. Whether to auto-configure Spring Boot environment properties from bindings.  Defaults to y.
+| Environment Variable                  | Description                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `$BP_SPRING_CLOUD_BINDINGS_DISABLED`  | Whether to contribute Spring Cloud Bindings support to the image at build time.  Defaults to false.                                                                                                                                                                     |
+| `$BPL_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to false.                                                               |
+| `$BPL_SPRING_CLOUD_BINDINGS_ENABLED`  | Deprecated in favour of `$BPL_SPRING_CLOUD_BINDINGS_DISABLED`. Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to true. |
 
 ## Bindings
 The buildpack optionally accepts the following bindings:
 
 ### Type: `dependency-mapping`
-|Key                   | Value   | Description
-|----------------------|---------|------------
-|`<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>`
+| Key                   | Value   | Description                                                                                       |
+| --------------------- | ------- | ------------------------------------------------------------------------------------------------- |
+| `<dependency-digest>` | `<uri>` | If needed, the buildpack will fetch the dependency with digest `<dependency-digest>` from `<uri>` |
 
 ## License
 This buildpack is released under version 2.0 of the [Apache License][a].
