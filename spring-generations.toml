@@ -1175,9 +1175,9 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-16"
+    Commercial = "2024-10-20"
     Name = "2.9.x"
-    OSS = "2023-05-16"
+    OSS = "2023-06-20"
 
   [[Projects.Generations]]
     Commercial = "2024-03-15"
