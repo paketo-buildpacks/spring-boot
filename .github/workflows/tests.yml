@@ -65,6 +65,11 @@ jobs:
 
                 set -euo pipefail
 
+                if [ -z "${GITHUB_REF+set}" ]; then
+                  echo "GITHUB_REF set to [${GITHUB_REF-<unset>}], but should never be empty or unset"
+                  exit 255
+                fi
+
                 if [[ ${GITHUB_REF} =~ refs/tags/v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
                   VERSION=${BASH_REMATCH[1]}
 
@@ -112,10 +117,15 @@ jobs:
                 OS: linux
                 VERSION: ${{ steps.version.outputs.version }}
             - name: Package Buildpack
-              run: |
+              run: |-
                 #!/usr/bin/env bash
 
                 set -euo pipefail
+
+
+                PACKAGE_LIST=($PACKAGES)
+                # Extract first repo (Docker Hub) as the main to package & register
+                PACKAGE=${PACKAGE_LIST[0]}
 
                 if [[ "${PUBLISH:-x}" == "true" ]]; then
                   pack buildpack package \
@@ -129,6 +139,20 @@ jobs:
                   fi
                   crane tag "${PACKAGE}:${VERSION}" latest
                   echo "::set-output name=digest::$(crane digest "${PACKAGE}:${VERSION}")"
+
+                  # copy to other repositories specified
+                  for P in "${PACKAGE_LIST[@]}"
+                    do
+                      if [ "$P" != "$PACKAGE" ]; then
+                        crane copy "${PACKAGE}:${VERSION}" "${P}:${VERSION}"
+                        if [[ -n ${VERSION_MINOR:-} && -n ${VERSION_MAJOR:-} ]]; then
+                           crane tag "${P}:${VERSION}" "${VERSION_MINOR}"
+                           crane tag "${P}:${VERSION}" "${VERSION_MAJOR}"
+                        fi
+                        crane tag "${P}:${VERSION}" latest
+                      fi
+                    done
+
                 else
                   pack buildpack package \
                     "${PACKAGE}:${VERSION}" \
@@ -137,7 +161,7 @@ jobs:
                 fi
               env:
                 FORMAT: image
-                PACKAGE: test
+                PACKAGES: test
                 VERSION: ${{ steps.version.outputs.version }}
     unit:
         name: Unit Test
