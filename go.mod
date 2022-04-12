@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
-	github.com/buildpacks/libcnb v1.25.5
+	github.com/buildpacks/libcnb v1.26.0
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.6
 	github.com/onsi/gomega v1.19.0
@@ -16,7 +16,7 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.0.0 // indirect
+	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/creack/pty v1.1.17 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
