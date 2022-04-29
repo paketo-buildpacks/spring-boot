@@ -745,14 +745,24 @@
   Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
+    Commercial = "2022-09-12"
+    Name = "2.3.x"
+    OSS = "2021-05-12"
+
+  [[Projects.Generations]]
     Commercial = "2022-01-30"
     Name = "2.2.x"
     OSS = "2020-09-30"
 
   [[Projects.Generations]]
-    Commercial = "2021-01-21"
+    Commercial = "2021-02-28"
     Name = "2.1.x"
-    OSS = "2019-09-21"
+    OSS = "2019-10-30"
+
+  [[Projects.Generations]]
+    Commercial = "2020-02-02"
+    Name = "2.0.x"
+    OSS = "2018-10-02"
 
 [[Projects]]
   Name = "Spring Data for Apache Geode"
