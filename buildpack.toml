@@ -50,14 +50,14 @@ api = "0.7"
     name = "BPL_SPRING_CLOUD_BINDINGS_DISABLED"
 
   [[metadata.dependencies]]
-    cpes = ["cpe:2.3:a:vmware:spring_cloud_bindings:1.8.1:*:*:*:*:*:*:*"]
+    cpes = ["cpe:2.3:a:vmware:spring_cloud_bindings:1.9.0:*:*:*:*:*:*:*"]
     id = "spring-cloud-bindings"
     name = "Spring Cloud Bindings"
-    purl = "pkg:generic/springframework/spring-cloud-bindings@1.8.1"
-    sha256 = "a4640d93b0ed6664c62d7f5c7aab2ad364bfe5881acb0acfe8742e5e03369873"
+    purl = "pkg:generic/springframework/spring-cloud-bindings@1.9.0"
+    sha256 = "f816081685fe9032e46bf502f993401f24ab811cade1ef0dbae4cbeae7fe6363"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-    uri = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.8.1/spring-cloud-bindings-1.8.1.jar"
-    version = "1.8.1"
+    uri = "https://repo.spring.io/release/org/springframework/cloud/spring-cloud-bindings/1.9.0/spring-cloud-bindings-1.9.0.jar"
+    version = "1.9.0"
 
     [[metadata.dependencies.licenses]]
       type = "Apache-2.0"
