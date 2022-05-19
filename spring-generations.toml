@@ -715,6 +715,11 @@
   Status = "COMMUNITY"
 
   [[Projects.Generations]]
+    Commercial = "2024-09-13"
+    Name = "2.7.x"
+    OSS = "2023-05-13"
+
+  [[Projects.Generations]]
     Commercial = "2024-03-12"
     Name = "2.6.x"
     OSS = "2022-11-12"
@@ -810,6 +815,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2024-09-13"
+    Name = "2.4.x"
+    OSS = "2023-05-13"
+
+  [[Projects.Generations]]
     Commercial = "2024-03-12"
     Name = "2.3.x"
     OSS = "2022-11-12"
@@ -843,6 +853,11 @@
   Name = "Spring Data JPA"
   Slug = "spring-data-jpa"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-13"
+    Name = "2.7.x"
+    OSS = "2023-05-13"
 
   [[Projects.Generations]]
     Commercial = "2024-03-12"
@@ -958,6 +973,11 @@
   Name = "Spring Data R2DBC"
   Slug = "spring-data-r2dbc"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-13"
+    Name = "1.5.x"
+    OSS = "2023-05-13"
 
   [[Projects.Generations]]
     Commercial = "2024-03-12"
@@ -1278,6 +1298,11 @@
   Name = "Spring Security"
   Slug = "spring-security"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-16"
+    Name = "5.7.x"
+    OSS = "2023-05-16"
 
   [[Projects.Generations]]
     Commercial = "2024-03-15"
