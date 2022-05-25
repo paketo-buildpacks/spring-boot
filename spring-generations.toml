@@ -35,6 +35,11 @@
   Status = "END_OF_LIFE"
 
 [[Projects]]
+  Name = "Spring Authorization Server"
+  Slug = "spring-authorization-server"
+  Status = "ACTIVE"
+
+[[Projects]]
   Name = "Spring Batch"
   Slug = "spring-batch"
   Status = "ACTIVE"
