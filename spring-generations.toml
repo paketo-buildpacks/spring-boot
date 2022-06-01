@@ -1180,9 +1180,9 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-18"
+    Commercial = "2026-12-31"
     Name = "5.5.x"
-    OSS = "2022-05-18"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
     Commercial = "2023-02-28"
@@ -1198,11 +1198,6 @@
     Commercial = "2022-02-01"
     Name = "5.2.x"
     OSS = "2020-10-01"
-
-  [[Projects.Generations]]
-    Commercial = "2021-02-28"
-    Name = "5.1.x"
-    OSS = "2019-10-29"
 
 [[Projects]]
   Name = "Spring Integration Groovy DSL"
@@ -1220,9 +1215,9 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-10-20"
+    Commercial = "2024-11-18"
     Name = "2.9.x"
-    OSS = "2023-06-20"
+    OSS = "2023-07-18"
 
   [[Projects.Generations]]
     Commercial = "2024-03-15"
@@ -1352,7 +1347,7 @@
 [[Projects]]
   Name = "Spring Security OAuth"
   Slug = "spring-security-oauth"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Commercial = "2022-05-28"
