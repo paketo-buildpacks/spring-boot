@@ -186,7 +186,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 				for name, paths := range layer {
 					size, err := calcSize(paths)
 					if err != nil {
-						size = "(error)"
+						size = "size unavailable"
 					}
 
 					b.Logger.Body(fmt.Sprintf("%s (%s)", name, size))
