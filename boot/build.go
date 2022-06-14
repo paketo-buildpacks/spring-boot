@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -129,7 +130,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		classpathLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, classpathLayer)
 	} else {
-
 		// contribute Spring Cloud Bindings - false by default
 		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") {
 			h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
@@ -184,7 +184,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 			for _, layer := range layers {
 				for name, paths := range layer {
-					b.Logger.Body(name)
+					size, err := calcSize(paths)
+					if err != nil {
+						size = "(error)"
+					}
+
+					b.Logger.Body(fmt.Sprintf("%s (%s)", name, size))
 					result.Slices = append(result.Slices, libcnb.Slice{Paths: paths})
 				}
 			}
@@ -276,4 +281,45 @@ func configurationMetadataLabels(appDir string, manifest *properties.Properties)
 	}
 
 	return labels, err
+}
+
+func calcSize(paths []string) (string, error) {
+	var size float64
+
+	for _, path := range paths {
+		if err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			size += float64(info.Size())
+
+			return nil
+		}); err != nil {
+			return "", err
+		}
+	}
+
+	return friendlySize(size), nil
+}
+
+func friendlySize(size float64) string {
+	unit := "B"
+
+	if size/1024.0 > 1.0 {
+		size /= 1024.0
+		unit = "KB"
+	}
+
+	if size/1024.0 > 1.0 {
+		size /= 1024.0
+		unit = "MB"
+	}
+
+	if size/1024.0 > 1.0 {
+		size /= 1024.0
+		unit = "GB"
+	}
+
+	return fmt.Sprintf("%0.1f %s", size, unit)
 }
