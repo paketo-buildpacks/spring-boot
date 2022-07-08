@@ -38,7 +38,7 @@ jobs:
                   "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
                 | tar -C "${HOME}"/bin -xz pack
               env:
-                PACK_VERSION: 0.24.0
+                PACK_VERSION: 0.27.0
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
