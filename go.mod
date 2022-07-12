@@ -9,7 +9,7 @@ require (
 	github.com/magiconair/properties v1.8.6
 	github.com/onsi/gomega v1.19.0
 	github.com/paketo-buildpacks/libjvm v1.38.0
-	github.com/paketo-buildpacks/libpak v1.60.1
+	github.com/paketo-buildpacks/libpak v1.61.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sclevine/spec v1.4.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -19,7 +19,7 @@ require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
 	github.com/creack/pty v1.1.18 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
-	github.com/imdario/mergo v0.3.12 // indirect
+	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-shellwords v1.0.12 // indirect
