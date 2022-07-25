@@ -1484,6 +1484,11 @@
   Slug = "spring-shell"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2024-11-23"
+    Name = "2.1.x"
+    OSS = "2023-07-23"
+
 [[Projects]]
   Name = "Spring Social"
   Slug = "spring-social"
