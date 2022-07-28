@@ -1275,6 +1275,11 @@
   Status = "END_OF_LIFE"
 
 [[Projects]]
+  Name = "Spring Modulith"
+  Slug = "spring-modulith"
+  Status = "INCUBATING"
+
+[[Projects]]
   Name = "Spring Plugin"
   Slug = "spring-plugin"
   Status = "INCUBATING"
