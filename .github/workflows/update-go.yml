@@ -1,0 +1,61 @@
+name: Update Go
+"on":
+    schedule:
+        - cron: 0 2 * * 1
+    workflow_dispatch: {}
+jobs:
+    update:
+        name: Update Go
+        runs-on:
+            - ubuntu-latest
+        steps:
+            - uses: actions/setup-go@v3
+              with:
+                go-version: "1.18"
+            - uses: actions/checkout@v3
+            - name: Update Go Version
+              id: update-go
+              run: |
+                #!/usr/bin/env bash
+
+                set -euo pipefail
+
+                if [ -z "${GO_VERSION:-}" ]; then
+                    echo "No go version set"
+                    exit 1
+                fi
+
+                OLD_GO_VERSION=$(grep -P '^go \d\.\d+' go.mod | cut -d ' ' -f 2)
+
+                go mod edit -go="$GO_VERSION"
+                go mod tidy
+                go get -u all
+                go mod tidy
+
+                git add go.mod go.sum
+                git checkout -- .
+
+                echo "::set-output name=old-go-version::${OLD_GO_VERSION}"
+                echo "::set-output name=go-version::${GO_VERSION}"
+              env:
+                GO_VERSION: "1.18"
+            - uses: peter-evans/create-pull-request@v4
+              with:
+                author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
+                body: |-
+                    Bumps Go from `${{ steps.update-go.outputs.old-go-version }}` to `${{ steps.update-go.outputs.go-version }}`.
+
+                    <details>
+                    <summary>Release Notes</summary>
+                    ${{ steps.pipeline.outputs.release-notes }}
+                    </details>
+                branch: update/go
+                commit-message: |-
+                    Bump Go from ${{ steps.update-go.outputs.old-go-version }} to ${{ steps.update-go.outputs.go-version }}
+
+                    Bumps Go from ${{ steps.update-go.outputs.old-go-version }} to ${{ steps.update-go.outputs.go-version }}.
+                delete-branch: true
+                labels: semver:minor, type:task
+                signoff: true
+                title: Bump Go from ${{ steps.update-go.outputs.old-go-version }} to ${{ steps.update-go.outputs.go-version }}
+                token: ${{ secrets.JAVA_GITHUB_TOKEN }}

@@ -11,14 +11,14 @@ jobs:
         steps:
             - uses: actions/setup-go@v3
               with:
-                go-version: "1.17"
+                go-version: "1.18"
             - name: Install update-buildpack-dependency
               run: |
                 #!/usr/bin/env bash
 
                 set -euo pipefail
 
-                GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/update-buildpack-dependency
+                go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/update-buildpack-dependency@latest
             - name: Install yj
               run: |
                 #!/usr/bin/env bash

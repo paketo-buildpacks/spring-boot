@@ -16,14 +16,14 @@ jobs:
         steps:
             - uses: actions/setup-go@v3
               with:
-                go-version: "1.17"
+                go-version: "1.18"
             - name: Install octo
               run: |
                 #!/usr/bin/env bash
 
                 set -euo pipefail
 
-                GO111MODULE=on go get -u -ldflags="-s -w" github.com/paketo-buildpacks/pipeline-builder/cmd/octo
+                go install -ldflags="-s -w" github.com/paketo-buildpacks/pipeline-builder/cmd/octo@latest
             - uses: actions/checkout@v3
             - name: Update Pipeline
               id: pipeline
