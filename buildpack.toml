@@ -19,7 +19,7 @@ api = "0.7"
   homepage = "https://github.com/paketo-buildpacks/spring-boot"
   id = "paketo-buildpacks/spring-boot"
   keywords = ["java", "spring", "spring-boot"]
-  name = "Paketo Spring Boot Buildpack"
+  name = "Paketo Buildpack for Spring Boot"
   sbom-formats = ["application/vnd.cyclonedx+json", "application/vnd.syft+json"]
   version = "{{.version}}"
 
