@@ -1,5 +1,5 @@
 # `gcr.io/paketo-buildpacks/spring-boot`
-The Paketo Spring Boot Buildpack is a Cloud Native Buildpack that contributes Spring Boot dependency information and slices an application into multiple layers.
+The Paketo Buildpack for Spring Boot is a Cloud Native Buildpack that contributes Spring Boot dependency information and slices an application into multiple layers.
 
 ## Behavior
 
