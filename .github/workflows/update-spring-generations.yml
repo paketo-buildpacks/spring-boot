@@ -1,7 +1,8 @@
+# Custom Workflow - not managed by pipeline-builder
 name: Update Spring Generations
 "on":
     schedule:
-        - cron: 30 * * * *
+        - cron: 0 2 * * 1-5
     workflow_dispatch: {}
 jobs:
     update:
@@ -29,11 +30,12 @@ jobs:
                 CONTENT: ${{ steps.generations.outputs.content }}
             - uses: peter-evans/create-pull-request@v3
               with:
+                author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
                 body: Bumps Spring Generations
                 branch: update/buildpack/spring-generations
                 commit-message: Bump Spring Generations
                 delete-branch: true
-                labels: semver:minor, type:dependency-upgrade
+                labels: semver:patch, type:dependency-upgrade
                 signoff: true
                 title: Bump Spring Generations
                 token: ${{ secrets.JAVA_GITHUB_TOKEN }}
