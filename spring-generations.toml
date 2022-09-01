@@ -1144,6 +1144,16 @@
   Slug = "spring-graphql"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2025-03-22"
+    Name = "1.1.x"
+    OSS = "2023-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "1.0.x"
+    OSS = "2023-11-18"
+
 [[Projects]]
   Name = "Spring for Apache Hadoop"
   Slug = "spring-hadoop"
