@@ -4,12 +4,12 @@ go 1.18
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
-	github.com/buildpacks/libcnb v1.26.0
+	github.com/buildpacks/libcnb v1.27.0
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.6
 	github.com/onsi/gomega v1.20.1
 	github.com/paketo-buildpacks/libjvm v1.40.0
-	github.com/paketo-buildpacks/libpak v1.61.0
+	github.com/paketo-buildpacks/libpak v1.62.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sclevine/spec v1.4.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -28,6 +28,6 @@ require (
 	github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/net v0.0.0-20220826154423-83b083e8dc8b // indirect
-	golang.org/x/sys v0.0.0-20220825204002-c680a09ffe64 // indirect
+	golang.org/x/sys v0.0.0-20220829200755-d48e67d00261 // indirect
 	golang.org/x/text v0.3.7 // indirect
 )
