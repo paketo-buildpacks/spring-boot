@@ -210,11 +210,6 @@
   Status = "ACTIVE"
 
 [[Projects]]
-  Name = "Spring Cloud Cluster"
-  Slug = "spring-cloud-cluster"
-  Status = "END_OF_LIFE"
-
-[[Projects]]
   Name = "Spring Cloud Commons"
   Slug = "spring-cloud-commons"
   Status = "ACTIVE"
