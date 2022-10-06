@@ -10,6 +10,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-03-21"
+    Name = "3.0.x"
+    OSS = "2023-11-21"
+
+  [[Projects.Generations]]
     Commercial = "2026-12-31"
     Name = "2.4.x"
     OSS = "2024-12-31"
@@ -1121,6 +1126,16 @@
 
   [[Projects.Generations]]
     Commercial = "2026-12-31"
+    Name = "6.1.x"
+    OSS = "2025-08-31"
+
+  [[Projects.Generations]]
+    Commercial = "2025-12-31"
+    Name = "6.0.x"
+    OSS = "2024-08-31"
+
+  [[Projects.Generations]]
+    Commercial = "2026-12-31"
     Name = "5.3.x"
     OSS = "2024-12-31"
 
@@ -1218,6 +1233,11 @@
   Name = "Spring for Apache Kafka"
   Slug = "spring-kafka"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-21"
+    Name = "3.0.x"
+    OSS = "2023-11-21"
 
   [[Projects.Generations]]
     Commercial = "2026-12-31"
@@ -1590,9 +1610,9 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-18"
+    Commercial = "2025-03-18"
     Name = "3.1.x"
-    OSS = "2022-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2022-05-18"
