@@ -1404,110 +1404,35 @@
   Slug = "spring-session"
   Status = "ACTIVE"
 
-[[Projects]]
-  Name = "Spring Session Core"
-  Slug = "spring-session-core"
-  Status = "ACTIVE"
+  [[Projects.Generations]]
+    Commercial = "2025-03-22"
+    Name = "3.0.x"
+    OSS = "2023-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2024-09-18"
+    Name = "2021.2.x"
+    OSS = "2023-05-18"
 
   [[Projects.Generations]]
     Commercial = "2024-03-17"
-    Name = "2.6.x"
+    Name = "2021.1.x"
     OSS = "2022-11-17"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
-    Name = "2.5.x"
+    Name = "2021.0.x"
     OSS = "2022-05-19"
 
   [[Projects.Generations]]
     Commercial = "2023-02-28"
-    Name = "2.4.x"
+    Name = "2020.0.x"
     OSS = "2021-10-29"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
   Slug = "spring-session-data-geode"
   Status = "ACTIVE"
-
-[[Projects]]
-  Name = "Spring Session MongoDB"
-  Slug = "spring-session-data-mongodb"
-  Status = "ACTIVE"
-
-  [[Projects.Generations]]
-    Commercial = "2024-03-16"
-    Name = "2.6.x"
-    OSS = "2022-11-16"
-
-  [[Projects.Generations]]
-    Commercial = "2023-09-19"
-    Name = "2.5.x"
-    OSS = "2022-05-19"
-
-  [[Projects.Generations]]
-    Commercial = "2023-02-28"
-    Name = "2.4.x"
-    OSS = "2021-10-28"
-
-[[Projects]]
-  Name = "Spring Session Data Redis"
-  Slug = "spring-session-data-redis"
-  Status = "ACTIVE"
-
-  [[Projects.Generations]]
-    Commercial = "2024-03-17"
-    Name = "2.6.x"
-    OSS = "2022-11-17"
-
-  [[Projects.Generations]]
-    Commercial = "2023-09-19"
-    Name = "2.5.x"
-    OSS = "2022-05-19"
-
-  [[Projects.Generations]]
-    Commercial = "2023-02-28"
-    Name = "2.4.x"
-    OSS = "2021-10-29"
-
-[[Projects]]
-  Name = "Spring Session Hazelcast"
-  Slug = "spring-session-hazelcast"
-  Status = "ACTIVE"
-
-  [[Projects.Generations]]
-    Commercial = "2024-03-17"
-    Name = "2.6.x"
-    OSS = "2022-11-17"
-
-  [[Projects.Generations]]
-    Commercial = "2023-09-19"
-    Name = "2.5.x"
-    OSS = "2022-05-19"
-
-  [[Projects.Generations]]
-    Commercial = "2023-02-28"
-    Name = "2.4.x"
-    OSS = "2021-10-29"
-
-[[Projects]]
-  Name = "Spring Session JDBC"
-  Slug = "spring-session-jdbc"
-  Status = "ACTIVE"
-
-  [[Projects.Generations]]
-    Commercial = "2024-03-17"
-    Name = "2.6.x"
-    OSS = "2022-11-17"
-
-  [[Projects.Generations]]
-    Commercial = "2023-09-19"
-    Name = "2.5.x"
-    OSS = "2022-05-19"
-
-  [[Projects.Generations]]
-    Commercial = "2023-02-28"
-    Name = "2.4.x"
-    OSS = "2021-10-29"
 
 [[Projects]]
   Name = "Spring Shell"
