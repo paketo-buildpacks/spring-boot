@@ -116,4 +116,24 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 			Expect(layer.LayerTypes.Launch).To(BeFalse())
 		})
 	})
+	context("Boot @argfile is found", func() {
+		it.Before(func() {
+			Expect(ioutil.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
+- "some.jar"
+- "other.jar"
+`), 0644)).To(Succeed())
+			Expect(os.MkdirAll(filepath.Join(appDir, "META-INF", "native-image"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(appDir, "META-INF", "native-image", "argfile"), []byte("file-data"), 0644)).To(Succeed())
+		})
+
+		it("ensures BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE is set when argfile is found", func() {
+			layer, err := contributor.Contribute(layer)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(layer.BuildEnvironment["BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE.default"]).To(Equal(
+				filepath.Join(appDir, "META-INF", "native-image", "argfile")))
+			Expect(layer.LayerTypes.Build).To(BeTrue())
+			Expect(layer.LayerTypes.Launch).To(BeFalse())
+		})
+	})
 }

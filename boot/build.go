@@ -129,6 +129,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 		classpathLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, classpathLayer)
+
 	} else {
 		// contribute Spring Cloud Bindings - false by default
 		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") {
