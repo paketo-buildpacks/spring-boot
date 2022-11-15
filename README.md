@@ -25,6 +25,9 @@ The buildpack will do the following:
       * Contributes application slices as defined by the layer's index
     * If the application is a reactive web application
       * Configures `$BPL_JVM_THREAD_COUNT` to 50
+* If `<APPLICATION_ROOT>/META-INF/native-image/argfile` exists:
+  * The default value of the environment variable `BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE` is set to the absolute path to this file
+  * A build plan entry is provided, `native-image-argfile`, which can be required by `native-image` to automatically trigger a native image build
 * When contributing to a native image application:
    * Adds classes from the executable JAR and entries from `classpath.idx` to the build-time class path, so they are available to `native-image`
 

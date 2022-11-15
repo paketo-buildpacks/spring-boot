@@ -17,29 +17,54 @@
 package boot
 
 import (
+	"fmt"
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libpak/sherpa"
+	"path/filepath"
 )
 
 const (
 	PlanEntrySpringBoot     = "spring-boot"
+	PlanEntryNativeArgFile  = "native-image-argfile"
 	PlanEntryJVMApplication = "jvm-application"
 )
 
 type Detect struct{}
 
 func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
-	return libcnb.DetectResult{
+	result := libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
 			{
 				Provides: []libcnb.BuildPlanProvide{
-					{Name: "spring-boot"},
+					{Name: PlanEntrySpringBoot},
 				},
 				Requires: []libcnb.BuildPlanRequire{
-					{Name: "jvm-application"},
-					{Name: "spring-boot"},
+					{Name: PlanEntryJVMApplication},
+					{Name: PlanEntrySpringBoot},
 				},
 			},
 		},
-	}, nil
+	}
+	nativeImageArgFile := filepath.Join(context.Application.Path, "META-INF", "native-image", "argfile")
+	if exists, err := sherpa.Exists(nativeImageArgFile); err != nil{
+		return libcnb.DetectResult{}, fmt.Errorf("unable to check for native-image arguments file at %s\n%w", nativeImageArgFile, err)
+	} else if exists{
+		result = libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Provides: []libcnb.BuildPlanProvide{
+						{Name: PlanEntrySpringBoot},
+						{Name: PlanEntryNativeArgFile},
+					},
+					Requires: []libcnb.BuildPlanRequire{
+						{Name: PlanEntrySpringBoot},
+						{Name: PlanEntryJVMApplication},
+					},
+				},
+			},
+		}
+	}
+	return result, nil
 }
