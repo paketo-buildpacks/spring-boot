@@ -17,6 +17,7 @@
 package boot_test
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -357,6 +358,115 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		it("contributes to the result for API <= 0.6", func() {
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			ctx.Buildpack.API = "0.6"
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
+
+			Expect(result.BOM.Entries).To(HaveLen(1))
+			Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		})
+	})
+
+	context("have an existing spring-cloud-bindings jar among spring libs", func() {
+
+		mavenJars := make([]libjvm.MavenJAR, 0, 2)
+		mavenJars = append(mavenJars, libjvm.MavenJAR{
+			Name:    "spring-boot",
+			Version: "3",
+			SHA256:  "1",
+		})
+		mavenJars = append(mavenJars, libjvm.MavenJAR{
+			Name:    "junit",
+			Version: "5",
+			SHA256:  "2",
+		})
+
+		it("returns the version of the found spring cloud bindings jar", func() {
+			expectedScbJar := libjvm.MavenJAR{
+				Name:    "spring-cloud-bindings",
+				Version: "1.8.1",
+				SHA256:  "79a036f93414230a402d30d75ab2ccec9a953259bdeb3dd31e8fee2056445df3",
+			}
+			mavenJars = append(mavenJars, expectedScbJar)
+
+			// add another jar to make sure the detection stops correctly after the first found occurence
+			mavenJars = append(mavenJars, libjvm.MavenJAR{
+				Name:    "tomcat",
+				Version: "10",
+				SHA256:  "3",
+			})
+			scbJarFound := boot.FindExistingDependency(mavenJars, "spring-cloud-bindings")
+			Expect(scbJarFound == true)
+		})
+
+		it("returns no match", func() {
+			scbJarFound := boot.FindExistingDependency(mavenJars, "spring-cloud-bindings")
+			Expect(scbJarFound == false)
+		})
+
+	})
+
+	context("when the Spring Boot lib folder already contains a spring-cloud-bindings jar", func() {
+
+		var Copy = func(name string) {
+			in, err := os.Open(filepath.Join("testdata", "spring-cloud-bindings", name))
+			Expect(err).NotTo(HaveOccurred())
+			defer in.Close()
+
+			out, err := os.OpenFile(filepath.Join(ctx.Application.Path, "BOOT-INF/lib", name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+			Expect(err).NotTo(HaveOccurred())
+			defer out.Close()
+
+			_, err = io.Copy(out, in)
+			Expect(err).NotTo(HaveOccurred())
+		}
+
+		it("contributes to the result for API 0.7+", func() {
+			os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
+			Copy("spring-cloud-bindings-1.2.3.jar")
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+			ctx.Buildpack.API = "0.7"
+			ctx.Buildpack.Metadata = map[string]interface{}{
+				"dependencies": []map[string]interface{}{
+					{
+						"id":      "spring-cloud-bindings",
+						"version": "1.1.0",
+						"stacks":  []interface{}{"test-stack-id"},
+						"cpes":    []string{"cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"},
+						"purl":    "pkg:generic/springframework/spring-cloud-bindings@1.8.0",
+					},
+				},
+			}
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
+
+			Expect(result.BOM.Entries).To(HaveLen(1))
+			Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		})
+
+		it("contributes to the result for API <= 0.6", func() {
+			os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
+			Copy("spring-cloud-bindings-1.2.3.jar")
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
