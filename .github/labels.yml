@@ -25,3 +25,18 @@
 - name: type:task
   description: A general task
   color: e3d9fc
+- name: type:informational
+  description: Provides information or notice to the community
+  color: e3d9fc
+- name: type:poll
+  description: Request for feedback from the community
+  color: e3d9fc
+- name: note:ideal-for-contribution
+  description: An issue that a contributor can help us with
+  color: 54f7a8
+- name: note:on-hold
+  description: We can't start working on this issue yet
+  color: 54f7a8
+- name: note:good-first-issue
+  description: A good first issue to get started with
+  color: 54f7a8
