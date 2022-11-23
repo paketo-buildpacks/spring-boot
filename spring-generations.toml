@@ -1210,6 +1210,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-03-22"
+    Name = "6.0.x"
+    OSS = "2023-11-22"
+
+  [[Projects.Generations]]
     Commercial = "2026-12-31"
     Name = "5.5.x"
     OSS = "2024-12-31"
@@ -1543,6 +1548,11 @@
   Name = "Spring Web Services"
   Slug = "spring-ws"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-21"
+    Name = "4.0.x"
+    OSS = "2023-11-21"
 
   [[Projects.Generations]]
     Commercial = "2025-03-18"
