@@ -113,12 +113,19 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	buildNativeImage := false
+	nativeImageArgFile := ""
 	if n, ok, err := pr.Resolve("spring-boot"); err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve spring-boot plan entry\n%w", err)
 	} else if ok {
 		if v, ok := n.Metadata["native-image"].(bool); ok {
 			buildNativeImage = v
 		}
+	}
+	if _, ok, err := pr.Resolve("native-image-argfile"); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve native-image-argfile plan entry\n%w", err)
+	} else if ok {
+		buildNativeImage = true
+		nativeImageArgFile = filepath.Join(context.Application.Path, "META-INF", "native-image", "argfile")
 	}
 
 	if buildNativeImage {
@@ -127,6 +134,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		if err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create NativeImageClasspath\n%w", err)
 		}
+		classpathLayer.NativeArgFile = nativeImageArgFile
 		classpathLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, classpathLayer)
 

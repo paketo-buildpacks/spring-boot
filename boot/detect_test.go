@@ -17,6 +17,8 @@
 package boot_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/buildpacks/libcnb"
@@ -34,7 +36,8 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		detect boot.Detect
 	)
 
-	it("always passes", func() {
+	it("always passes for standard build", func() {
+		Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "META-INF", "native-image"))).To(Succeed())
 		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{
 			Pass: true,
 			Plans: []libcnb.BuildPlan{
@@ -45,6 +48,26 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: "jvm-application"},
 						{Name: "spring-boot"},
+					},
+				},
+			},
+		}))
+	})
+
+	it("always passes for native build", func() {
+		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF", "native-image"), 0755)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "native-image", "argfile"), []byte("file-data"), 0644)).To(Succeed())
+		Expect(detect.Detect(ctx)).To(Equal(libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Provides: []libcnb.BuildPlanProvide{
+						{Name: "spring-boot"},
+						{Name: "native-image-argfile"},
+					},
+					Requires: []libcnb.BuildPlanRequire{
+						{Name: "spring-boot"},
+						{Name: "jvm-application"},
 					},
 				},
 			},
