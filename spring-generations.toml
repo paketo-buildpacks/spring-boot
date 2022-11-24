@@ -680,6 +680,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "4.0.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
     Commercial = "2024-09-01"
     Name = "3.4.x"
     OSS = "2023-05-01"
@@ -830,6 +835,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
     Commercial = "2024-09-13"
     Name = "2.4.x"
     OSS = "2023-05-13"
@@ -870,6 +880,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
     Commercial = "2024-09-13"
     Name = "2.7.x"
     OSS = "2023-05-13"
@@ -903,6 +918,11 @@
   Name = "Spring Data LDAP"
   Slug = "spring-data-ldap"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2024-09-01"
@@ -943,6 +963,11 @@
   Name = "Spring Data MongoDB"
   Slug = "spring-data-mongodb"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "4.0.x"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2024-09-01"
@@ -990,6 +1015,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
     Commercial = "2024-09-13"
     Name = "1.5.x"
     OSS = "2023-05-13"
@@ -1018,6 +1048,11 @@
   Name = "Spring Data Redis"
   Slug = "spring-data-redis"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2024-09-01"
@@ -1058,6 +1093,11 @@
   Name = "Spring Data REST"
   Slug = "spring-data-rest"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "4.0.x"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2024-09-13"
