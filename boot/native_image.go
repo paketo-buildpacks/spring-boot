@@ -17,6 +17,7 @@ package boot
 
 import (
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,7 +33,6 @@ type NativeImageClasspath struct {
 	Logger          bard.Logger
 	ApplicationPath string
 	Manifest        *properties.Properties
-	NativeArgFile   string
 }
 
 func NewNativeImageClasspath(appDir string, manifest *properties.Properties) (NativeImageClasspath, error) {
@@ -67,8 +67,12 @@ func (n NativeImageClasspath) Contribute(layer libcnb.Layer) (libcnb.Layer, erro
 			strings.Join(cp, string(filepath.ListSeparator)),
 		)
 
-		if n.NativeArgFile != ""{
-			layer.BuildEnvironment.Default("BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE", n.NativeArgFile)
+		nativeImageArgFile := filepath.Join(n.ApplicationPath, "META-INF", "native-image", "argfile")
+		if exists, err := sherpa.Exists(nativeImageArgFile); err != nil{
+			return libcnb.Layer{}, fmt.Errorf("unable to check for native-image arguments file at %s\n%w", nativeImageArgFile, err)
+		} else if exists{
+			lc.Logger.Bodyf(fmt.Sprintf("native args file %s", nativeImageArgFile))
+			layer.BuildEnvironment.Default("BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE", nativeImageArgFile)
 		}
 
 		return layer, nil
