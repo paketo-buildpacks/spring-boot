@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.2.0
 	github.com/buildpacks/libcnb v1.27.0
 	github.com/heroku/color v0.0.6
-	github.com/magiconair/properties v1.8.6
+	github.com/magiconair/properties v1.8.7
 	github.com/onsi/gomega v1.24.1
 	github.com/paketo-buildpacks/libjvm v1.41.0
 	github.com/paketo-buildpacks/libpak v1.63.0
