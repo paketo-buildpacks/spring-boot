@@ -127,22 +127,11 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 		})
 
 		it("ensures BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE is set when argfile is found", func() {
-			contributor.NativeArgFile = filepath.Join(appDir, "META-INF", "native-image", "argfile")
 			layer, err := contributor.Contribute(layer)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(layer.BuildEnvironment["BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE.default"]).To(Equal(
 				filepath.Join(appDir, "META-INF", "native-image", "argfile")))
-			Expect(layer.LayerTypes.Build).To(BeTrue())
-			Expect(layer.LayerTypes.Launch).To(BeFalse())
-		})
-
-		it("ensures BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE is not set when argfile is not found", func() {
-			contributor.NativeArgFile = ""
-			layer, err := contributor.Contribute(layer)
-			Expect(err).NotTo(HaveOccurred())
-
-			Expect(layer.BuildEnvironment["BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE.default"]).To(Equal(""))
 			Expect(layer.LayerTypes.Build).To(BeTrue())
 			Expect(layer.LayerTypes.Launch).To(BeFalse())
 		})
