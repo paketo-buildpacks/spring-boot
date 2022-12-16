@@ -770,7 +770,7 @@
     OSS = "2020-09-30"
 
 [[Projects]]
-  Name = "Spring Data for VMware Tanzu GemFire"
+  Name = "Spring Data for VMware GemFire"
   Slug = "spring-data-gemfire"
   Status = "END_OF_LIFE"
 
