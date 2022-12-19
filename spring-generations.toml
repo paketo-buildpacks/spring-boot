@@ -450,11 +450,6 @@
   Status = "ACTIVE"
 
 [[Projects]]
-  Name = "Spring Cloud Schema Registry"
-  Slug = "spring-cloud-schema-registry"
-  Status = "ACTIVE"
-
-[[Projects]]
   Name = "Spring Cloud Security"
   Slug = "spring-cloud-security"
   Status = "ACTIVE"
