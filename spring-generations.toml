@@ -155,9 +155,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-18"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -175,9 +180,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-18"
+    Commercial = "2025-04-19"
+    Name = "3.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "2.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -194,18 +204,28 @@
   Slug = "spring-cloud-cli"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
+    Name = "3.1.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2023-08-24"
+    Name = "3.0.x"
+    OSS = "2022-05-19"
+
 [[Projects]]
   Name = "Spring Cloud for Cloud Foundry"
   Slug = "spring-cloud-cloudfoundry"
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-18"
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-19"
+    Commercial = "2023-08-24"
     Name = "3.0.x"
     OSS = "2022-05-19"
 
@@ -225,9 +245,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -245,9 +270,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -275,9 +305,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -295,9 +330,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -360,9 +400,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -385,7 +430,12 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "3.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "2.1.x"
     OSS = "2023-05-18"
 
@@ -405,9 +455,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-18"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -430,9 +485,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -470,9 +530,9 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -488,6 +548,11 @@
   Name = "Spring Cloud Stream"
   Slug = "spring-cloud-stream"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
 
   [[Projects.Generations]]
     Commercial = "2024-03-30"
@@ -570,6 +635,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2025-04-19"
+    Name = "3.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
     Commercial = "2024-08-22"
     Name = "2.4.x"
     OSS = "2023-05-18"
@@ -584,16 +654,6 @@
     Name = "2.2.x"
     OSS = "2020-11-22"
 
-  [[Projects.Generations]]
-    Commercial = "2021-05-22"
-    Name = "2.1.x"
-    OSS = "2020-01-22"
-
-  [[Projects.Generations]]
-    Commercial = "2020-09-03"
-    Name = "2.0.x"
-    OSS = "2019-05-03"
-
 [[Projects]]
   Name = "Spring Cloud Task App Starters"
   Slug = "spring-cloud-task-app-starters"
@@ -605,9 +665,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -625,9 +690,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-22"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
     Name = "3.1.x"
-    OSS = "2023-05-18"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
