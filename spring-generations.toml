@@ -360,7 +360,12 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-10-12"
+    Commercial = "2024-11-18"
+    Name = "2.10.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2023-12-12"
     Name = "2.9.x"
     OSS = "2022-10-12"
 
@@ -380,19 +385,19 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-30"
+    Commercial = "2025-04-19"
+    Name = "4.0.x"
+    OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
     Name = "3.2.x"
-    OSS = "2022-11-30"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-04-21"
     Name = "3.1.x"
     OSS = "2021-12-21"
-
-  [[Projects.Generations]]
-    Commercial = "2022-03-22"
-    Name = "3.0.x"
-    OSS = "2020-11-22"
 
 [[Projects]]
   Name = "Spring Cloud Gateway"
@@ -555,19 +560,14 @@
     OSS = "2023-12-19"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-30"
+    Commercial = "2025-03-18"
     Name = "3.2.x"
-    OSS = "2022-11-30"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2023-04-21"
     Name = "3.1.x"
     OSS = "2021-12-21"
-
-  [[Projects.Generations]]
-    Commercial = "2022-03-22"
-    Name = "3.0.x"
-    OSS = "2020-11-22"
 
 [[Projects]]
   Name = "Spring Cloud Stream Applications"
