@@ -20,6 +20,6 @@ dependencies:
 - id:   spring-cloud-bindings
   uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
   with:
-    uri:         https://repo.spring.io/release
+    uri:         https://repo1.maven.org/maven2
     group_id:    org.springframework.cloud
     artifact_id: spring-cloud-bindings
