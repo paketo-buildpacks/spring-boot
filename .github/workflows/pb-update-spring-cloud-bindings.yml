@@ -46,7 +46,7 @@ jobs:
               with:
                 artifact_id: spring-cloud-bindings
                 group_id: org.springframework.cloud
-                uri: https://repo.spring.io/release
+                uri: https://repo1.maven.org/maven2
             - name: Update Buildpack Dependency
               id: buildpack
               run: |-
