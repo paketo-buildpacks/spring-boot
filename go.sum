@@ -37,8 +37,8 @@ github.com/paketo-buildpacks/libjvm v1.41.0 h1:PK99hqV4htl2yLHNzz1GBGlAd/jccYE1u
 github.com/paketo-buildpacks/libjvm v1.41.0/go.mod h1:HvZmNTF6c9WV1uA+8z1ObHwCUJbRn9LbTK95Eb/3yyQ=
 github.com/paketo-buildpacks/libpak v1.63.0 h1:LLBKp3QNXzpSIrz54dZqvxtZawFzZon69d7HGof2eKw=
 github.com/paketo-buildpacks/libpak v1.63.0/go.mod h1:F8SrPD3jZsSQrBVU0Tnunf9nZLDVZr8L/0QPTV4Ie64=
-github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.0 h1:y9azNmMzvkNBPyczpNRwaV4bm0U6e7Oyrj7gi2/SNFI=
-github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.0/go.mod h1:lAVhWwbNaveeJmxrxuSTxMgKpF6DjnuVpn6T8WiBwYQ=
+github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1 h1:FyBdsRqqHH4LctMLL+BL2oGO+ONcIPwn96ctofCVtNE=
+github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1/go.mod h1:lAVhWwbNaveeJmxrxuSTxMgKpF6DjnuVpn6T8WiBwYQ=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
 github.com/pelletier/go-toml v1.9.5/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
