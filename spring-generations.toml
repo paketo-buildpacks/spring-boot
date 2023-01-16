@@ -44,6 +44,16 @@
   Slug = "spring-authorization-server"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2027-03-21"
+    Name = "1.0.x"
+    OSS = "2025-11-21"
+
+  [[Projects.Generations]]
+    Commercial = "2025-11-21"
+    Name = "0.4.x"
+    OSS = "2025-11-21"
+
 [[Projects]]
   Name = "Spring Batch"
   Slug = "spring-batch"
@@ -1268,6 +1278,11 @@
   Name = "Spring for GraphQL"
   Slug = "spring-graphql"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-09-17"
+    Name = "1.2.x"
+    OSS = "2024-05-17"
 
   [[Projects.Generations]]
     Commercial = "2025-03-22"
