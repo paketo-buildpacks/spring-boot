@@ -57,12 +57,14 @@ jobs:
                 git add .github/
                 git checkout -- .
 
-                echo "::set-output name=old-version::${OLD_VERSION}"
-                echo "::set-output name=new-version::${NEW_VERSION}"
-                echo "::set-output name=release-notes::${RELEASE_NOTES//$'\n'/%0A}"
+                echo "old-version=${OLD_VERSION}" >> "$GITHUB_OUTPUT"
+                echo "new-version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
+
+                DELIMITER=$(openssl rand -hex 16) # roughly the same entropy as uuid v4 used in https://github.com/actions/toolkit/blob/b36e70495fbee083eb20f600eafa9091d832577d/packages/core/src/file-command.ts#L28
+                printf "release-notes<<%s\n%s\n%s\n" "${DELIMITER}" "${RELEASE_NOTES}" "${DELIMITER}" >> "${GITHUB_OUTPUT}" # see https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
               env:
                 DESCRIPTOR: .github/pipeline-descriptor.yml
-                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
             - uses: peter-evans/create-pull-request@v4
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
@@ -82,4 +84,4 @@ jobs:
                 labels: semver:patch, type:task
                 signoff: true
                 title: Bump pipeline from ${{ steps.pipeline.outputs.old-version }} to ${{ steps.pipeline.outputs.new-version }}
-                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}

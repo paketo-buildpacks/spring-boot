@@ -1,7 +1,7 @@
 name: Update Go
 "on":
     schedule:
-        - cron: 0 2 * * 1
+        - cron: 14 2 * * 1
     workflow_dispatch: {}
 jobs:
     update:
@@ -45,9 +45,9 @@ jobs:
                     COMMIT_SEMVER="semver:minor"
                 fi
 
-                echo "::set-output name=commit-title::${COMMIT_TITLE}"
-                echo "::set-output name=commit-body::${COMMIT_BODY}"
-                echo "::set-output name=commit-semver::${COMMIT_SEMVER}"
+                echo "commit-title=${COMMIT_TITLE}" >> "$GITHUB_OUTPUT"
+                echo "commit-body=${COMMIT_BODY}" >> "$GITHUB_OUTPUT"
+                echo "commit-semver=${COMMIT_SEMVER}" >> "$GITHUB_OUTPUT"
               env:
                 GO_VERSION: "1.18"
             - uses: peter-evans/create-pull-request@v4
@@ -69,4 +69,4 @@ jobs:
                 labels: ${{ steps.update-go.outputs.commit-semver }}, type:task
                 signoff: true
                 title: ${{ steps.update-go.outputs.commit-title }}
-                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}

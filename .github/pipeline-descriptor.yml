@@ -1,20 +1,23 @@
 github:
   username: ${{ secrets.JAVA_GITHUB_USERNAME }}
-  token:    ${{ secrets.JAVA_GITHUB_TOKEN }}
+  token:    ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
 
 codeowners:
 - path:  "*"
-  owner: "@paketo-buildpacks/java-buildpacks"
+  owner: "@paketo-buildpacks/java-maintainers"
 
 package:
-  repository:     gcr.io/paketo-buildpacks/spring-boot
+  repositories:   ["docker.io/paketobuildpacks/spring-boot","gcr.io/paketo-buildpacks/spring-boot"]
   register:       true
-  registry_token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+  registry_token: ${ secrets.PAKETO_BOT_GITHUB_TOKEN }
 
 docker_credentials:
 - registry: gcr.io
   username: _json_key
-  password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
+  password: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
+- registry: docker.io
+  username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
+  password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
 
 dependencies:
 - id:   spring-cloud-bindings

@@ -12,12 +12,12 @@ jobs:
             - id: release-drafter
               uses: release-drafter/release-drafter@v5
               env:
-                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
             - uses: actions/checkout@v3
             - name: Update draft release with buildpack information
               uses: docker://ghcr.io/paketo-buildpacks/actions/draft-release:main
               with:
-                github_token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                github_token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
                 release_body: ${{ steps.release-drafter.outputs.body }}
                 release_id: ${{ steps.release-drafter.outputs.id }}
                 release_name: ${{ steps.release-drafter.outputs.name }}
