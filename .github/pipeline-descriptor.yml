@@ -9,7 +9,7 @@ codeowners:
 package:
   repositories:   ["docker.io/paketobuildpacks/spring-boot","gcr.io/paketo-buildpacks/spring-boot"]
   register:       true
-  registry_token: ${ secrets.PAKETO_BOT_GITHUB_TOKEN }
+  registry_token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
 
 docker_credentials:
 - registry: gcr.io
