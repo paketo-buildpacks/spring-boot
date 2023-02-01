@@ -1,7 +1,7 @@
 name: Update Go
 "on":
     schedule:
-        - cron: 14 2 * * 1
+        - cron: 42 2 * * 1
     workflow_dispatch: {}
 jobs:
     update:

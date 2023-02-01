@@ -227,5 +227,5 @@ jobs:
               with:
                 address: docker.io/paketobuildpacks/spring-boot@${{ steps.package.outputs.digest }}
                 id: paketo-buildpacks/spring-boot
-                token: ${ secrets.PAKETO_BOT_GITHUB_TOKEN }
+                token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
                 version: ${{ steps.version.outputs.version }}
