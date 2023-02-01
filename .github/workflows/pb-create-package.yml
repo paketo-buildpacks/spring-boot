@@ -13,9 +13,16 @@ jobs:
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
               uses: docker/login-action@v2
               with:
-                password: ${{ secrets.JAVA_GCLOUD_SERVICE_ACCOUNT_KEY }}
+                password: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
                 registry: gcr.io
                 username: _json_key
+            - name: Docker login docker.io
+              if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
+              uses: docker/login-action@v2
+              with:
+                password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
+                registry: docker.io
+                username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
             - uses: actions/setup-go@v3
               with:
                 go-version: "1.18"
@@ -102,15 +109,15 @@ jobs:
                   MAJOR_VERSION="$(echo "${VERSION}" | awk -F '.' '{print $1 }')"
                   MINOR_VERSION="$(echo "${VERSION}" | awk -F '.' '{print $1 "." $2 }')"
 
-                  echo "::set-output name=version-major::${MAJOR_VERSION}"
-                  echo "::set-output name=version-minor::${MINOR_VERSION}"
+                  echo "version-major=${MAJOR_VERSION}" >> "$GITHUB_OUTPUT"
+                  echo "version-minor=${MINOR_VERSION}" >> "$GITHUB_OUTPUT"
                 elif [[ ${GITHUB_REF} =~ refs/heads/(.+) ]]; then
                   VERSION=${BASH_REMATCH[1]}
                 else
                   VERSION=$(git rev-parse --short HEAD)
                 fi
 
-                echo "::set-output name=version::${VERSION}"
+                echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
                 echo "Selected ${VERSION} from
                   * ref: ${GITHUB_REF}
                   * sha: ${GITHUB_SHA}
@@ -166,7 +173,7 @@ jobs:
                     crane tag "${PACKAGE}:${VERSION}" "${VERSION_MAJOR}"
                   fi
                   crane tag "${PACKAGE}:${VERSION}" latest
-                  echo "::set-output name=digest::$(crane digest "${PACKAGE}:${VERSION}")"
+                  echo "digest=$(crane digest "${PACKAGE}:${VERSION}")" >> "$GITHUB_OUTPUT"
 
                   # copy to other repositories specified
                   for P in "${PACKAGE_LIST[@]}"
@@ -188,7 +195,7 @@ jobs:
                     --format "${FORMAT}"
                 fi
               env:
-                PACKAGES: gcr.io/paketo-buildpacks/spring-boot
+                PACKAGES: docker.io/paketobuildpacks/spring-boot gcr.io/paketo-buildpacks/spring-boot
                 PUBLISH: "true"
                 VERSION: ${{ steps.version.outputs.version }}
                 VERSION_MAJOR: ${{ steps.version.outputs.version-major }}
@@ -214,11 +221,11 @@ jobs:
                   --field "body=${RELEASE_BODY//<!-- DIGEST PLACEHOLDER -->/\`${DIGEST}\`}"
               env:
                 DIGEST: ${{ steps.package.outputs.digest }}
-                GITHUB_TOKEN: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
             - if: ${{ true }}
               uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:4.0.1
               with:
-                address: gcr.io/paketo-buildpacks/spring-boot@${{ steps.package.outputs.digest }}
+                address: docker.io/paketobuildpacks/spring-boot@${{ steps.package.outputs.digest }}
                 id: paketo-buildpacks/spring-boot
-                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+                token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
                 version: ${{ steps.version.outputs.version }}
