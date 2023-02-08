@@ -14,7 +14,7 @@ jobs:
             - id: generations
               uses: docker://ghcr.io/paketo-buildpacks/actions/spring-generations:main
               with:
-                uri: https://spring.io/api
+                uri: https://api.spring.io
             - id: buildpack
               name: Update Buildpack Dependency
               run: |
