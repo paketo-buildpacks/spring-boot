@@ -136,7 +136,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			b.Logger.Header("A Spring Cloud Bindings library was found in the Spring Boot libs - not adding another one")
 		}
 		// contribute Spring Cloud Bindings - false by default
-		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") && scbJarFound == false {
+		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") && !scbJarFound {
 			h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
 			h.Logger = b.Logger
 			result.Layers = append(result.Layers, h)
