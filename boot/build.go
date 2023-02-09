@@ -131,8 +131,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		result.Layers = append(result.Layers, classpathLayer)
 
 	} else {
+		scbJarFound := FindExistingDependency(d, "spring-cloud-bindings")
+		if scbJarFound {
+			b.Logger.Header("A Spring Cloud Bindings library was found in the Spring Boot libs - not adding another one")
+		}
 		// contribute Spring Cloud Bindings - false by default
-		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") {
+		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") && !scbJarFound {
 			h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
 			h.Logger = b.Logger
 			result.Layers = append(result.Layers, h)
@@ -237,7 +241,7 @@ func configurationMetadataLabels(appDir string, manifest *properties.Properties)
 
 	lib, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
-		return nil, errors.New("manifest does not container Spring-Boot-Lib")
+		return nil, errors.New("manifest does not contain Spring-Boot-Lib")
 	}
 	file := filepath.Join(lib, "*.jar")
 	files, err := filepath.Glob(file)
@@ -323,4 +327,13 @@ func friendlySize(size float64) string {
 	}
 
 	return fmt.Sprintf("%0.1f %s", size, unit)
+}
+
+func FindExistingDependency(jars []libjvm.MavenJAR, dependencyName string) bool {
+	for _, lib := range jars {
+		if lib.Name == dependencyName {
+			return true
+		}
+	}
+	return false
 }
