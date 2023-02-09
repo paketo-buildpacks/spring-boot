@@ -132,7 +132,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	} else {
 		scbJarFound := FindExistingDependency(d, "spring-cloud-bindings")
-		if scbJarFound == true {
+		if scbJarFound {
 			b.Logger.Header("A Spring Cloud Bindings library was found in the Spring Boot libs - not adding another one")
 		}
 		// contribute Spring Cloud Bindings - false by default
