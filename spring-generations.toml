@@ -60,24 +60,19 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2021-02-28"
-    Name = "4.1.x"
-    OSS = "2019-10-29"
+    Commercial = "2025-08-18"
+    Name = "5.0.x"
+    OSS = "2024-05-18"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-18"
+    Name = "4.3.x"
+    OSS = "2023-11-18"
 
   [[Projects.Generations]]
     Commercial = "2022-09-20"
     Name = "4.2.x"
     OSS = "2021-05-20"
-
-  [[Projects.Generations]]
-    Commercial = "2024-09-18"
-    Name = "4.3.x"
-    OSS = "2023-05-18"
-
-  [[Projects.Generations]]
-    Commercial = "2025-03-23"
-    Name = "5.0.x"
-    OSS = "2023-11-23"
 
 [[Projects]]
   Name = "Spring Boot"
@@ -1443,6 +1438,11 @@
     Commercial = "2026-12-31"
     Name = "2.4.x"
     OSS = "2024-12-31"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-18"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
 
 [[Projects]]
   Name = "Spring Mobile"
