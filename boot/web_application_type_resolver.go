@@ -34,14 +34,17 @@ const (
 )
 
 const (
-	WebMVCIndicatorClass  = "org.springframework.web.servlet.DispatcherServlet"
-	WebFluxIndicatorClass = "org.springframework.web.reactive.DispatcherHandler"
-	JerseyIndicatorClass  = "org.glassfish.jersey.servlet.ServletContainer"
+	WebMVCIndicatorClass                            = "org.springframework.web.servlet.DispatcherServlet"
+	WebFluxIndicatorClass                           = "org.springframework.web.reactive.DispatcherHandler"
+	JerseyIndicatorClass                            = "org.glassfish.jersey.servlet.ServletContainer"
+	ConfigurableWebApplicationContextIndicatorClass = "org.springframework.web.context.ConfigurableWebApplicationContext"
+	JakartaServlet                                  = "jakarta.servlet.Servlet"
+	JavaxServlet                                    = "javax.servlet.Servlet"
 )
 
 var ServletIndicatorClasses = []string{
-	"javax.servlet.Servlet",
-	"org.springframework.web.context.ConfigurableWebApplicationContext",
+	JavaxServlet,
+	JakartaServlet,
 }
 
 type WebApplicationTypeResolver struct {
@@ -138,10 +141,8 @@ func (w WebApplicationTypeResolver) Resolve() ApplicationType {
 		return Reactive
 	}
 
-	for _, class := range ServletIndicatorClasses {
-		if !w.isPresent(class) {
-			return None
-		}
+	if !w.webEnvironmentIsPresent() {
+		return None
 	}
 
 	return Servlet
@@ -150,4 +151,17 @@ func (w WebApplicationTypeResolver) Resolve() ApplicationType {
 func (w WebApplicationTypeResolver) isPresent(class string) bool {
 	_, ok := w.Classes[class]
 	return ok
+}
+
+func (w WebApplicationTypeResolver) webEnvironmentIsPresent() bool {
+	return w.servletIsPresent() && w.isPresent(ConfigurableWebApplicationContextIndicatorClass)
+}
+
+func (w WebApplicationTypeResolver) servletIsPresent() bool {
+	for _, class := range ServletIndicatorClasses {
+		if w.isPresent(class) {
+			return true
+		}
+	}
+	return false
 }
