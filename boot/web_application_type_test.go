@@ -84,10 +84,23 @@ func testWebApplicationType(t *testing.T, context spec.G, it spec.S) {
 		Expect(layer.LaunchEnvironment["BPL_JVM_THREAD_COUNT.default"]).To(Equal("50"))
 	})
 
-	it("contributes Servlet application type configuration", func() {
-		for _, class := range boot.ServletIndicatorClasses {
-			w.Resolver.Classes[class] = nil
-		}
+	it("contributes Javax Servlet application type configuration", func() {
+		w.Resolver.Classes[boot.JavaxServlet] = nil
+		w.Resolver.Classes[boot.ConfigurableWebApplicationContextIndicatorClass] = nil
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = w.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(layer.Launch).To(BeTrue())
+		Expect(layer.LaunchEnvironment["BPL_JVM_THREAD_COUNT.default"]).To(Equal("250"))
+	})
+
+	it("contributes Jakarta Servlet application type configuration", func() {
+		w.Resolver.Classes[boot.JakartaServlet] = nil
+		w.Resolver.Classes[boot.ConfigurableWebApplicationContextIndicatorClass] = nil
 
 		layer, err := ctx.Layers.Layer("test-layer")
 		Expect(err).NotTo(HaveOccurred())

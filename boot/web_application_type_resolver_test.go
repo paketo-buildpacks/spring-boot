@@ -93,15 +93,34 @@ func testWebApplicationTypeResolver(t *testing.T, context spec.G, it spec.S) {
 			Expect(w.Resolve()).To(Equal(boot.None))
 		})
 
-		it("ServletIndicatorClasses", func() {
-			for _, class := range boot.ServletIndicatorClasses {
-				Touch(class)
-			}
+		it("ServletIndicatorClasses Javax", func() {
+			Touch(boot.JavaxServlet)
+			Touch(boot.ConfigurableWebApplicationContextIndicatorClass)
 
 			w, err := boot.NewWebApplicationResolver(path, path)
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(w.Resolve()).To(Equal(boot.Servlet))
+		})
+
+		it("ServletIndicatorClasses Jakarta", func() {
+			Touch(boot.JakartaServlet)
+			Touch(boot.ConfigurableWebApplicationContextIndicatorClass)
+
+			w, err := boot.NewWebApplicationResolver(path, path)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(w.Resolve()).To(Equal(boot.Servlet))
+		})
+
+		it("Servlets only", func() {
+			Touch(boot.JakartaServlet)
+			Touch(boot.JavaxServlet)
+
+			w, err := boot.NewWebApplicationResolver(path, path)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(w.Resolve()).To(Equal(boot.None))
 		})
 	})
 
@@ -156,6 +175,15 @@ func testWebApplicationTypeResolver(t *testing.T, context spec.G, it spec.S) {
 
 		it("ServletIndicatorClasses", func() {
 			Copy("servletindicators.jar")
+
+			w, err := boot.NewWebApplicationResolver(path, path)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(w.Resolve()).To(Equal(boot.Servlet))
+		})
+
+		it("ServletIndicatorClasses Jakarta", func() {
+			Copy("servletindicators-jakarta.jar")
 
 			w, err := boot.NewWebApplicationResolver(path, path)
 			Expect(err).NotTo(HaveOccurred())
