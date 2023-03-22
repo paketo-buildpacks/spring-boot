@@ -4,6 +4,8 @@ updates:
       directory: /
       schedule:
         interval: daily
+      ignore:
+        - dependency-name: github.com/onsi/gomega
       labels:
         - semver:patch
         - type:dependency-upgrade

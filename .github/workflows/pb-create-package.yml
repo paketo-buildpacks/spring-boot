@@ -23,7 +23,7 @@ jobs:
                 password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
                 registry: docker.io
                 username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
-            - uses: actions/setup-go@v3
+            - uses: actions/setup-go@v4
               with:
                 go-version: "1.18"
             - name: Install create-package
