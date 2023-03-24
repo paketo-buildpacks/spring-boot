@@ -25,11 +25,6 @@
     OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2021-02-15"
-    Name = "2.1.x"
-    OSS = "2019-10-15"
-
-  [[Projects.Generations]]
     Commercial = "2025-03-21"
     Name = "3.0.x"
     OSS = "2023-11-21"
