@@ -25,7 +25,7 @@ jobs:
                 username: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_USERNAME }}
             - uses: actions/setup-go@v4
               with:
-                go-version: "1.18"
+                go-version: "1.20"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -70,7 +70,7 @@ jobs:
                   "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
                 | tar -C "${HOME}"/bin -xz pack
               env:
-                PACK_VERSION: 0.27.0
+                PACK_VERSION: 0.29.0
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
@@ -127,6 +127,13 @@ jobs:
                 #!/usr/bin/env bash
 
                 set -euo pipefail
+
+                # With Go 1.20, we need to set this so that we produce statically compiled binaries
+                #
+                # Starting with Go 1.20, Go will produce binaries that are dynamically linked against libc
+                #   which can cause compatibility issues. The compiler links against libc on the build system
+                #   but that may be newer than on the stacks we support.
+                export CGO_ENABLED=0
 
                 if [[ "${INCLUDE_DEPENDENCIES}" == "true" ]]; then
                   create-package \
