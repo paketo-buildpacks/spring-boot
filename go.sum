@@ -2,8 +2,8 @@ github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
-github.com/buildpacks/libcnb v1.27.0 h1:Jwp5EDGJWYBLPn902w/648w3S+H2HL7/Xw8FLcrXgAo=
-github.com/buildpacks/libcnb v1.27.0/go.mod h1:SZirCtDl+AiFHTS6R4KlUPMqWzjwmEACsz/c2wI1nb8=
+github.com/buildpacks/libcnb v1.28.0 h1:iWK1tPKinlcXZaepTSCO9m/7uBevv12ERs4vZBwrSbY=
+github.com/buildpacks/libcnb v1.28.0/go.mod h1:Q57o6hD2cLhfQbmFgFbweqFz/MeSvoxlImjERQG5ugk=
 github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
 github.com/creack/pty v1.1.18/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
