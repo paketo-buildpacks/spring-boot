@@ -1427,7 +1427,7 @@
 [[Projects]]
   Name = "Spring Modulith"
   Slug = "spring-modulith"
-  Status = "INCUBATING"
+  Status = "ACTIVE"
 
 [[Projects]]
   Name = "Spring Plugin"
