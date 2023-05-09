@@ -17,29 +17,58 @@
 package boot
 
 import (
+	"fmt"
 	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libjvm"
+	"strconv"
 )
 
 const (
-	PlanEntrySpringBoot     = "spring-boot"
-	PlanEntryJVMApplication = "jvm-application"
+	PlanEntrySpringBoot      = "spring-boot"
+	PlanEntryJVMApplication  = "jvm-application"
+	PlanEntryNativeProcessed = "native-processed"
 )
 
 type Detect struct{}
 
 func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
-	return libcnb.DetectResult{
+	result := libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
 			{
 				Provides: []libcnb.BuildPlanProvide{
-					{Name: "spring-boot"},
+					{Name: PlanEntrySpringBoot},
 				},
 				Requires: []libcnb.BuildPlanRequire{
-					{Name: "jvm-application"},
-					{Name: "spring-boot"},
+					{Name: PlanEntryJVMApplication},
+					{Name: PlanEntrySpringBoot},
 				},
 			},
 		},
-	}, nil
+	}
+	manifest, err := libjvm.NewManifest(context.Application.Path)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
+	}
+
+	springBootNativeProcessedString, ok := manifest.Get("Spring-Boot-Native-Processed")
+	springBootNativeProcessed, err := strconv.ParseBool(springBootNativeProcessedString)
+	if ok && springBootNativeProcessed {
+		result = libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Provides: []libcnb.BuildPlanProvide{
+						{Name: PlanEntrySpringBoot},
+						{Name: PlanEntryNativeProcessed},
+					},
+					Requires: []libcnb.BuildPlanRequire{
+						{Name: PlanEntryJVMApplication},
+						{Name: PlanEntrySpringBoot},
+					},
+				},
+			},
+		}
+	}
+	return result, nil
 }

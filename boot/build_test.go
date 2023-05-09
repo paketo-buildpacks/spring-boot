@@ -318,6 +318,31 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 	})
 
+	context("when a native-processed BuildPlanEntry is found with a native-image sub entry", func() {
+		it.Before(func() {
+			ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{
+				Name:     "native-processed",
+				Metadata: map[string]interface{}{"native-image": true},
+			})
+		})
+
+		it("contributes a native image build", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("Class Path"))
+			Expect(result.Slices).To(HaveLen(0))
+		})
+
+	})
+
 	context("set BP_SPRING_CLOUD_BINDINGS_DISABLED to true", func() {
 		it.Before(func() {
 			Expect(os.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")).To(Succeed())
