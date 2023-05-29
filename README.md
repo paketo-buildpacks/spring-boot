@@ -25,7 +25,7 @@ The buildpack will do the following:
       * Contributes application slices as defined by the layer's index
     * If the application is a reactive web application
       * Configures `$BPL_JVM_THREAD_COUNT` to 50
-* If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Native-Processed` entry:
+* If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Native-Processed` entry OR if `$BP_MAVEN_ACTIVE_PROFILES` contains the `native` profile:
   * A build plan entry is provided, `native-image-application`, which can be required by `native-image` to automatically trigger a native image build
 * When contributing to a native image application:
    * Adds classes from the executable JAR and entries from `classpath.idx` to the build-time class path, so they are available to `native-image`

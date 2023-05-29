@@ -19,19 +19,27 @@ package boot
 import (
 	"fmt"
 	"github.com/buildpacks/libcnb"
+	"github.com/magiconair/properties"
 	"github.com/paketo-buildpacks/libjvm"
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 const (
-	PlanEntrySpringBoot      = "spring-boot"
-	PlanEntryJVMApplication  = "jvm-application"
-	PlanEntryNativeProcessed = "native-processed"
+	PlanEntrySpringBoot       = "spring-boot"
+	PlanEntryJVMApplication   = "jvm-application"
+	PlanEntryNativeProcessed  = "native-processed"
+	MavenConfigActiveProfiles = "BP_MAVEN_ACTIVE_PROFILES"
 )
 
-type Detect struct{}
+type Detect struct {
+	Logger bard.Logger
+}
 
-func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
 	result := libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
@@ -51,9 +59,15 @@ func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) 
 		return libcnb.DetectResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
 	}
 
-	springBootNativeProcessedString, ok := manifest.Get("Spring-Boot-Native-Processed")
-	springBootNativeProcessed, err := strconv.ParseBool(springBootNativeProcessedString)
-	if ok && springBootNativeProcessed {
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
+
+	mavenNativeProfileDetected := isMavenNativeProfileDetected(&cr, &d.Logger)
+	springBootNativeProcessedDetected := isSpringBootNativeProcessedDetected(manifest, &d.Logger)
+
+	if springBootNativeProcessedDetected || mavenNativeProfileDetected {
 		result = libcnb.DetectResult{
 			Pass: true,
 			Plans: []libcnb.BuildPlan{
@@ -71,4 +85,28 @@ func (Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) 
 		}
 	}
 	return result, nil
+}
+
+func isSpringBootNativeProcessedDetected(manifest *properties.Properties, logger *bard.Logger) bool {
+	springBootNativeProcessedString, found := manifest.Get("Spring-Boot-Native-Processed")
+	springBootNativeProcessed, _ := strconv.ParseBool(springBootNativeProcessedString)
+	detected := found && springBootNativeProcessed
+	if detected {
+		logger.Bodyf("Spring-Boot-Native-Processed MANIFEST entry was detected, activating native image")
+	}
+	return detected
+}
+
+func isMavenNativeProfileDetected(cr *libpak.ConfigurationResolver, logger *bard.Logger) bool {
+	mavenActiveProfiles, _ := cr.Resolve(MavenConfigActiveProfiles)
+	mavenActiveProfilesAsSlice := strings.Split(mavenActiveProfiles, ",")
+	r, _ := regexp.Compile("^native$|^\\?native$")
+
+	for _, profile := range mavenActiveProfilesAsSlice {
+		if r.MatchString(profile) {
+			logger.Bodyf("Maven native profile was detected in %s, activating native image", MavenConfigActiveProfiles)
+			return true
+		}
+	}
+	return false
 }
