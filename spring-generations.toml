@@ -1515,21 +1515,6 @@
     OSS = "2022-05-18"
 
   [[Projects.Generations]]
-    Commercial = "2023-04-30"
-    Name = "5.4.x"
-    OSS = "2021-12-31"
-
-  [[Projects.Generations]]
-    Commercial = "2023-04-30"
-    Name = "5.3.x"
-    OSS = "2021-12-31"
-
-  [[Projects.Generations]]
-    Commercial = "2023-04-30"
-    Name = "5.2.x"
-    OSS = "2021-12-31"
-
-  [[Projects.Generations]]
     Commercial = "2024-09-16"
     Name = "5.7.x"
     OSS = "2023-05-16"
@@ -1543,6 +1528,11 @@
     Commercial = "2025-03-21"
     Name = "6.0.x"
     OSS = "2023-11-21"
+
+  [[Projects.Generations]]
+    Commercial = "2025-09-15"
+    Name = "6.1.x"
+    OSS = "2024-05-15"
 
 [[Projects]]
   Name = "Spring Security Kerberos"
@@ -1590,14 +1580,14 @@
     OSS = "2022-05-19"
 
   [[Projects.Generations]]
-    Commercial = "2023-02-28"
-    Name = "2020.0.x"
-    OSS = "2021-10-29"
-
-  [[Projects.Generations]]
     Commercial = "2025-03-22"
     Name = "3.0.x"
     OSS = "2023-11-22"
+
+  [[Projects.Generations]]
+    Commercial = "2025-09-16"
+    Name = "3.1.x"
+    OSS = "2024-05-16"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
