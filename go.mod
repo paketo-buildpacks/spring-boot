@@ -8,7 +8,7 @@ require (
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.7
 	github.com/onsi/gomega v1.27.7
-	github.com/paketo-buildpacks/libjvm v1.42.0
+	github.com/paketo-buildpacks/libjvm v1.43.0
 	github.com/paketo-buildpacks/libpak v1.65.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/sclevine/spec v1.4.0
@@ -16,7 +16,7 @@ require (
 )
 
 require (
-	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/BurntSushi/toml v1.3.0 // indirect
 	github.com/creack/pty v1.1.18 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/h2non/filetype v1.1.3 // indirect

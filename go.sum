@@ -1,5 +1,5 @@
-github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
-github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/BurntSushi/toml v1.3.0 h1:Ws8e5YmnrGEHzZEzg0YvK/7COGYtTC5PbaH9oSSbgfA=
+github.com/BurntSushi/toml v1.3.0/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/buildpacks/libcnb v1.28.0 h1:iWK1tPKinlcXZaepTSCO9m/7uBevv12ERs4vZBwrSbY=
@@ -35,8 +35,8 @@ github.com/mitchellh/hashstructure/v2 v2.0.2/go.mod h1:MG3aRVU/N29oo/V/IhBX8GR/z
 github.com/onsi/ginkgo/v2 v2.9.5 h1:+6Hr4uxzP4XIUyAkg61dWBw8lb/gc4/X5luuxN/EC+Q=
 github.com/onsi/gomega v1.27.7 h1:fVih9JD6ogIiHUN6ePK7HJidyEDpWGVB5mzM7cWNXoU=
 github.com/onsi/gomega v1.27.7/go.mod h1:1p8OOlwo2iUUDsHnOrjE5UKYJ+e3W8eQ3qSlRahPmr4=
-github.com/paketo-buildpacks/libjvm v1.42.0 h1:xFKO9fBm7neQDN5Nvy0E2WgkG22pU/MZc1TfxDamDx0=
-github.com/paketo-buildpacks/libjvm v1.42.0/go.mod h1:+LWkDIcHLxuWx353tzPcnT3p0EXoJap1pa7dyZ9oDHo=
+github.com/paketo-buildpacks/libjvm v1.43.0 h1:RsIxureNAhLnhcGmky6t+0+vDZpBTnuRZ8s9Rf8Oo14=
+github.com/paketo-buildpacks/libjvm v1.43.0/go.mod h1:irPzwoqoKIJM8yaIHCC7aR4EbUjXzh1lpndiVIJ52n4=
 github.com/paketo-buildpacks/libpak v1.65.0 h1:31Cn9g4JlRsUV4kmEzJASQS1uUmmyP7lYzUojvgLJ3Q=
 github.com/paketo-buildpacks/libpak v1.65.0/go.mod h1:eqkZKq0RMnQKjVB2NCiQZagI6SaGBxc9LZ4wevR/NpY=
 github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1 h1:FyBdsRqqHH4LctMLL+BL2oGO+ONcIPwn96ctofCVtNE=
@@ -47,7 +47,7 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/sclevine/spec v1.4.0 h1:z/Q9idDcay5m5irkZ28M7PtQM4aOISzOpj4bUPkDee8=
 github.com/sclevine/spec v1.4.0/go.mod h1:LvpgJaFyvQzRvc1kaDs0bulYwzC70PbiYjC4QnFHkOM=
 github.com/stretchr/objx v0.5.0 h1:1zr/of2m5FGMsad5YfcqgdqdWrIhu+EBEJRhR1U7z/c=
-github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
+github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
 github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 h1:nIPpBwaJSVYIxUFsDv3M8ofmx9yWTog9BfvIu0q41lo=
 github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8/go.mod h1:HUYIGzjTL3rfEspMxjDjgmT5uz5wzYJKVo23qUhYTos=
 golang.org/x/net v0.10.0 h1:X2//UzNDwYmtCLn7To6G58Wr6f5ahEAQgKNzv9Y951M=
