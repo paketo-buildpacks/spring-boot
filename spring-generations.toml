@@ -1539,6 +1539,11 @@
   Slug = "spring-security-kerberos"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2025-10-05"
+    Name = "2.0.x"
+    OSS = "2024-06-05"
+
 [[Projects]]
   Name = "Spring Security OAuth"
   Slug = "spring-security-oauth"
