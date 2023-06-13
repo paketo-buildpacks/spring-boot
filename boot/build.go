@@ -121,6 +121,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
+	if _, ok, err := pr.Resolve("native-processed"); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve native-processed plan entry\n%w", err)
+	} else if ok {
+		buildNativeImage = true
+	}
+
 	if buildNativeImage {
 		// set CLASSPATH for native image build
 		classpathLayer, err := NewNativeImageClasspath(context.Application.Path, manifest)
