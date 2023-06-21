@@ -184,6 +184,11 @@
     Name = "4.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Circuit Breaker"
   Slug = "spring-cloud-circuitbreaker"
@@ -208,6 +213,11 @@
     Commercial = "2025-04-19"
     Name = "3.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "3.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring Cloud CLI"
@@ -274,6 +284,11 @@
     Name = "4.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Config"
   Slug = "spring-cloud-config"
@@ -298,6 +313,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring Cloud Connectors"
@@ -334,6 +354,11 @@
     Name = "4.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Contract"
   Slug = "spring-cloud-contract"
@@ -358,6 +383,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "spring-cloud-data"
@@ -409,6 +439,11 @@
     Name = "4.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Gateway"
   Slug = "spring-cloud-gateway"
@@ -433,6 +468,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring Cloud GCP"
@@ -464,6 +504,11 @@
     Name = "3.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "3.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Netflix"
   Slug = "spring-cloud-netflix"
@@ -488,6 +533,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring Cloud Open Service Broker"
@@ -518,6 +568,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring Cloud Pipelines"
@@ -578,6 +633,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring Cloud Stream Applications"
@@ -664,6 +724,11 @@
     Name = "3.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "3.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Vault"
   Slug = "spring-cloud-vault"
@@ -689,6 +754,11 @@
     Name = "4.0.x"
     OSS = "2023-12-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
+
 [[Projects]]
   Name = "Spring Cloud Zookeeper"
   Slug = "spring-cloud-zookeeper"
@@ -713,6 +783,11 @@
     Commercial = "2025-04-19"
     Name = "4.0.x"
     OSS = "2023-12-19"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-28"
+    Name = "4.1.x"
+    OSS = "2024-11-28"
 
 [[Projects]]
   Name = "Spring CredHub"
@@ -1453,6 +1528,11 @@
     Commercial = "2025-03-18"
     Name = "3.0.x"
     OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2025-09-11"
+    Name = "3.1.x"
+    OSS = "2024-05-11"
 
 [[Projects]]
   Name = "Spring Mobile"
