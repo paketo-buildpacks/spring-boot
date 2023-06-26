@@ -1655,11 +1655,6 @@
     OSS = "2023-05-18"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-17"
-    Name = "2021.1.x"
-    OSS = "2022-11-17"
-
-  [[Projects.Generations]]
     Commercial = "2023-09-19"
     Name = "2021.0.x"
     OSS = "2022-05-19"
@@ -1673,6 +1668,11 @@
     Commercial = "2025-09-16"
     Name = "3.1.x"
     OSS = "2024-05-16"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-17"
+    Name = "2021.1.x"
+    OSS = "2022-11-17"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
@@ -1750,9 +1750,9 @@
     OSS = "2023-05-04"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-05"
+    Commercial = "2025-02-18"
     Name = "3.2.x"
-    OSS = "2023-05-05"
+    OSS = "2023-11-18"
 
 [[Projects]]
   Name = "Spring Vault"
