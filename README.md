@@ -21,6 +21,10 @@ The buildpack will do the following:
 * When contributing to a JVM application:
     * Contributes [Spring Cloud Bindings][b] as an application dependency
       * This enables bindings-aware Spring Boot auto-configuration when [CNB bindings][c] are present during launch
+      * The version of the Spring Cloud Bindings library to install will be determined by (in order):
+        * An explicit value set in `BP_SPRING_CLOUD_BINDINGS_VERSION` by the user
+        * The Spring Boot version from  `<APPLICATION_ROOT>/META-INF/MANIFEST.MF`: Boot 2.x will install Spring Cloud Bindings v1, Boot 3.x will install Spring Cloud Bindings v2
+        * The default value for `BP_SPRING_CLOUD_BINDINGS_VERSION`
     * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Layers-Index` entry
       * Contributes application slices as defined by the layer's index
     * If the application is a reactive web application
@@ -39,6 +43,7 @@ The buildpack will do the following:
 | `$BP_SPRING_CLOUD_BINDINGS_DISABLED`  | Whether to contribute Spring Cloud Bindings support to the image at build time.  Defaults to false.                                                                                                                                                                     |
 | `$BPL_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to false.                                                               |
 | `$BPL_SPRING_CLOUD_BINDINGS_ENABLED`  | Deprecated in favour of `$BPL_SPRING_CLOUD_BINDINGS_DISABLED`. Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to true. |
+| `$BP_SPRING_CLOUD_BINDINGS_VERSION`  | Explicit version of Spring Cloud Bindings library to install.  Defaults to `1`.   
 
 ## Bindings
 The buildpack optionally accepts the following bindings:
