@@ -43,7 +43,7 @@ The buildpack will do the following:
 | `$BP_SPRING_CLOUD_BINDINGS_DISABLED`  | Whether to contribute Spring Cloud Bindings support to the image at build time.  Defaults to false.                                                                                                                                                                     |
 | `$BPL_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to false.                                                               |
 | `$BPL_SPRING_CLOUD_BINDINGS_ENABLED`  | Deprecated in favour of `$BPL_SPRING_CLOUD_BINDINGS_DISABLED`. Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to true. |
-| `$BP_SPRING_CLOUD_BINDINGS_VERSION`  | Explicit version of Spring Cloud Bindings library to install.  Defaults to `1`.   
+| `$BP_SPRING_CLOUD_BINDINGS_VERSION`  | Explicit version of Spring Cloud Bindings library to install. 
 
 ## Bindings
 The buildpack optionally accepts the following bindings:
