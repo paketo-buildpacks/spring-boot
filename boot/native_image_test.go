@@ -126,6 +126,10 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 			Expect(ioutil.WriteFile(filepath.Join(appDir, "META-INF", "native-image", "argfile"), []byte("file-data"), 0644)).To(Succeed())
 		})
 
+		it.After(func() {
+			Expect(os.RemoveAll(filepath.Join(appDir, "META-INF"))).To(Succeed())
+		})
+
 		it("ensures BP_NATIVE_IMAGE_BUILD_ARGUMENTS_FILE is set when argfile is found", func() {
 			layer, err := contributor.Contribute(layer)
 			Expect(err).NotTo(HaveOccurred())

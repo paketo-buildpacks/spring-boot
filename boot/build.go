@@ -24,8 +24,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/buildpacks/libcnb"
 	"github.com/magiconair/properties"
 	"github.com/paketo-buildpacks/libjvm"
@@ -40,6 +42,8 @@ const (
 	LabelImageVersion                  = "org.opencontainers.image.version"
 	LabelBootConfigurationMetadata     = "org.springframework.boot.spring-configuration-metadata.json"
 	LabelDataFlowConfigurationMetadata = "org.springframework.cloud.dataflow.spring-configuration-metadata.json"
+	SpringCloudBindingsBoot2		   = "1"
+	SpringCloudBindingsBoot3		   = "2"
 )
 
 type Build struct {
@@ -148,7 +152,16 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			result.Layers = append(result.Layers, h)
 			result.BOM.Entries = append(result.BOM.Entries, be)
 
-			dep, err := dr.Resolve("spring-cloud-bindings", "")
+			scbVer, scbSet := cr.Resolve("BP_SPRING_CLOUD_BINDINGS_VERSION")
+			if !scbSet {
+				scbVerFromBoot, err := getSCBVersion(version)
+				if err != nil{
+					return libcnb.BuildResult{}, fmt.Errorf("Unable to read the Spring Boot version from META-INF/MANIFEST.MF. Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
+				} 
+				scbVer = scbVerFromBoot
+			}
+
+			dep, err := dr.Resolve("spring-cloud-bindings", scbVer)
 			if err != nil {
 				return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
 			}
@@ -342,4 +355,26 @@ func FindExistingDependency(jars []libjvm.MavenJAR, dependencyName string) bool 
 		}
 	}
 	return false
+}
+
+func getSCBVersion (manifestVer string) (string, error) {
+	bootTwoConstraint, _ := semver.NewConstraint("<= 3.0.0")
+	bv, err := bootVersion(manifestVer)
+	if err != nil{
+		return SpringCloudBindingsBoot2, err
+	}
+	if bootTwoConstraint.Check(bv) {
+		return SpringCloudBindingsBoot2, nil
+	}
+	return SpringCloudBindingsBoot3, nil
+}
+
+func bootVersion (version string) (*semver.Version, error) {
+	pattern := regexp.MustCompile(`[\d]+(?:\.[\d]+(?:\.[\d]+)?)?`)
+	bootV := pattern.FindString(version)
+	semverBoot, err := semver.NewVersion(bootV)
+	if err != nil{
+		return nil, fmt.Errorf("unable to parse spring-boot version\n%w", err)
+	}
+	return semverBoot, nil
 }

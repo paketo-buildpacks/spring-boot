@@ -345,11 +345,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	context("set BP_SPRING_CLOUD_BINDINGS_DISABLED to true", func() {
 		it.Before(func() {
-			Expect(os.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")).To(Succeed())
-		})
-
-		it.After(func() {
-			Expect(os.Unsetenv(("BP_SPRING_CLOUD_BINDINGS_DISABLED"))).To(Succeed())
+			t.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")
 		})
 
 		it("contributes to the result for API 0.7+", func() {
@@ -507,6 +503,71 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 			Expect(result.BOM.Entries).To(HaveLen(1))
 			Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
+		})
+	})
+
+	context("when there are multiple Spring Cloud Binding versions", func() {
+		it.Before(func() {
+			ctx.Buildpack.Metadata = map[string]interface{}{
+				"dependencies": []map[string]interface{}{
+					{
+						"id":      "spring-cloud-bindings",
+						"version": "1.1.0",
+						"stacks":  []interface{}{"test-stack-id"},
+						"cpes":    []string{"cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"},
+						"purl":    "pkg:generic/springframework/spring-cloud-bindings@1.8.0",
+					},
+					{
+						"id":      "spring-cloud-bindings",
+						"version": "2.1.0",
+						"stacks":  []interface{}{"test-stack-id"},
+						"cpes":    []string{"cpe:2.3:a:vmware:spring_cloud_bindings:1.8.0:*:*:*:*:*:*:*"},
+						"purl":    "pkg:generic/springframework/spring-cloud-bindings@1.8.0",
+					},
+				},
+			}
+	    })
+
+		it("installs the correct bindings version based on the Spring Boot version in manifest (2.x)", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+						Spring-Boot-Version: 2.1.1
+						Spring-Boot-Classes: BOOT-INF/classes
+						Spring-Boot-Lib: BOOT-INF/lib
+						`), 0644)).To(Succeed())
+			
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			
+			Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("1.1.0"))
+
+		})
+
+		it("installs the correct bindings version based on the Spring Boot version in manifest (3.x)", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+						Spring-Boot-Version: 3.1.0
+						Spring-Boot-Classes: BOOT-INF/classes
+						Spring-Boot-Lib: BOOT-INF/lib
+						`), 0644)).To(Succeed())
+			
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			
+			Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
+
+		})
+
+		it("installs the correct bindings version based on the SCB Configuration Variable", func() {
+			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+						Spring-Boot-Version: 2.1.1
+						Spring-Boot-Classes: BOOT-INF/classes
+						Spring-Boot-Lib: BOOT-INF/lib
+						`), 0644)).To(Succeed())
+			t.Setenv("BP_SPRING_CLOUD_BINDINGS_VERSION", "2")
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			
+			Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
+
 		})
 	})
 }
