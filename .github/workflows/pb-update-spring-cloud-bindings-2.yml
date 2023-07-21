@@ -47,6 +47,7 @@ jobs:
                 artifact_id: spring-cloud-bindings
                 group_id: org.springframework.cloud
                 uri: https://repo1.maven.org/maven2
+                version_regex: ^2\.[\d]+\.[\d]+$
             - name: Update Buildpack Dependency
               id: buildpack
               run: |
@@ -95,7 +96,7 @@ jobs:
                 SHA256: ${{ steps.dependency.outputs.sha256 }}
                 URI: ${{ steps.dependency.outputs.uri }}
                 VERSION: ${{ steps.dependency.outputs.version }}
-                VERSION_PATTERN: '[\d]+\.[\d]+\.[\d]+'
+                VERSION_PATTERN: ^2\.[\d]+\.[\d]+
             - uses: peter-evans/create-pull-request@v5
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
