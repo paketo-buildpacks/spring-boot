@@ -48,7 +48,7 @@ api = "0.7"
     description = "whether to auto-configure Spring Boot environment properties from bindings"
     launch = true
     name = "BPL_SPRING_CLOUD_BINDINGS_DISABLED"
-  
+
   [[metadata.configurations]]
     build = true
     default = "1"
@@ -74,7 +74,7 @@ api = "0.7"
     id = "spring-cloud-bindings"
     name = "Spring Cloud Bindings"
     purl = "pkg:generic/springframework/spring-cloud-bindings@2.0.0"
-    sha256 = ""
+    sha256 = "19264ab3b27b8e9bf4974f2a876b78d86ad564cf2405b2aa61ffefa9b0de1184"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
     uri = "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-bindings/2.0.0/spring-cloud-bindings-2.0.0.jar"
     version = "2.0.0"
