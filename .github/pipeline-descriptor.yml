@@ -21,7 +21,17 @@ docker_credentials:
 
 dependencies:
 - id:   spring-cloud-bindings
+  name: Spring Cloud Bindings 1
   uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  version_regex: "^1\\.[\\d]+\\.[\\d]+$"
+  with:
+    uri:         https://repo1.maven.org/maven2
+    group_id:    org.springframework.cloud
+    artifact_id: spring-cloud-bindings
+- id:   spring-cloud-bindings
+  name: Spring Cloud Bindings 2
+  uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
+  version_regex: "^2\\.[\\d]+\\.[\\d]+$"
   with:
     uri:         https://repo1.maven.org/maven2
     group_id:    org.springframework.cloud
