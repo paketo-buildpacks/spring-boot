@@ -74,10 +74,10 @@ api = "0.7"
     id = "spring-cloud-bindings"
     name = "Spring Cloud Bindings"
     purl = "pkg:generic/springframework/spring-cloud-bindings@2.0.0"
-    sha256 = "19264ab3b27b8e9bf4974f2a876b78d86ad564cf2405b2aa61ffefa9b0de1184"
+    sha256 = "941e3cf7aeda8ac37d4301c630bbab68e226e05c011a4a9245d7d4e8fac949dc"
     stacks = ["io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"]
-    uri = "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-bindings/2.0.0/spring-cloud-bindings-2.0.0.jar"
-    version = "2.0.0"
+    uri = "https://repo1.maven.org/maven2/org/springframework/cloud/spring-cloud-bindings/2.0.1/spring-cloud-bindings-2.0.1.jar"
+    version = "2.0.1"
 
     [[metadata.dependencies.licenses]]
       type = "Apache-2.0"
