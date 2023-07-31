@@ -33,12 +33,12 @@ github.com/mattn/go-shellwords v1.0.12/go.mod h1:EZzvwXDESEeg03EKmM+RmDnNOPKG4lL
 github.com/mitchellh/hashstructure/v2 v2.0.2 h1:vGKWl0YJqUNxE8d+h8f6NJLcCJrgbhC4NcD46KavDd4=
 github.com/mitchellh/hashstructure/v2 v2.0.2/go.mod h1:MG3aRVU/N29oo/V/IhBX8GR/zz4kQkprJgF2EVszyDE=
 github.com/onsi/ginkgo/v2 v2.11.0 h1:WgqUCUt/lT6yXoQ8Wef0fsNn5cAuMK7+KT9UFRz2tcU=
-github.com/onsi/gomega v1.27.9 h1:qIyVWbOsvQEye2QCqLsNSeH/5L1RS9vS382erEWfT3o=
-github.com/onsi/gomega v1.27.9/go.mod h1:RsS8tutOdbdgzbPtzzATp12yT7kM5I5aElG3evPbQ0M=
+github.com/onsi/gomega v1.27.10 h1:naR28SdDFlqrG6kScpT8VWpu1xWY5nJRCF3XaYyBjhI=
+github.com/onsi/gomega v1.27.10/go.mod h1:RsS8tutOdbdgzbPtzzATp12yT7kM5I5aElG3evPbQ0M=
 github.com/paketo-buildpacks/libjvm v1.43.2 h1:ZIXVMe6UH+CyQV1n1l1tyPVbSZvNQGDqfjdEtEyyCv0=
 github.com/paketo-buildpacks/libjvm v1.43.2/go.mod h1:bzYXHm3XD4ZIbYhFP/21QjFjBlRtLN7KllxqOK/71Yg=
-github.com/paketo-buildpacks/libpak v1.66.1 h1:lHi2ueYzzyQfk34n3K3d7yb3WSaubth0bhHI+BzNX0w=
-github.com/paketo-buildpacks/libpak v1.66.1/go.mod h1:Ca654P3i4x9hqvDm5glzvNxmqKoQV5UB08JrZtdK5V8=
+github.com/paketo-buildpacks/libpak v1.66.2 h1:ovvxoSMa+P2O6FwPnqGVwTeFqJZXwmq2b4+Wpeuk1xY=
+github.com/paketo-buildpacks/libpak v1.66.2/go.mod h1:m9ip2UPVCcrxK8TN8gGQ2WtJnjzBT84JFNl96mzYTwk=
 github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1 h1:FyBdsRqqHH4LctMLL+BL2oGO+ONcIPwn96ctofCVtNE=
 github.com/pavlo-v-chernykh/keystore-go/v4 v4.4.1/go.mod h1:lAVhWwbNaveeJmxrxuSTxMgKpF6DjnuVpn6T8WiBwYQ=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
