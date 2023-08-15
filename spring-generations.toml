@@ -1835,9 +1835,9 @@
     OSS = "2018-10-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-21"
+    Commercial = "2026-02-23"
     Name = "4.0.x"
-    OSS = "2023-11-21"
+    OSS = "2024-11-23"
 
 [[Projects]]
   Name = "Spring XD"
