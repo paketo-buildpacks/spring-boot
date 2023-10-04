@@ -71,7 +71,9 @@ jobs:
                   --purl-pattern "${PURL_PATTERN:-}" \
                   --purl "${PURL:-}" \
                   --uri "${URI}" \
-                  --sha256 "${SHA256}"
+                  --sha256 "${SHA256}" \
+                  --source "${SOURCE_URI}" \
+                  --source-sha256 "${SOURCE_SHA256}"
 
                 git add buildpack.toml
                 git checkout -- .
@@ -94,6 +96,8 @@ jobs:
                 PURL: ${{ steps.dependency.outputs.purl }}
                 PURL_PATTERN: ""
                 SHA256: ${{ steps.dependency.outputs.sha256 }}
+                SOURCE_SHA256: ${{ steps.dependency.outputs.source_sha256 }}
+                SOURCE_URI: ${{ steps.dependency.outputs.source }}
                 URI: ${{ steps.dependency.outputs.uri }}
                 VERSION: ${{ steps.dependency.outputs.version }}
                 VERSION_PATTERN: ^2\.[\d]+\.[\d]+
