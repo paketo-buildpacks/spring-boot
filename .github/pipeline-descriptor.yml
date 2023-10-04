@@ -29,6 +29,7 @@ dependencies:
     group_id:    org.springframework.cloud
     artifact_id: spring-cloud-bindings
     version_regex: "^1\\.[\\d]+\\.[\\d]+$"
+    source_classifier: sources
 - id:   spring-cloud-bindings
   name: Spring Cloud Bindings 2
   uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
@@ -38,3 +39,4 @@ dependencies:
     group_id:    org.springframework.cloud
     artifact_id: spring-cloud-bindings
     version_regex: "^2\\.[\\d]+\\.[\\d]+$"
+    source_classifier: sources
