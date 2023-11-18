@@ -29,6 +29,11 @@
     Name = "3.0.x"
     OSS = "2023-11-21"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-20"
+    Name = "3.1.x"
+    OSS = "2024-11-20"
+
 [[Projects]]
   Name = "Spring for Android"
   Slug = "spring-android"
@@ -120,9 +125,9 @@
     OSS = "2022-11-24"
 
   [[Projects.Generations]]
-    Commercial = "2025-08-18"
+    Commercial = "2025-08-24"
     Name = "2.7.x"
-    OSS = "2023-11-18"
+    OSS = "2023-11-24"
 
   [[Projects.Generations]]
     Commercial = "2025-02-24"
@@ -424,6 +429,11 @@
     Name = "2.10.x"
     OSS = "2023-11-18"
 
+  [[Projects.Generations]]
+    Commercial = "2025-09-20"
+    Name = "2.11.x"
+    OSS = "2024-09-20"
+
 [[Projects]]
   Name = "Spring Cloud Function"
   Slug = "spring-cloud-function"
@@ -664,6 +674,11 @@
     Name = "2021.1.x"
     OSS = "2023-02-24"
 
+  [[Projects.Generations]]
+    Commercial = "2026-02-28"
+    Name = "2022.0.x"
+    OSS = "2024-10-28"
+
 [[Projects]]
   Name = "Spring Cloud Stream Kafka Binder"
   Slug = "spring-cloud-stream-binder-kafka"
@@ -884,6 +899,11 @@
     Name = "4.1.x"
     OSS = "2024-05-12"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "4.2.x"
+    OSS = "2024-11-17"
+
 [[Projects]]
   Name = "Spring Data Couchbase"
   Slug = "spring-data-couchbase"
@@ -1039,6 +1059,11 @@
     Name = "3.1.x"
     OSS = "2024-05-12"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "3.2.x"
+    OSS = "2024-11-17"
+
 [[Projects]]
   Name = "Spring Data JDBC Extensions"
   Slug = "spring-data-jdbc-ext"
@@ -1088,6 +1113,11 @@
     Commercial = "2025-09-12"
     Name = "3.1.x"
     OSS = "2024-05-12"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "3.2.x"
+    OSS = "2024-11-17"
 
 [[Projects]]
   Name = "Spring Data LDAP"
@@ -1139,6 +1169,11 @@
     Name = "3.1.x"
     OSS = "2024-05-12"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "3.2.x"
+    OSS = "2024-11-17"
+
 [[Projects]]
   Name = "Spring Data MongoDB"
   Slug = "spring-data-mongodb"
@@ -1189,6 +1224,11 @@
     Name = "4.1.x"
     OSS = "2024-05-12"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "4.2.x"
+    OSS = "2024-11-17"
+
 [[Projects]]
   Name = "Spring Data Neo4j"
   Slug = "spring-data-neo4j"
@@ -1233,6 +1273,11 @@
     Commercial = "2025-09-12"
     Name = "3.1.x"
     OSS = "2024-05-12"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "3.2.x"
+    OSS = "2024-11-17"
 
 [[Projects]]
   Name = "Spring Data Redis"
@@ -1284,6 +1329,11 @@
     Name = "3.1.x"
     OSS = "2024-05-12"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "3.2.x"
+    OSS = "2024-11-17"
+
 [[Projects]]
   Name = "Spring Data REST"
   Slug = "spring-data-rest"
@@ -1334,10 +1384,15 @@
     Name = "4.1.x"
     OSS = "2024-05-12"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "4.2.x"
+    OSS = "2024-11-17"
+
 [[Projects]]
   Name = "Spring Data for Apache Solr"
   Slug = "spring-data-solr"
-  Status = "COMMUNITY"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Commercial = "2023-02-28"
@@ -1410,9 +1465,9 @@
     OSS = "2023-11-22"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-02-28"
     Name = "1.2.x"
-    OSS = "2024-05-17"
+    OSS = "2024-11-30"
 
 [[Projects]]
   Name = "Spring for Apache Hadoop"
@@ -1529,6 +1584,11 @@
     Name = "3.0.x"
     OSS = "2023-11-21"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-20"
+    Name = "3.1.x"
+    OSS = "2024-11-20"
+
 [[Projects]]
   Name = "Spring LDAP"
   Slug = "spring-ldap"
@@ -1570,6 +1630,11 @@
   Status = "INCUBATING"
 
 [[Projects]]
+  Name = "Spring for Apache Pulsar"
+  Slug = "spring-pulsar"
+  Status = "ACTIVE"
+
+[[Projects]]
   Name = "Spring REST Docs"
   Slug = "spring-restdocs"
   Status = "ACTIVE"
@@ -1585,9 +1650,9 @@
     OSS = "2023-11-18"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-21"
+    Commercial = "2026-02-16"
     Name = "3.0.x"
-    OSS = "2023-11-21"
+    OSS = "2024-11-18"
 
 [[Projects]]
   Name = "Spring Roo"
@@ -1799,6 +1864,11 @@
     Name = "3.0.x"
     OSS = "2023-11-25"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-20"
+    Name = "3.1.x"
+    OSS = "2024-11-20"
+
 [[Projects]]
   Name = "Spring Web Flow"
   Slug = "spring-webflow"
@@ -1808,11 +1878,6 @@
   Name = "Spring Web Services"
   Slug = "spring-ws"
   Status = "ACTIVE"
-
-  [[Projects.Generations]]
-    Commercial = "2018-12-29"
-    Name = "2.4.x"
-    OSS = "2017-08-29"
 
   [[Projects.Generations]]
     Commercial = "2025-03-18"
