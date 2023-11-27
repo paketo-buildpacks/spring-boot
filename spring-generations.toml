@@ -20,9 +20,9 @@
     OSS = "2022-05-19"
 
   [[Projects.Generations]]
-    Commercial = "2026-12-31"
+    Commercial = "2025-08-24"
     Name = "2.4.x"
-    OSS = "2024-12-31"
+    OSS = "2023-11-24"
 
   [[Projects.Generations]]
     Commercial = "2025-03-21"
@@ -45,11 +45,6 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2027-03-21"
-    Name = "1.0.x"
-    OSS = "2025-11-21"
-
-  [[Projects.Generations]]
     Commercial = "2025-11-21"
     Name = "0.4.x"
     OSS = "2025-11-21"
@@ -58,6 +53,16 @@
     Commercial = "2025-09-16"
     Name = "1.1.x"
     OSS = "2024-05-16"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-21"
+    Name = "1.2.x"
+    OSS = "2024-11-21"
+
+  [[Projects.Generations]]
+    Commercial = "2025-03-21"
+    Name = "1.0.x"
+    OSS = "2023-11-21"
 
 [[Projects]]
   Name = "Spring Batch"
@@ -78,6 +83,11 @@
     Commercial = "2022-09-20"
     Name = "4.2.x"
     OSS = "2021-05-20"
+
+  [[Projects.Generations]]
+    Commercial = "2026-02-22"
+    Name = "5.1.x"
+    OSS = "2024-11-22"
 
 [[Projects]]
   Name = "Spring Boot"
@@ -1520,24 +1530,19 @@
     OSS = "2021-10-28"
 
   [[Projects.Generations]]
-    Commercial = "2026-12-31"
+    Commercial = "2025-08-21"
     Name = "5.5.x"
-    OSS = "2024-12-31"
+    OSS = "2023-11-21"
 
   [[Projects.Generations]]
-    Commercial = "2022-02-01"
-    Name = "5.2.x"
-    OSS = "2020-10-01"
-
-  [[Projects.Generations]]
-    Commercial = "2025-03-22"
+    Commercial = "2025-03-21"
     Name = "6.0.x"
-    OSS = "2023-11-22"
+    OSS = "2023-11-21"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-16"
+    Commercial = "2025-08-19"
     Name = "6.1.x"
-    OSS = "2024-05-16"
+    OSS = "2024-05-21"
 
   [[Projects.Generations]]
     Commercial = "2026-03-21"
@@ -1570,14 +1575,14 @@
     OSS = "2022-05-19"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-15"
+    Commercial = "2025-08-24"
     Name = "2.8.x"
     OSS = "2022-11-15"
 
   [[Projects.Generations]]
-    Commercial = "2026-12-31"
+    Commercial = "2025-08-24"
     Name = "2.9.x"
-    OSS = "2024-12-31"
+    OSS = "2023-11-24"
 
   [[Projects.Generations]]
     Commercial = "2025-03-21"
@@ -1634,6 +1639,11 @@
   Slug = "spring-pulsar"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2026-03-20"
+    Name = "1.0.x"
+    OSS = "2024-11-20"
+
 [[Projects]]
   Name = "Spring REST Docs"
   Slug = "spring-restdocs"
@@ -1647,7 +1657,7 @@
   [[Projects.Generations]]
     Commercial = "2025-08-18"
     Name = "2.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-11-20"
 
   [[Projects.Generations]]
     Commercial = "2026-02-16"
@@ -1698,6 +1708,11 @@
     Commercial = "2025-09-15"
     Name = "6.1.x"
     OSS = "2024-05-15"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-20"
+    Name = "6.2.x"
+    OSS = "2024-11-20"
 
 [[Projects]]
   Name = "Spring Security Kerberos"
@@ -1758,6 +1773,11 @@
     Commercial = "2024-03-17"
     Name = "2021.1.x"
     OSS = "2022-11-17"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-21"
+    Name = "3.2.x"
+    OSS = "2024-11-21"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
