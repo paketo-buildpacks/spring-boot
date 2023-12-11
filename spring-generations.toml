@@ -10,11 +10,6 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2022-08-19"
-    Name = "2.2.x"
-    OSS = "2020-10-01"
-
-  [[Projects.Generations]]
     Commercial = "2023-08-24"
     Name = "2.3.x"
     OSS = "2022-05-19"
@@ -27,7 +22,7 @@
   [[Projects.Generations]]
     Commercial = "2025-03-21"
     Name = "3.0.x"
-    OSS = "2023-11-21"
+    OSS = "2024-05-21"
 
   [[Projects.Generations]]
     Commercial = "2026-03-20"
@@ -1587,7 +1582,7 @@
   [[Projects.Generations]]
     Commercial = "2025-03-21"
     Name = "3.0.x"
-    OSS = "2023-11-21"
+    OSS = "2024-05-21"
 
   [[Projects.Generations]]
     Commercial = "2026-03-20"
@@ -1858,6 +1853,11 @@
     Commercial = "2025-08-18"
     Name = "3.2.x"
     OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2026-04-04"
+    Name = "4.0.x"
+    OSS = "2024-12-04"
 
 [[Projects]]
   Name = "Spring Vault"
