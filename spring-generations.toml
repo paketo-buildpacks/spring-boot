@@ -569,6 +569,31 @@
   Slug = "spring-cloud-open-service-broker"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2026-02-10"
+    Name = "4.1.x"
+    OSS = "2024-10-10"
+
+  [[Projects.Generations]]
+    Commercial = "2025-08-14"
+    Name = "4.0.x"
+    OSS = "2024-04-14"
+
+  [[Projects.Generations]]
+    Commercial = "2025-06-01"
+    Name = "3.6.x"
+    OSS = "2024-02-01"
+
+  [[Projects.Generations]]
+    Commercial = "2024-06-07"
+    Name = "3.5.x"
+    OSS = "2023-02-07"
+
+  [[Projects.Generations]]
+    Commercial = "2024-04-10"
+    Name = "3.4.x"
+    OSS = "2022-12-10"
+
 [[Projects]]
   Name = "Spring Cloud OpenFeign"
   Slug = "spring-cloud-openfeign"
@@ -1898,6 +1923,11 @@
   Name = "Spring Web Flow"
   Slug = "spring-webflow"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2025-11-12"
+    Name = "3.0.0"
+    OSS = "2024-07-12"
 
 [[Projects]]
   Name = "Spring Web Services"
