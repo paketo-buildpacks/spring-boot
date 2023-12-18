@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -42,8 +43,8 @@ const (
 	LabelImageVersion                  = "org.opencontainers.image.version"
 	LabelBootConfigurationMetadata     = "org.springframework.boot.spring-configuration-metadata.json"
 	LabelDataFlowConfigurationMetadata = "org.springframework.cloud.dataflow.spring-configuration-metadata.json"
-	SpringCloudBindingsBoot2		   = "1"
-	SpringCloudBindingsBoot3		   = "2"
+	SpringCloudBindingsBoot2           = "1"
+	SpringCloudBindingsBoot3           = "2"
 )
 
 type Build struct {
@@ -57,13 +58,43 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	version, ok := manifest.Get("Spring-Boot-Version")
+	cds, _ := sherpa.FileExists("run-app.jar")
+	result := libcnb.NewBuildResult()
+
+	if cds {
+		// cds specific
+		b.Logger.Title(context.Buildpack)
+		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-class-data-sharing")
+		h.Logger = b.Logger
+
+		// add labels
+		result.Labels, err = labels(context, manifest)
+		if err != nil {
+			return libcnb.BuildResult{}, err
+		}
+
+		result.Layers = append(result.Layers, h)
+		result.BOM.Entries = append(result.BOM.Entries, be)
+
+		dc, err := libpak.NewDependencyCache(context)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
+		}
+		dc.Logger = b.Logger
+		bindingsLayer := NewSpringClassDataSharing(dc)
+		bindingsLayer.Logger = b.Logger
+		result.Layers = append(result.Layers, bindingsLayer)
+		result.BOM.Entries = append(result.BOM.Entries, be)
+		return result, nil
+	}
+
 	if !ok {
 		// this isn't a boot app, return without printing title
 		return libcnb.BuildResult{}, nil
 	}
+	fmt.Printf("passed spring detection")
 
 	b.Logger.Title(context.Buildpack)
-	result := libcnb.NewBuildResult()
 
 	pr := libpak.PlanEntryResolver{Plan: context.Plan}
 
@@ -92,7 +123,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	// add dependencies to BOM
 	lib, ok := manifest.Get("Spring-Boot-Lib")
 	if !ok {
-		return libcnb.BuildResult{}, fmt.Errorf("manifest does not container Spring-Boot-Lib")
+		return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Lib")
 	}
 	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
 	if err != nil {
@@ -155,9 +186,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			scbVer, scbSet := cr.Resolve("BP_SPRING_CLOUD_BINDINGS_VERSION")
 			if !scbSet {
 				scbVerFromBoot, err := getSCBVersion(version)
-				if err != nil{
+				if err != nil {
 					return libcnb.BuildResult{}, fmt.Errorf("Unable to read the Spring Boot version from META-INF/MANIFEST.MF. Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
-				} 
+				}
 				scbVer = scbVerFromBoot
 			}
 
@@ -357,10 +388,10 @@ func FindExistingDependency(jars []libjvm.MavenJAR, dependencyName string) bool 
 	return false
 }
 
-func getSCBVersion (manifestVer string) (string, error) {
+func getSCBVersion(manifestVer string) (string, error) {
 	bootTwoConstraint, _ := semver.NewConstraint("<= 3.0.0")
 	bv, err := bootVersion(manifestVer)
-	if err != nil{
+	if err != nil {
 		return SpringCloudBindingsBoot2, err
 	}
 	if bootTwoConstraint.Check(bv) {
@@ -369,11 +400,11 @@ func getSCBVersion (manifestVer string) (string, error) {
 	return SpringCloudBindingsBoot3, nil
 }
 
-func bootVersion (version string) (*semver.Version, error) {
+func bootVersion(version string) (*semver.Version, error) {
 	pattern := regexp.MustCompile(`[\d]+(?:\.[\d]+(?:\.[\d]+)?)?`)
 	bootV := pattern.FindString(version)
 	semverBoot, err := semver.NewVersion(bootV)
-	if err != nil{
+	if err != nil {
 		return nil, fmt.Errorf("unable to parse spring-boot version\n%w", err)
 	}
 	return semverBoot, nil
