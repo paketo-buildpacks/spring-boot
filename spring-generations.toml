@@ -669,6 +669,31 @@
   Slug = "spring-cloud-skipper"
   Status = "ACTIVE"
 
+  [[Projects.Generations]]
+    Commercial = "2022-11-30"
+    Name = "2.7.x"
+    OSS = "2021-11-30"
+
+  [[Projects.Generations]]
+    Commercial = "2023-06-11"
+    Name = "2.8.x"
+    OSS = "2022-06-11"
+
+  [[Projects.Generations]]
+    Commercial = "2023-12-12"
+    Name = "2.9.x"
+    OSS = "2022-10-12"
+
+  [[Projects.Generations]]
+    Commercial = "2024-11-18"
+    Name = "2.10.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2025-09-20"
+    Name = "2.11.x"
+    OSS = "2024-09-20"
+
 [[Projects]]
   Name = "Spring Cloud Sleuth"
   Slug = "spring-cloud-sleuth"
@@ -904,10 +929,45 @@
     Name = "3.0.x"
     OSS = "2024-02-02"
 
+  [[Projects.Generations]]
+    Commercial = "2026-02-10"
+    Name = "3.1.x"
+    OSS = "2024-10-10"
+
 [[Projects]]
   Name = "Spring Data"
   Slug = "spring-data"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2026-03-17"
+    Name = "3.2.x"
+    OSS = "2024-11-17"
+
+  [[Projects.Generations]]
+    Commercial = "2025-09-12"
+    Name = "3.1.x"
+    OSS = "2024-05-12"
+
+  [[Projects.Generations]]
+    Commercial = "2025-02-24"
+    Name = "3.0.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2025-08-18"
+    Name = "2.7.x"
+    OSS = "2023-11-18"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-12"
+    Name = "2.6.x"
+    OSS = "2022-11-12"
+
+  [[Projects.Generations]]
+    Commercial = "2023-08-14"
+    Name = "2.5.x"
+    OSS = "2022-04-14"
 
 [[Projects]]
   Name = "Spring Data for Apache Cassandra"
@@ -1833,6 +1893,21 @@
   Name = "Spring Session for Apache Geode"
   Slug = "spring-session-data-geode"
   Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Commercial = "2023-08-14"
+    Name = "2.5.x"
+    OSS = "2022-04-14"
+
+  [[Projects.Generations]]
+    Commercial = "2024-03-12"
+    Name = "2.6.x"
+    OSS = "2022-11-12"
+
+  [[Projects.Generations]]
+    Commercial = "2025-08-18"
+    Name = "2.7.x"
+    OSS = "2023-11-18"
 
 [[Projects]]
   Name = "Spring Shell"
