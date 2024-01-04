@@ -1929,6 +1929,11 @@
     Name = "3.1.x"
     OSS = "2024-05-25"
 
+  [[Projects.Generations]]
+    Commercial = "2026-05-03"
+    Name = "3.2.x"
+    OSS = "2025-01-03"
+
 [[Projects]]
   Name = "Spring Social"
   Slug = "spring-social"
