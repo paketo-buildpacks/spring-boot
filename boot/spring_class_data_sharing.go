@@ -18,28 +18,33 @@ package boot
 
 import (
 	"fmt"
-	"github.com/buildpacks/libcnb"
-	"github.com/paketo-buildpacks/libpak"
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/spring-boot/v5/helper"
 	"log"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/buildpacks/libcnb"
+	"github.com/paketo-buildpacks/libpak"
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/effect"
 )
 
 type SpringClassDataSharing struct {
 	Dependency       libpak.BuildpackDependency
 	LayerContributor libpak.LayerContributor
 	Logger           bard.Logger
+	Executor         effect.Executor
+	AppPath		 string
 }
 
-func NewSpringClassDataSharing(cache libpak.DependencyCache) SpringClassDataSharing {
+func NewSpringClassDataSharing(cache libpak.DependencyCache, appPath string) SpringClassDataSharing {
 	contributor := libpak.NewLayerContributor("spring-class-data-sharing", cache, libcnb.LayerTypes{
-		Launch: true,
+		Build: true,
 	})
 	return SpringClassDataSharing{
 		LayerContributor: contributor,
+		Executor: effect.NewExecutor(),
+		AppPath: appPath,
 	}
 }
 
@@ -47,19 +52,29 @@ func (s SpringClassDataSharing) Contribute(layer libcnb.Layer) (libcnb.Layer, er
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 		s.Logger.Body("Those are the files we have in the workspace BEFORE the training run", layer.Path)
-		helper.StartOSCommand("", "ls", "-al", "./")
-		helper.StartOSCommand("TZ=UTC", "find", "./", "-exec", "touch", "-t", "198001010000.01", "{}", ";")
-		s.Logger.Body("Launching training run for CDS app", layer.Path)
-		helper.StartOSCommand("", "/layers/paketo-buildpacks_oracle/jdk/bin/java",
-			"-Dspring.aot.enabled=true",
+		if err := s.Executor.Execute(effect.Execution{
+			Command: "find",
+			Env: []string{"TZ=UTC"},
+			Args: []string{"./", "-exec", "touch", "-t", "198001010000.01", "{}", ";"},
+			Dir:     s.AppPath,
+			Stdout:  s.Logger.InfoWriter(),
+			Stderr:  s.Logger.InfoWriter(),
+		}); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
+		}
+
+		if err := s.Executor.Execute(effect.Execution{
+			Command: "java",
+			Args: []string{"-Dspring.aot.enabled=true",
 			"-Dspring.context.exit=onRefresh",
 			"-XX:ArchiveClassesAtExit=application.jsa",
-			"-jar", "run-app.jar")
-
-		s.Logger.Body("Those are the files we have in the workspace AFTER the training run", layer.Path)
-		helper.StartOSCommand("", "ls", "-al", "./")
-		helper.StartOSCommand("", "ls", "-al", "./application")
-		helper.StartOSCommand("", "ls", "-al", "./dependencies")
+			"-jar", "run-app.jar"},
+			Dir:     s.AppPath,
+			Stdout:  s.Logger.InfoWriter(),
+			Stderr:  s.Logger.InfoWriter(),
+		}); err != nil {
+			return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
+		}
 		return layer, nil
 	})
 	if err != nil {
