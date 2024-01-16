@@ -57,7 +57,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
 	}
 
-	version, ok := manifest.Get("Spring-Boot-Version")
 	cds, _ := sherpa.FileExists("run-app.jar")
 	result := libcnb.NewBuildResult()
 
@@ -88,6 +87,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return result, nil
 	}
 
+	version, ok := manifest.Get("Spring-Boot-Version")
 	if !ok {
 		// this isn't a boot app, return without printing title
 		return libcnb.BuildResult{}, nil
