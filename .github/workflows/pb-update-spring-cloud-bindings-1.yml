@@ -9,7 +9,7 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
-            - uses: actions/setup-go@v4
+            - uses: actions/setup-go@v5
               with:
                 go-version: "1.20"
             - name: Install update-buildpack-dependency
@@ -35,12 +35,12 @@ jobs:
                   --show-error \
                   --silent \
                   --output "${HOME}"/bin/yj \
-                  "https://github.com/sclevine/yj/releases/download/v${YJ_VERSION}/yj-linux"
+                  "https://github.com/sclevine/yj/releases/download/v${YJ_VERSION}/yj-linux-amd64"
 
                 chmod +x "${HOME}"/bin/yj
               env:
-                YJ_VERSION: 5.0.0
-            - uses: actions/checkout@v3
+                YJ_VERSION: 5.1.0
+            - uses: actions/checkout@v4
             - id: dependency
               uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
               with:
@@ -56,15 +56,17 @@ jobs:
 
                 set -euo pipefail
 
-                OLD_VERSION=$(yj -tj < buildpack.toml | jq -r "
-                  .metadata.dependencies[] |
-                  select( .id == env.ID ) |
-                  select( .version | test( env.VERSION_PATTERN ) ) |
-                  .version")
+                if [ -z "${ARCH}" ]; then
+                  ARCH="amd64"
+                fi
+
+                OLD_VERSION=$(yj -tj < buildpack.toml | \
+                  jq -r ".metadata.dependencies[] | select( .id == env.ID ) | select( .version | test( env.VERSION_PATTERN ) ) | select( .purl | contains( env.ARCH ) ) | .version")
 
                 update-buildpack-dependency \
                   --buildpack-toml buildpack.toml \
                   --id "${ID}" \
+                  --arch "${ARCH}" \
                   --version-pattern "${VERSION_PATTERN}" \
                   --version "${VERSION}" \
                   --cpe-pattern "${CPE_PATTERN:-}" \
@@ -91,6 +93,7 @@ jobs:
                 echo "new-version=${VERSION}" >> "$GITHUB_OUTPUT"
                 echo "version-label=${LABEL}" >> "$GITHUB_OUTPUT"
               env:
+                ARCH: ""
                 CPE: ${{ steps.dependency.outputs.cpe }}
                 CPE_PATTERN: ""
                 ID: spring-cloud-bindings
