@@ -14,7 +14,7 @@ jobs:
         runs-on:
             - ubuntu-latest
         steps:
-            - uses: actions/setup-go@v4
+            - uses: actions/setup-go@v5
               with:
                 go-version: "1.20"
             - name: Install octo
@@ -24,7 +24,7 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/pipeline-builder/cmd/octo@latest
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Update Pipeline
               id: pipeline
               run: |
