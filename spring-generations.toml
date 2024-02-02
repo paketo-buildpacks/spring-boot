@@ -40,11 +40,6 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2025-11-21"
-    Name = "0.4.x"
-    OSS = "2025-11-21"
-
-  [[Projects.Generations]]
     Commercial = "2025-09-16"
     Name = "1.1.x"
     OSS = "2024-05-16"
@@ -282,7 +277,7 @@
 [[Projects]]
   Name = "Spring Cloud for Cloud Foundry"
   Slug = "spring-cloud-cloudfoundry"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Commercial = "2022-03-26"
@@ -367,7 +362,7 @@
 [[Projects]]
   Name = "Spring Cloud Connectors"
   Slug = "spring-cloud-connectors"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Commercial = "2022-12-01"
@@ -652,7 +647,7 @@
 [[Projects]]
   Name = "Spring Cloud Pipelines"
   Slug = "spring-cloud-pipelines"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
 [[Projects]]
   Name = "Spring Cloud Security"
