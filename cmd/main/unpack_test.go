@@ -292,3 +292,27 @@ func CloseOrPanic(f io.Closer) func() {
 		}
 	}
 }
+
+func resetAllFilesMtimeAndATime(root string, date time.Time) ([]string, error) {
+	println("Entering resetAllFIles")
+	var files []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if !info.IsDir() {
+			println(path)
+			file, err := os.Open(path)
+			if err != nil {
+				log.Printf("Could not open file: %s", path)
+			}
+			sherpa.CopyFile(file, fmt.Sprintf("%s.bak", path))
+
+			if err := os.Chtimes(path, date, date); err != nil {
+				log.Printf("Could not update atime and mtime for %s\n", fmt.Sprintf("%s.bak", path))
+			}
+			os.Remove(path)
+			os.Rename(fmt.Sprintf("%s.bak", path), path)
+			files = append(files, path)
+		}
+		return nil
+	})
+	return files, err
+}

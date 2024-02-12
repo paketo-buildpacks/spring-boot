@@ -19,40 +19,43 @@ package helper
 import (
 	"bytes"
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/sherpa"
-	"log"
+	"github.com/paketo-buildpacks/libpak/bard"
 	"os"
 	"os/exec"
-	"path/filepath"
+	"strconv"
 	"strings"
-	"time"
-
-	"github.com/paketo-buildpacks/libpak/bard"
 )
 
-type SpringClassDataSharing struct {
+type SpringAppCds struct {
 	Logger bard.Logger
 }
 
-func (s SpringClassDataSharing) Execute() (map[string]string, error) {
+func (s SpringAppCds) Execute() (map[string]string, error) {
 
-	s.Logger.Info("Spring Class Data Sharing Enabled, contributing -Dspring.aot.enabled=true and -XX:SharedArchiveFile=application.jsa to JAVA_OPTS")
+	s.Logger.Info("Spring App CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_OPTS")
 	s.Logger.Body("Those are the files we have in the workspace")
 
 	StartOSCommand("", "ls", "-al", "./")
-
+	StartOSCommand("", "env")
 	var values []string
 	if s, ok := os.LookupEnv("JAVA_TOOL_OPTIONS"); ok {
 		values = append(values, s)
 	}
-
-	values = append(values, "-Dspring.aot.enabled=true")
+	if val, ok := os.LookupEnv("BPL_APP_CDS_AOT_ENABLED"); ok {
+		enabled, err := strconv.ParseBool(val)
+		if enabled && err == nil {
+			s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_OPTS")
+			values = append(values, "-Dspring.aot.enabled=true")
+		}
+	}
 	values = append(values, "-XX:SharedArchiveFile=application.jsa")
 
 	return map[string]string{"JAVA_TOOL_OPTIONS": strings.Join(values, " ")}, nil
 }
 
 func StartOSCommand(envVariable string, command string, arguments ...string) {
+	fmt.Println("StartOSCommand")
+	fmt.Println(command, arguments)
 	cmd := exec.Command(command, arguments...)
 	cmd.Env = os.Environ()
 	if envVariable != "" {
@@ -67,28 +70,4 @@ func StartOSCommand(envVariable string, command string, arguments ...string) {
 		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
 	}
 	fmt.Println("Result: " + out.String())
-}
-
-func resetAllFilesMtimeAndATime(root string, date time.Time) ([]string, error) {
-	println("Entering resetAllFIles")
-	var files []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
-			println(path)
-			file, err := os.Open(path)
-			if err != nil {
-				log.Printf("Could not open file: %s", path)
-			}
-			sherpa.CopyFile(file, fmt.Sprintf("%s.bak", path))
-
-			if err := os.Chtimes(path, date, date); err != nil {
-				log.Printf("Could not update atime and mtime for %s\n", fmt.Sprintf("%s.bak", path))
-			}
-			os.Remove(path)
-			os.Rename(fmt.Sprintf("%s.bak", path), path)
-			files = append(files, path)
-		}
-		return nil
-	})
-	return files, err
 }
