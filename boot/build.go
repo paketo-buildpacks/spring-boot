@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -57,13 +56,19 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
 	}
 
-	cds, _ := sherpa.FileExists("run-app.jar")
+	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
+
+	//cds, _ := sherpa.FileExists("run-app.jar")
 	result := libcnb.NewBuildResult()
 
-	if cds {
+	if cr.ResolveBool("BP_APP_CDS_ENABLED") {
+		//if cds {
 		// cds specific
 		b.Logger.Title(context.Buildpack)
-		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-class-data-sharing")
+		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-app-cds")
 		h.Logger = b.Logger
 
 		// add labels
@@ -80,7 +85,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
 		}
 		dc.Logger = b.Logger
-		bindingsLayer := NewSpringClassDataSharing(dc, context.Application.Path)
+		bindingsLayer := NewSpringAppCDS(dc, context.Application.Path, manifest, cr.ResolveBool("BP_APP_CDS_AOT_ENABLED"))
 		bindingsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, bindingsLayer)
 		result.BOM.Entries = append(result.BOM.Entries, be)
@@ -101,11 +106,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	dr, err := libpak.NewDependencyResolver(context)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
-	}
-
-	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
 	dc, err := libpak.NewDependencyCache(context)
