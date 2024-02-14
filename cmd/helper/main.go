@@ -29,7 +29,7 @@ func main() {
 	sherpa.Execute(func() error {
 		return sherpa.Helpers(map[string]sherpa.ExecD{
 			"spring-cloud-bindings": helper.SpringCloudBindings{Logger: bard.NewLogger(os.Stdout)},
-			"spring-app-cds":        helper.SpringAppCds{Logger: bard.NewLogger(os.Stdout)},
+			"spring-cds":            helper.SpringCds{Logger: bard.NewLogger(os.Stdout)},
 		})
 	})
 }

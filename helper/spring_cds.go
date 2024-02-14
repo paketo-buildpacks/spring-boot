@@ -26,11 +26,11 @@ import (
 	"strings"
 )
 
-type SpringAppCds struct {
+type SpringCds struct {
 	Logger bard.Logger
 }
 
-func (s SpringAppCds) Execute() (map[string]string, error) {
+func (s SpringCds) Execute() (map[string]string, error) {
 
 	s.Logger.Info("Spring App CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_OPTS")
 	s.Logger.Body("Those are the files we have in the workspace")

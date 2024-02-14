@@ -17,12 +17,13 @@
 package boot
 
 import (
+	"archive/zip"
 	"fmt"
 	"github.com/magiconair/properties"
-	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"github.com/paketo-buildpacks/spring-boot/v5/helper"
 	"gopkg.in/yaml.v3"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,7 +36,7 @@ import (
 	"github.com/paketo-buildpacks/libpak/effect"
 )
 
-type SpringAppCDS struct {
+type SpringCds struct {
 	Dependency       libpak.BuildpackDependency
 	LayerContributor libpak.LayerContributor
 	Logger           bard.Logger
@@ -45,11 +46,11 @@ type SpringAppCDS struct {
 	AotEnabled       bool
 }
 
-func NewSpringAppCDS(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool) SpringAppCDS {
-	contributor := libpak.NewLayerContributor("spring-app-cds", cache, libcnb.LayerTypes{
+func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool) SpringCds {
+	contributor := libpak.NewLayerContributor("spring-cds", cache, libcnb.LayerTypes{
 		Build: true,
 	})
-	return SpringAppCDS{
+	return SpringCds{
 		LayerContributor: contributor,
 		Executor:         effect.NewExecutor(),
 		AppPath:          appPath,
@@ -58,7 +59,7 @@ func NewSpringAppCDS(cache libpak.DependencyCache, appPath string, manifest *pro
 	}
 }
 
-func (s SpringAppCDS) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
+func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 
@@ -72,7 +73,7 @@ func (s SpringAppCDS) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		startClassValue, okSC := s.Manifest.Get("Start-Class")
 		classpathIndex, okSI := s.Manifest.Get("Spring-Boot-Classpath-Index")
 		if !(okIT && okIV && okSC && okSI) {
-			return layer, fmt.Errorf("unable to contribute spring-app-cds layer - " +
+			return layer, fmt.Errorf("unable to contribute spring-cds layer - " +
 				"missing Spring Boot Manifest entries, Implementation-Title or Implementation-Version" +
 				"or Start-Class or Spring-Boot-Classpath-Index\n")
 		}
@@ -82,13 +83,12 @@ func (s SpringAppCDS) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		// we prepare a location for the unpacked version
 		targetUnpackedDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/unpacked"
-		os.MkdirAll(targetUnpackedDirectory, 0755)
 		os.MkdirAll(targetUnpackedDirectory+"/application", 0755)
 		os.MkdirAll(targetUnpackedDirectory+"/dependencies", 0755)
 
 		// we create the application jar: the one that contains the user classes
 		jarName := implementationTitle + "-" + implementationValue + ".jar"
-		helper.StartOSCommand("", "jar", "cf", targetUnpackedDirectory+"/application/"+jarName, "-C", originalJarExplodedDirectory+"/BOOT-INF/classes/", ".")
+		createJar(originalJarExplodedDirectory+"/BOOT-INF/classes/", targetUnpackedDirectory+"/application/"+jarName)
 
 		s.Logger.Bodyf("Those are the files we have in the target folder %s", targetUnpackedDirectory)
 		helper.StartOSCommand("", "ls", "-al", targetUnpackedDirectory)
@@ -97,12 +97,16 @@ func (s SpringAppCDS) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		tempDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
 		os.MkdirAll(tempDirectory+"/META-INF/", 0755)
 		runAppJarManifest, _ := os.Create(tempDirectory + "/META-INF/MANIFEST.MF")
-		// TODO: it should be possible to rather use the JDK Created-by
-		const createdBy = "17.9.9 (Spring Boot Paketo Buildpack)"
-		writeRunAppJarManifest(originalJarExplodedDirectory, runAppJarManifest, "application/"+jarName, createdBy, startClassValue, classpathIndex)
+		writeRunAppJarManifest(originalJarExplodedDirectory, runAppJarManifest, "application/"+jarName, startClassValue, classpathIndex)
+
+		s.Logger.Bodyf("that's the run-app.jar manifest:\n")
+		helper.StartOSCommand("", "cat", runAppJarManifest.Name())
+		s.Logger.Bodyf("That's the jar we're building: %s in %s", filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/run-app.jar")
 
 		// we create the runner-app.jar that will contain just its MANIFEST
-		helper.StartOSCommand("", "jar", "cfm", targetUnpackedDirectory+"/run-app.jar", runAppJarManifest.Name())
+		createJar(filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/run-app.jar")
+		//helper.StartOSCommand("", "unzip", "-t", targetUnpackedDirectory+"/run-app.jar")
+		//helper.StartOSCommand("", "jar", "cfm", targetUnpackedDirectory+"/run-app.jar", runAppJarManifest.Name())
 
 		// we copy all the dependencies libs from the original jar to the dependencies/folder
 		sherpa.CopyDir(originalJarExplodedDirectory+"/BOOT-INF/lib/", targetUnpackedDirectory+"/dependencies/")
@@ -149,13 +153,13 @@ func (s SpringAppCDS) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	})
 
 	if err != nil {
-		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-app-cds layer\n%w", err)
+		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cds layer\n%w", err)
 	}
 	return layer, nil
 }
 
 // OldContribute TODO: this function could still be interesting when an unpack'ed Spring Boot app was provided (run-app.jar was found)
-func (s SpringAppCDS) OldContribute(layer libcnb.Layer) (libcnb.Layer, error) {
+func (s SpringCds) OldContribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 		s.Logger.Body("Those are the files we have in the workspace BEFORE the training run", layer.Path)
@@ -185,36 +189,35 @@ func (s SpringAppCDS) OldContribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		return layer, nil
 	})
 	if err != nil {
-		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-app-cds layer\n%w", err)
+		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cds layer\n%w", err)
 	}
 	return layer, nil
 }
 
-func (s SpringAppCDS) Name() string {
+func (s SpringCds) Name() string {
 	return s.LayerContributor.Name
 }
 
-func writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, createdBy string, startClassValue string, classpathIdx string) {
-	originalManifest, _ := libjvm.NewManifest(originalJarExplodedDirectory)
-	classPathValue, _ := retrieveClasspathFromIdx(originalManifest, originalJarExplodedDirectory, "dependencies/", relocatedOriginalJar, classpathIdx)
+func writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
+	classPathValue, _ := retrieveClasspathFromIdx(originalJarExplodedDirectory, "dependencies/", relocatedOriginalJar, classpathIdx)
 
 	type Manifest struct {
 		MainClass string
 		ClassPath string
-		CreatedBy string
 	}
 
-	manifestValues := Manifest{startClassValue, rewriteWithMaxLineLength("Class-Path: "+classPathValue, 72), createdBy}
-	tmpl, err := template.New("manifest").Parse("Manifest-Version: 1.0\n" +
-		"Main-Class: {{.MainClass}}\n" +
-		"{{.ClassPath}}\n" +
-		"Created-By: {{.CreatedBy}}\n" +
-		" ")
+	manifestValues := Manifest{
+		rewriteWithMaxLineLength("Main-Class: "+startClassValue, 72),
+		rewriteWithMaxLineLength("Class-Path: "+classPathValue, 72),
+	}
+	tmpl, err := template.New("manifest").Parse(
+		"Manifest-Version: 1.0\r\n" +
+			"{{.MainClass}}\r\n" +
+			"{{.ClassPath}}\r\n" +
+			"\r\n")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("that's my manifest: %s", manifestValues)
-	//buf := &bytes.Buffer{}
 	err = tmpl.Execute(runAppJarManifest, manifestValues)
 	if err != nil {
 		panic(err)
@@ -235,7 +238,8 @@ func rewriteWithMaxLineLength(s string, length int) string {
 			j = i + 1 + indent
 		}
 		if i > 0 && j%length == 0 {
-			result = result + currentLine + "\n"
+			// this is no mistake here! Java won't open a Jar with a \n only MANIFEST!
+			result = result + currentLine + "\r\n"
 			currentLine = " "
 			indent = indent + 1
 			remainder = " "
@@ -244,7 +248,7 @@ func rewriteWithMaxLineLength(s string, length int) string {
 	result = result + remainder
 	return result
 }
-func retrieveClasspathFromIdx(manifest *properties.Properties, dir string, relocatedDir string, relocatedOriginalJar string, classpathIdx string) (string, error) {
+func retrieveClasspathFromIdx(dir string, relocatedDir string, relocatedOriginalJar string, classpathIdx string) (string, error) {
 	file := filepath.Join(dir, classpathIdx)
 	in, err := os.Open(filepath.Join(dir, classpathIdx))
 	if err != nil {
@@ -264,4 +268,61 @@ func retrieveClasspathFromIdx(manifest *properties.Properties, dir string, reloc
 	}
 
 	return strings.Join(relocatedLibs, " "), nil
+}
+
+// heavily inspired by: https://gosamples.dev/zip-file/
+func createJar(source, target string) error {
+	// 1. Create a ZIP file and zip.Writer
+	f, err := os.Create(target)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	writer := zip.NewWriter(f)
+	defer writer.Close()
+
+	// 2. Go through all the files of the source
+	return filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// 3. Create a local file header
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		// set compression
+		header.Method = zip.Store
+
+		// 4. Set relative path of a file as the header name
+		header.Name, err = filepath.Rel(filepath.Dir(source), path)
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			header.Name += "/"
+		}
+
+		// 5. Create writer for the file header and save content of the file
+		headerWriter, err := writer.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		_, err = io.Copy(headerWriter, f)
+		return err
+	})
 }
