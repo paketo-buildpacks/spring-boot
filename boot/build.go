@@ -68,7 +68,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		//if cds {
 		// cds specific
 		b.Logger.Title(context.Buildpack)
-		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-app-cds")
+		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cds")
 		h.Logger = b.Logger
 
 		// add labels
@@ -85,7 +85,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
 		}
 		dc.Logger = b.Logger
-		bindingsLayer := NewSpringAppCDS(dc, context.Application.Path, manifest, cr.ResolveBool("BP_APP_CDS_AOT_ENABLED"))
+		bindingsLayer := NewSpringCds(dc, context.Application.Path, manifest, cr.ResolveBool("BP_APP_CDS_AOT_ENABLED"))
 		bindingsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, bindingsLayer)
 		result.BOM.Entries = append(result.BOM.Entries, be)
