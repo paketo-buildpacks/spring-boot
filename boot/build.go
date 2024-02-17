@@ -33,6 +33,7 @@ import (
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/spring-boot/v5/helper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -51,10 +52,45 @@ type Build struct {
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
+
+	b.Logger.Bodyf("This is the value of AppPath: %s", context.Application.Path)
+	b.Logger.Body("Those are the files we have in the workspace")
+	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
+
 	manifest, err := libjvm.NewManifest(context.Application.Path)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
+		//} else if manifest.Len() == 0 {
+		//	jarPath := ""
+		//	jarPath, manifest, err = findSpringBootExecutableJAR(context.Application.Path)
+		//	if err != nil {
+		//		// this isn't a boot app, return without printing title
+		//		return libcnb.BuildResult{}, nil
+		//	}
+		//
+		//	b.Logger.Bodyf("This is the Spring Boot jar: %s", jarPath)
+		//
+		//	tempDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
+		//	os.MkdirAll(tempDirectory, 0755)
+		//	file, err := os.Open(jarPath)
+		//	if err != nil {
+		//		log.Printf("Could not open file: %s", jarPath)
+		//	}
+		//	sherpa.CopyFile(file, tempDirectory+path.Base(jarPath))
+		//	helper.StartOSCommand("", "ls", "-al", tempDirectory)
+		//	// we discard the original directory
+		//	os.RemoveAll(context.Application.Path)
+		//	file, err = os.Open(tempDirectory + path.Base(jarPath))
+		//	if err != nil {
+		//		log.Printf("Could not open file: %s", jarPath)
+		//	}
+		//	sherpa.CopyFile(file, jarPath)
+		//	helper.StartOSCommand("", "ls", "-al", tempDirectory)
+		//	manifest, _ = libjvm.NewManifestFromJAR(jarPath)
+		//	//sherpa.CopyFile(tempDirectory, context.Application.Path)
 	}
+	b.Logger.Body("Those are the files we have in the workspace")
+	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
 
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
 	if err != nil {
@@ -72,7 +108,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		h.Logger = b.Logger
 
 		// add labels
-		result.Labels, err = labels(context, manifest)
+		result.Labels, err = labels(context.Application.Path, manifest)
 		if err != nil {
 			return libcnb.BuildResult{}, err
 		}
@@ -115,7 +151,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	dc.Logger = b.Logger
 
 	// add labels
-	result.Labels, err = labels(context, manifest)
+	result.Labels, err = labels(context.Application.Path, manifest)
 	if err != nil {
 		return libcnb.BuildResult{}, err
 	}
@@ -187,7 +223,10 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			if !scbSet {
 				scbVerFromBoot, err := getSCBVersion(version)
 				if err != nil {
-					return libcnb.BuildResult{}, fmt.Errorf("Unable to read the Spring Boot version from META-INF/MANIFEST.MF. Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
+					return libcnb.BuildResult{}, fmt.Errorf(
+						"unable to read the Spring Boot version from META-INF/MANIFEST.MF. " +
+							"Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or " +
+							"BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
 				}
 				scbVer = scbVerFromBoot
 			}
@@ -254,7 +293,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	return result, nil
 }
 
-func labels(context libcnb.BuildContext, manifest *properties.Properties) ([]libcnb.Label, error) {
+func labels(jarPath string, manifest *properties.Properties) ([]libcnb.Label, error) {
 	var labels []libcnb.Label
 
 	if s, ok := manifest.Get("Spring-Boot-Version"); ok {
@@ -269,7 +308,7 @@ func labels(context libcnb.BuildContext, manifest *properties.Properties) ([]lib
 		labels = append(labels, libcnb.Label{Key: LabelImageVersion, Value: s})
 	}
 
-	mdLabels, err := configurationMetadataLabels(context.Application.Path, manifest)
+	mdLabels, err := configurationMetadataLabels(jarPath, manifest)
 	if err != nil {
 		return nil, fmt.Errorf("unable to generate data flow configuration metadata\n%w", err)
 	}
@@ -409,3 +448,108 @@ func bootVersion(version string) (*semver.Version, error) {
 	}
 	return semverBoot, nil
 }
+
+//func findSpringBootExecutableJAR(appPath string) (string, *properties.Properties, error) {
+//	props := &properties.Properties{}
+//	jarPath := ""
+//	stopWalk := errors.New("stop walking")
+//
+//	err := fsutil.Walk(appPath, func(path string, info os.FileInfo, err error) error {
+//		if err != nil {
+//			return err
+//		}
+//
+//		// make sure it is a file
+//		if info.IsDir() {
+//			return nil
+//		}
+//
+//		// make sure it is a JAR file
+//		if !strings.HasSuffix(path, ".jar") {
+//			return nil
+//		}
+//
+//		// get the MANIFEST of the JAR file
+//		props, err = libjvm.NewManifestFromJAR(path)
+//		if err != nil {
+//			return fmt.Errorf("unable to load manifest\n%w", err)
+//		}
+//
+//		// we take it if it has a Main-Class AND a Spring-Boot-Version
+//		_, okMC := props.Get("Main-Class")
+//		_, okSBV := props.Get("Spring-Boot-Version")
+//		if okMC && okSBV {
+//			jarPath = path
+//			return stopWalk
+//		}
+//
+//		return nil
+//	})
+//
+//	if err != nil && !errors.Is(err, stopWalk) {
+//		return "", nil, err
+//	}
+//
+//	return jarPath, props, nil
+//}
+//
+//func Unzip(src, dest string) error {
+//	dest = filepath.Clean(dest) + "/"
+//
+//	r, err := zip.OpenReader(src)
+//	if err != nil {
+//		return err
+//	}
+//	defer CloseOrPanic(r)()
+//
+//	os.MkdirAll(dest, 0755)
+//
+//	// Closure to address file descriptors issue with all the deferred .Close() methods
+//	extractAndWriteFile := func(f *zip.File) error {
+//		path := filepath.Join(dest, f.Name)
+//		// Check for ZipSlip: https://snyk.io/research/zip-slip-vulnerability
+//		if !strings.HasPrefix(path, dest) {
+//			return fmt.Errorf("%s: illegal file path", path)
+//		}
+//
+//		rc, err := f.Open()
+//		if err != nil {
+//			return err
+//		}
+//		defer CloseOrPanic(rc)()
+//
+//		if f.FileInfo().IsDir() {
+//			os.MkdirAll(path, f.Mode())
+//		} else {
+//			os.MkdirAll(filepath.Dir(path), f.Mode())
+//			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+//			if err != nil {
+//				return err
+//			}
+//			defer CloseOrPanic(f)()
+//
+//			_, err = io.Copy(f, rc)
+//			if err != nil {
+//				return err
+//			}
+//		}
+//		return nil
+//	}
+//
+//	for _, f := range r.File {
+//		err := extractAndWriteFile(f)
+//		if err != nil {
+//			return err
+//		}
+//	}
+//
+//	return nil
+//}
+//
+//func CloseOrPanic(f io.Closer) func() {
+//	return func() {
+//		if err := f.Close(); err != nil {
+//			panic(err)
+//		}
+//	}
+//}
