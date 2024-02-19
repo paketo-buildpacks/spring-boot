@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -100,6 +101,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	//cds, _ := sherpa.FileExists("run-app.jar")
 	result := libcnb.NewBuildResult()
 
+	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
+	aotEnabled := false
+	if enabled, _ := sherpa.DirExists(dir); enabled {
+		aotEnabled = true
+	}
+
 	if cr.ResolveBool("BP_APP_CDS_ENABLED") {
 		//if cds {
 		// cds specific
@@ -121,12 +128,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
 		}
 		dc.Logger = b.Logger
-		bindingsLayer := NewSpringCds(dc, context.Application.Path, manifest, cr.ResolveBool("BP_APP_CDS_AOT_ENABLED"))
+		bindingsLayer := NewSpringCds(dc, context.Application.Path, manifest, aotEnabled)
 		bindingsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, bindingsLayer)
 		result.BOM.Entries = append(result.BOM.Entries, be)
 
-	
 		return result, nil
 	}
 
