@@ -5,6 +5,11 @@
   Status = "END_OF_LIFE"
 
 [[Projects]]
+  Name = "Spring AI"
+  Slug = "spring-ai"
+  Status = "ACTIVE"
+
+[[Projects]]
   Name = "Spring AMQP"
   Slug = "spring-amqp"
   Status = "ACTIVE"
@@ -1583,6 +1588,11 @@
     Commercial = "2026-02-28"
     Name = "1.2.x"
     OSS = "2024-11-30"
+
+  [[Projects.Generations]]
+    Commercial = "2026-09-21"
+    Name = "1.3.x"
+    OSS = "2025-05-21"
 
 [[Projects]]
   Name = "Spring for Apache Hadoop"
