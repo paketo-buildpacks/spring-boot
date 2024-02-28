@@ -11,14 +11,14 @@ jobs:
         steps:
             - name: Docker login gcr.io
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
-              uses: docker/login-action@v2
+              uses: docker/login-action@v3
               with:
                 password: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
                 registry: gcr.io
                 username: _json_key
             - name: Docker login docker.io
               if: ${{ (github.event_name != 'pull_request' || ! github.event.pull_request.head.repo.fork) && (github.actor != 'dependabot[bot]') }}
-              uses: docker/login-action@v2
+              uses: docker/login-action@v3
               with:
                 password: ${{ secrets.PAKETO_BUILDPACKS_DOCKERHUB_PASSWORD }}
                 registry: docker.io
@@ -33,44 +33,13 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package@latest
-            - name: Install crane
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                echo "Installing crane ${CRANE_VERSION}"
-
-                mkdir -p "${HOME}"/bin
-                echo "${HOME}/bin" >> "${GITHUB_PATH}"
-
-                curl \
-                  --show-error \
-                  --silent \
-                  --location \
-                  "https://github.com/google/go-containerregistry/releases/download/v${CRANE_VERSION}/go-containerregistry_Linux_x86_64.tar.gz" \
-                | tar -C "${HOME}/bin" -xz crane
-              env:
-                CRANE_VERSION: 0.18.0
-            - name: Install pack
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                echo "Installing pack ${PACK_VERSION}"
-
-                mkdir -p "${HOME}"/bin
-                echo "${HOME}/bin" >> "${GITHUB_PATH}"
-
-                curl \
-                  --location \
-                  --show-error \
-                  --silent \
-                  "https://github.com/buildpacks/pack/releases/download/v${PACK_VERSION}/pack-v${PACK_VERSION}-linux.tgz" \
-                | tar -C "${HOME}"/bin -xz pack
-              env:
-                PACK_VERSION: 0.32.1
+            - uses: buildpacks/github-actions/setup-tools@v5.5.3
+              with:
+                crane-version: 0.19.0
+                yj-version: 5.1.0
+            - uses: buildpacks/github-actions/setup-pack@v5.5.3
+              with:
+                pack-version: 0.33.2
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
@@ -98,8 +67,8 @@ jobs:
 
                 set -euo pipefail
 
-                if [ -z "${GITHUB_REF+set}" ]; then
-                  echo "GITHUB_REF set to [${GITHUB_REF-<unset>}], but should never be empty or unset"
+                if [[ ${GITHUB_REF:-} != "refs/"* ]]; then
+                  echo "GITHUB_REF set to [${GITHUB_REF:-}], but that is unexpected. It should start with 'refs/*'"
                   exit 255
                 fi
 
