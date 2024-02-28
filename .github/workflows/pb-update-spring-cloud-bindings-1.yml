@@ -19,27 +19,10 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/update-buildpack-dependency@latest
-            - name: Install yj
-              run: |
-                #!/usr/bin/env bash
-
-                set -euo pipefail
-
-                echo "Installing yj ${YJ_VERSION}"
-
-                mkdir -p "${HOME}"/bin
-                echo "${HOME}/bin" >> "${GITHUB_PATH}"
-
-                curl \
-                  --location \
-                  --show-error \
-                  --silent \
-                  --output "${HOME}"/bin/yj \
-                  "https://github.com/sclevine/yj/releases/download/v${YJ_VERSION}/yj-linux-amd64"
-
-                chmod +x "${HOME}"/bin/yj
-              env:
-                YJ_VERSION: 5.1.0
+            - uses: buildpacks/github-actions/setup-tools@v5.5.3
+              with:
+                crane-version: 0.19.0
+                yj-version: 5.1.0
             - uses: actions/checkout@v4
             - id: dependency
               uses: docker://ghcr.io/paketo-buildpacks/actions/maven-dependency:main
@@ -107,7 +90,7 @@ jobs:
                 URI: ${{ steps.dependency.outputs.uri }}
                 VERSION: ${{ steps.dependency.outputs.version }}
                 VERSION_PATTERN: ^1\.[\d]+\.[\d]+
-            - uses: peter-evans/create-pull-request@v5
+            - uses: peter-evans/create-pull-request@v6
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
                 body: Bumps `Spring Cloud Bindings 1` from `${{ steps.buildpack.outputs.old-version }}` to `${{ steps.buildpack.outputs.new-version }}`.

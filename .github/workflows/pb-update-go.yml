@@ -50,7 +50,7 @@ jobs:
                 echo "commit-semver=${COMMIT_SEMVER}" >> "$GITHUB_OUTPUT"
               env:
                 GO_VERSION: "1.20"
-            - uses: peter-evans/create-pull-request@v5
+            - uses: peter-evans/create-pull-request@v6
               with:
                 author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
                 body: |-
