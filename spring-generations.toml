@@ -1557,7 +1557,7 @@
   [[Projects.Generations]]
     Commercial = "2026-12-31"
     Name = "5.3.x"
-    OSS = "2024-12-31"
+    OSS = "2024-08-31"
 
   [[Projects.Generations]]
     Commercial = "2025-12-31"
