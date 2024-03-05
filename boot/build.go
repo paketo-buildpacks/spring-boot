@@ -61,37 +61,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	manifest, err := libjvm.NewManifest(context.Application.Path)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
-		//} else if manifest.Len() == 0 {
-		//	jarPath := ""
-		//	jarPath, manifest, err = findSpringBootExecutableJAR(context.Application.Path)
-		//	if err != nil {
-		//		// this isn't a boot app, return without printing title
-		//		return libcnb.BuildResult{}, nil
-		//	}
-		//
-		//	b.Logger.Bodyf("This is the Spring Boot jar: %s", jarPath)
-		//
-		//	tempDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
-		//	os.MkdirAll(tempDirectory, 0755)
-		//	file, err := os.Open(jarPath)
-		//	if err != nil {
-		//		log.Printf("Could not open file: %s", jarPath)
-		//	}
-		//	sherpa.CopyFile(file, tempDirectory+path.Base(jarPath))
-		//	helper.StartOSCommand("", "ls", "-al", tempDirectory)
-		//	// we discard the original directory
-		//	os.RemoveAll(context.Application.Path)
-		//	file, err = os.Open(tempDirectory + path.Base(jarPath))
-		//	if err != nil {
-		//		log.Printf("Could not open file: %s", jarPath)
-		//	}
-		//	sherpa.CopyFile(file, jarPath)
-		//	helper.StartOSCommand("", "ls", "-al", tempDirectory)
-		//	manifest, _ = libjvm.NewManifestFromJAR(jarPath)
-		//	//sherpa.CopyFile(tempDirectory, context.Application.Path)
 	}
-	b.Logger.Body("Those are the files we have in the workspace")
-	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
 
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
 	if err != nil {
