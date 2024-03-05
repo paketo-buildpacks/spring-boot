@@ -107,7 +107,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		aotEnabled = true
 	}
 
-	if cr.ResolveBool("BP_APP_CDS_ENABLED") {
+	if cr.ResolveBool("BP_JVM_CDS_ENABLED") {
 		//if cds {
 		// cds specific
 		b.Logger.Title(context.Buildpack)

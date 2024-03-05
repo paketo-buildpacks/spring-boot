@@ -41,7 +41,7 @@ func (s SpringCds) Execute() (map[string]string, error) {
 	if s, ok := os.LookupEnv("JAVA_TOOL_OPTIONS"); ok {
 		values = append(values, s)
 	}
-	if val, ok := os.LookupEnv("BPL_APP_CDS_AOT_ENABLED"); ok {
+	if val, ok := os.LookupEnv("BPL_SPRING_AOT_ENABLED"); ok {
 		enabled, err := strconv.ParseBool(val)
 		if enabled && err == nil {
 			s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_OPTS")
