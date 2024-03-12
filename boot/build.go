@@ -17,16 +17,20 @@
 package boot
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/sherpa"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
+
+	"github.com/paketo-buildpacks/libpak/sherpa"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/buildpacks/libcnb"
@@ -35,6 +39,7 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/spring-boot/v5/helper"
+	"github.com/paketo-buildpacks/spring-boot/v5/internal/fsutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -52,68 +57,50 @@ type Build struct {
 	Logger bard.Logger
 }
 
+
+
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	b.Logger.Bodyf("This is the value of AppPath: %s", context.Application.Path)
 	b.Logger.Body("Those are the files we have in the workspace")
 	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
+	result := libcnb.NewBuildResult()
+	bootJarFound := false
+	mainClass := ""
 
 	manifest, err := libjvm.NewManifest(context.Application.Path)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
 	}
 
+	trainingRun := sherpa.ResolveBool("BP_JVM_CDS_ENABLED")
+
+	version, version_found := manifest.Get("Spring-Boot-Version")
+	if !version_found {
+		if context.Application.Path, manifest, err = findSpringBootExecutableJAR(context.Application.Path); err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find Spring Boot Executable Jar\n%w", err)
+		} else if version, version_found = manifest.Get("Spring-Boot-Version"); !version_found {
+			// this isn't a boot app, return without printing title
+			return libcnb.BuildResult{}, nil
+		}
+		bootJarFound = true
+		mainClass, _ = manifest.Get("Main-Class")
+	}
+
+	b.Logger.Title(context.Buildpack)
+
+	var helpers []string
+
+	dc, err := libpak.NewDependencyCache(context)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
+	}
+	dc.Logger = b.Logger
+
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, &b.Logger)
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
-
-	//cds, _ := sherpa.FileExists("run-app.jar")
-	result := libcnb.NewBuildResult()
-
-	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
-	aotEnabled := false
-	if enabled, _ := sherpa.DirExists(dir); enabled {
-		aotEnabled = true
-	}
-
-	if cr.ResolveBool("BP_JVM_CDS_ENABLED") {
-		//if cds {
-		// cds specific
-		b.Logger.Title(context.Buildpack)
-		h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cds")
-		h.Logger = b.Logger
-
-		// add labels
-		result.Labels, err = labels(context.Application.Path, manifest)
-		if err != nil {
-			return libcnb.BuildResult{}, err
-		}
-
-		result.Layers = append(result.Layers, h)
-		result.BOM.Entries = append(result.BOM.Entries, be)
-
-		dc, err := libpak.NewDependencyCache(context)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
-		}
-		dc.Logger = b.Logger
-		bindingsLayer := NewSpringCds(dc, context.Application.Path, manifest, aotEnabled)
-		bindingsLayer.Logger = b.Logger
-		result.Layers = append(result.Layers, bindingsLayer)
-		result.BOM.Entries = append(result.BOM.Entries, be)
-
-		return result, nil
-	}
-
-	version, ok := manifest.Get("Spring-Boot-Version")
-	if !ok {
-		// this isn't a boot app, return without printing title
-		return libcnb.BuildResult{}, nil
-	}
-	fmt.Printf("passed spring detection")
-
-	b.Logger.Title(context.Buildpack)
 
 	pr := libpak.PlanEntryResolver{Plan: context.Plan}
 
@@ -121,12 +108,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency resolver\n%w", err)
 	}
-
-	dc, err := libpak.NewDependencyCache(context)
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create dependency cache\n%w", err)
-	}
-	dc.Logger = b.Logger
 
 	// add labels
 	result.Labels, err = labels(context.Application.Path, manifest)
@@ -139,28 +120,17 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if !ok {
 		return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Lib")
 	}
+
+
+	// gather libraries
 	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to generate dependencies from %s\n%w", context.Application.Path, err)
 	}
+	var additionalLibs []string
+	var classpathString string
 
-	result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{
-		Name:     "dependencies",
-		Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
-		Launch:   true,
-	})
-
-	// validate generations
-	gv, err := NewGenerationValidator(filepath.Join(context.Buildpack.Path, "spring-generations.toml"))
-	if err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to create generation validator\n%w", err)
-	}
-	gv.Logger = b.Logger
-
-	if err := gv.Validate("spring-boot", version); err != nil {
-		return libcnb.BuildResult{}, fmt.Errorf("unable to validate spring-boot version\n%w", err)
-	}
-
+	// Native Image
 	buildNativeImage := false
 	if n, ok, err := pr.Resolve("spring-boot"); err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to resolve spring-boot plan entry\n%w", err)
@@ -185,87 +155,120 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		classpathLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, classpathLayer)
 
+		return result, nil
+
+	}
+
+	// Spring Cloud Bindings
+	if scbJarFound := FindExistingDependency(d, "spring-cloud-bindings"); scbJarFound {
+		b.Logger.Header("A Spring Cloud Bindings library was found in the Spring Boot libs - not adding another one")
+	} else if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") {
+
+		var scbVer string
+		var scbSet bool
+		if scbVer, scbSet = cr.Resolve("BP_SPRING_CLOUD_BINDINGS_VERSION"); !scbSet {
+			if scbVer, err = getSCBVersion(version); err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf(
+					"unable to read the Spring Boot version from META-INF/MANIFEST.MF. " +
+						"Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or " +
+						"BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
+			}
+		}
+
+		dep, err := dr.Resolve("spring-cloud-bindings", scbVer)
+		if err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+		}
+
+		helpers = append(helpers, "spring-cloud-bindings")
+
+		bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
+		bindingsLayer.Logger = b.Logger
+		result.Layers = append(result.Layers, bindingsLayer)
+		result.BOM.Entries = append(result.BOM.Entries, be)
+
+		additionalLibs = append(additionalLibs, filepath.Base(dep.URI))
+	}
+
+	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
+	aotEnabled := false
+	if enabled, _ := sherpa.DirExists(dir); enabled && sherpa.ResolveBool("BP_SPRING_AOT_ENABLED") {
+		aotEnabled = true
+	}
+
+	if trainingRun || aotEnabled {
+
+		b.Logger.Bodyf("training %t, aot %t", trainingRun, aotEnabled)
+
+		helpers = append(helpers, "performance")
+
+		//Boot 3.2 vs 3.3 check here? == unpack ourselves? answer passed as last param to the NewSpringCds call
+
+		if trainingRun {
+			mainClass, _ = manifest.Get("Start-Class")
+			classpathString = "runner.jar"
+			if len(additionalLibs) > 0 {
+				cpLibs := []string{}
+				for _, lib :=  range additionalLibs {
+					cpLibs = append(cpLibs, fmt.Sprintf(":%s","dependencies/"+lib))
+				}
+				classpathString = fmt.Sprintf(classpathString+"%s", strings.Join(cpLibs,""))
+			}
+		}
+
+		cdsLayer := NewSpringCds(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, true)
+		cdsLayer.Logger = b.Logger
+		result.Layers = append(result.Layers, cdsLayer)
+
+	}
+
+	result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{
+		Name:     "dependencies",
+		Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
+		Launch:   true,
+	})
+
+	// validate generations
+	gv, err := NewGenerationValidator(filepath.Join(context.Buildpack.Path, "spring-generations.toml"))
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create generation validator\n%w", err)
+	}
+	gv.Logger = b.Logger
+
+	if err := gv.Validate("spring-boot", version); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to validate spring-boot version\n%w", err)
+	}
+
+	// configure JVM for application type
+	classes, ok := manifest.Get("Spring-Boot-Classes")
+	if !ok {
+		return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Classes")
+	}
+	wr, err := NewWebApplicationResolver(classes, lib)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationTypeResolver\n%w", err)
+	}
+	at, err := NewWebApplicationType(context.Application.Path, wr)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationType\n%w", err)
+	}
+	at.Logger = b.Logger
+	result.Layers = append(result.Layers, at)
+
+	// Slices
+	if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
+		b.Logger.Header("Creating slices from layers index")
+		if result, err = b.createSlices(context.Application.Path, index, result); err != nil {
+			return libcnb.BuildResult{}, fmt.Errorf("error creating slices\n%w", err)
+		}
+	}
+
+	result = b.contributeHelpers(context, result, helpers)
+
+	if (bootJarFound || trainingRun) && mainClass != "" {
+		result.Processes = append(result.Processes, b.setProcessTypes(mainClass, classpathString)...)
 	} else {
-		scbJarFound := FindExistingDependency(d, "spring-cloud-bindings")
-		if scbJarFound {
-			b.Logger.Header("A Spring Cloud Bindings library was found in the Spring Boot libs - not adding another one")
-		}
-		// contribute Spring Cloud Bindings - false by default
-		if !cr.ResolveBool("BP_SPRING_CLOUD_BINDINGS_DISABLED") && !scbJarFound {
-			h, be := libpak.NewHelperLayer(context.Buildpack, "spring-cloud-bindings")
-			h.Logger = b.Logger
-			result.Layers = append(result.Layers, h)
-			result.BOM.Entries = append(result.BOM.Entries, be)
-
-			scbVer, scbSet := cr.Resolve("BP_SPRING_CLOUD_BINDINGS_VERSION")
-			if !scbSet {
-				scbVerFromBoot, err := getSCBVersion(version)
-				if err != nil {
-					return libcnb.BuildResult{}, fmt.Errorf(
-						"unable to read the Spring Boot version from META-INF/MANIFEST.MF. " +
-							"Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or " +
-							"BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
-				}
-				scbVer = scbVerFromBoot
-			}
-
-			dep, err := dr.Resolve("spring-cloud-bindings", scbVer)
-			if err != nil {
-				return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
-			}
-
-			bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
-			bindingsLayer.Logger = b.Logger
-			result.Layers = append(result.Layers, bindingsLayer)
-			result.BOM.Entries = append(result.BOM.Entries, be)
-		}
-
-		// configure JVM for application type
-		classes, ok := manifest.Get("Spring-Boot-Classes")
-		if !ok {
-			return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Classes")
-		}
-
-		wr, err := NewWebApplicationResolver(classes, lib)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationTypeResolver\n%w", err)
-		}
-
-		at, err := NewWebApplicationType(context.Application.Path, wr)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to create WebApplicationType\n%w", err)
-		}
-		at.Logger = b.Logger
-		result.Layers = append(result.Layers, at)
-
-		// slice app dir
-		if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
-			b.Logger.Header("Creating slices from layers index")
-
-			file := filepath.Join(context.Application.Path, index)
-			in, err := os.Open(file)
-			if err != nil {
-				return libcnb.BuildResult{}, fmt.Errorf("unable to open %s\n%w", file, err)
-			}
-			defer in.Close()
-
-			var layers []map[string][]string
-			if err := yaml.NewDecoder(in).Decode(&layers); err != nil {
-				return libcnb.BuildResult{}, fmt.Errorf("unable to decode %s\n%w", file, err)
-			}
-
-			for _, layer := range layers {
-				for name, paths := range layer {
-					size, err := calcSize(paths)
-					if err != nil {
-						size = "size unavailable"
-					}
-
-					b.Logger.Body(fmt.Sprintf("%s (%s)", name, size))
-					result.Slices = append(result.Slices, libcnb.Slice{Paths: paths})
-				}
-			}
-		}
+		return libcnb.BuildResult{}, fmt.Errorf("error finding Main-Class or Start-Class manifest entry for Process Type\n%w", err)
 	}
 
 	return result, nil
@@ -427,107 +430,181 @@ func bootVersion(version string) (*semver.Version, error) {
 	return semverBoot, nil
 }
 
-//func findSpringBootExecutableJAR(appPath string) (string, *properties.Properties, error) {
-//	props := &properties.Properties{}
-//	jarPath := ""
-//	stopWalk := errors.New("stop walking")
-//
-//	err := fsutil.Walk(appPath, func(path string, info os.FileInfo, err error) error {
-//		if err != nil {
-//			return err
-//		}
-//
-//		// make sure it is a file
-//		if info.IsDir() {
-//			return nil
-//		}
-//
-//		// make sure it is a JAR file
-//		if !strings.HasSuffix(path, ".jar") {
-//			return nil
-//		}
-//
-//		// get the MANIFEST of the JAR file
-//		props, err = libjvm.NewManifestFromJAR(path)
-//		if err != nil {
-//			return fmt.Errorf("unable to load manifest\n%w", err)
-//		}
-//
-//		// we take it if it has a Main-Class AND a Spring-Boot-Version
-//		_, okMC := props.Get("Main-Class")
-//		_, okSBV := props.Get("Spring-Boot-Version")
-//		if okMC && okSBV {
-//			jarPath = path
-//			return stopWalk
-//		}
-//
-//		return nil
-//	})
-//
-//	if err != nil && !errors.Is(err, stopWalk) {
-//		return "", nil, err
-//	}
-//
-//	return jarPath, props, nil
-//}
-//
-//func Unzip(src, dest string) error {
-//	dest = filepath.Clean(dest) + "/"
-//
-//	r, err := zip.OpenReader(src)
-//	if err != nil {
-//		return err
-//	}
-//	defer CloseOrPanic(r)()
-//
-//	os.MkdirAll(dest, 0755)
-//
-//	// Closure to address file descriptors issue with all the deferred .Close() methods
-//	extractAndWriteFile := func(f *zip.File) error {
-//		path := filepath.Join(dest, f.Name)
-//		// Check for ZipSlip: https://snyk.io/research/zip-slip-vulnerability
-//		if !strings.HasPrefix(path, dest) {
-//			return fmt.Errorf("%s: illegal file path", path)
-//		}
-//
-//		rc, err := f.Open()
-//		if err != nil {
-//			return err
-//		}
-//		defer CloseOrPanic(rc)()
-//
-//		if f.FileInfo().IsDir() {
-//			os.MkdirAll(path, f.Mode())
-//		} else {
-//			os.MkdirAll(filepath.Dir(path), f.Mode())
-//			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-//			if err != nil {
-//				return err
-//			}
-//			defer CloseOrPanic(f)()
-//
-//			_, err = io.Copy(f, rc)
-//			if err != nil {
-//				return err
-//			}
-//		}
-//		return nil
-//	}
-//
-//	for _, f := range r.File {
-//		err := extractAndWriteFile(f)
-//		if err != nil {
-//			return err
-//		}
-//	}
-//
-//	return nil
-//}
-//
-//func CloseOrPanic(f io.Closer) func() {
-//	return func() {
-//		if err := f.Close(); err != nil {
-//			panic(err)
-//		}
-//	}
-//}
+func (b Build) createSlices(path string, index string, result libcnb.BuildResult) (libcnb.BuildResult, error) {
+
+	file := filepath.Join(path, index)
+	in, err := os.Open(file)
+	if err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to open %s\n%w", file, err)
+	}
+	defer in.Close()
+	var layers []map[string][]string
+	if err := yaml.NewDecoder(in).Decode(&layers); err != nil {
+		return libcnb.BuildResult{}, fmt.Errorf("unable to decode %s\n%w", file, err)
+	}
+	for _, layer := range layers {
+		for name, paths := range layer {
+			size, err := calcSize(paths)
+			if err != nil {
+				size = "size unavailable"
+			}
+			b.Logger.Body(fmt.Sprintf("%s (%s)", name, size))
+			result.Slices = append(result.Slices, libcnb.Slice{Paths: paths})
+		}
+	}
+
+	return result, nil
+}
+
+func (b *Build) contributeHelpers(context libcnb.BuildContext, result libcnb.BuildResult, helpers []string) libcnb.BuildResult {
+	h := libpak.NewHelperLayerContributor(context.Buildpack, helpers...)
+	h.Logger = b.Logger
+	result.Layers = append(result.Layers, h)
+	return result
+}
+
+func (b *Build) setProcessTypes(mainClass string, classpathString string) []libcnb.Process {
+
+	command := "java"
+	arguments := []string{}
+	if classpathString != "" {
+		arguments = append(arguments, "-cp")
+		arguments = append(arguments, classpathString)
+	}
+	arguments = append(arguments,mainClass)
+
+	processes := []libcnb.Process{}
+	processes = append(processes,
+		libcnb.Process{
+			Type:      "spring-boot-app",
+			Command:   command,
+			Arguments: arguments,
+			Direct:    true,
+		},
+		libcnb.Process{
+			Type:      "task",
+			Command:   command,
+			Arguments: arguments,
+			Direct:    true,
+		},
+		libcnb.Process{
+			Type:      "web",
+			Command:   command,
+			Arguments: arguments,
+			Direct:    true,
+			Default:   true,
+		})
+	return processes
+}
+
+func findSpringBootExecutableJAR(appPath string) (string, *properties.Properties, error) {
+
+	props := &properties.Properties{}
+	jarPath := ""
+	stopWalk := errors.New("stop walking")
+
+	err := fsutil.Walk(appPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// make sure it is a file
+		if info.IsDir() {
+			return nil
+		}
+
+		// make sure it is a JAR file
+		if !strings.HasSuffix(path, ".jar") {
+			return nil
+		}
+
+		// get the MANIFEST of the JAR file
+		props, err = libjvm.NewManifestFromJAR(path)
+		if err != nil {
+			return fmt.Errorf("unable to load manifest\n%w", err)
+		}
+
+		// we take it if it has a Main-Class AND a Spring-Boot-Version
+		_, okMC := props.Get("Main-Class")
+		_, okSBV := props.Get("Spring-Boot-Version")
+		if okMC && okSBV {
+			jarPath = path
+			return stopWalk
+		}
+
+		return nil
+	})
+
+	if err != nil && !errors.Is(err, stopWalk) {
+		return "", nil, err
+	}
+
+	tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
+	Unzip(jarPath, tempExplodedJar)
+	os.RemoveAll(appPath)
+	sherpa.CopyDir(tempExplodedJar, appPath)
+	jarPath = appPath
+
+	return jarPath, props, nil
+}
+
+func Unzip(src, dest string) error {
+	dest = filepath.Clean(dest) + "/"
+
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer CloseOrPanic(r)()
+
+	os.MkdirAll(dest, 0755)
+
+	// Closure to address file descriptors issue with all the deferred .Close() methods
+	extractAndWriteFile := func(f *zip.File) error {
+		path := filepath.Join(dest, f.Name)
+		// Check for ZipSlip: https://snyk.io/research/zip-slip-vulnerability
+		if !strings.HasPrefix(path, dest) {
+			return fmt.Errorf("%s: illegal file path", path)
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer CloseOrPanic(rc)()
+
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(path, f.Mode())
+		} else {
+			os.MkdirAll(filepath.Dir(path), f.Mode())
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer CloseOrPanic(f)()
+
+			_, err = io.Copy(f, rc)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	for _, f := range r.File {
+		err := extractAndWriteFile(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func CloseOrPanic(f io.Closer) func() {
+	return func() {
+		if err := f.Close(); err != nil {
+			panic(err)
+		}
+	}
+}

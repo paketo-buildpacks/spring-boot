@@ -44,10 +44,13 @@ type SpringCds struct {
 	AppPath          string
 	Manifest         *properties.Properties
 	AotEnabled       bool
+	DoTrainingRun    bool
+	ClasspathString	 string
+	Unpack         bool
 }
 
-func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool) SpringCds {
-	contributor := libpak.NewLayerContributor("spring-cds", cache, libcnb.LayerTypes{
+func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, unpack bool) SpringCds {
+	contributor := libpak.NewLayerContributor("Performance", cache, libcnb.LayerTypes{
 		Build:  true,
 		Launch: true,
 	})
@@ -57,12 +60,32 @@ func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *proper
 		AppPath:          appPath,
 		Manifest:         manifest,
 		AotEnabled:       aotEnabled,
+		DoTrainingRun:	  doTrainingRun,
+		ClasspathString:  classpathString,
+		Unpack: 		  unpack,	
 	}
 }
 
 func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
+
+		// prepare the training run JVM opts
+		var trainingRunArgs []string
+
+		if s.AotEnabled || s.DoTrainingRun {
+			layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
+			if s.DoTrainingRun {
+				trainingRunArgs = append(trainingRunArgs, "-Dspring.aot.enabled=true")
+				layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", "true")
+			} else {
+				return layer, nil
+			}
+		} else {
+			return layer, nil
+		}
+
+		// if unpack == true, follow this (with any updates needed), else (3.3+) run new command, +- touch file timestamps? + skip to training run section below
 
 		s.Logger.Bodyf("This is the value of AppPath: %s", s.AppPath)
 		s.Logger.Body("Those are the files we have in the workspace")
@@ -76,7 +99,7 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		if !(okIT && okIV && okSC && okSI) {
 			return layer, fmt.Errorf("unable to contribute spring-cds layer - " +
 				"missing Spring Boot Manifest entries, Implementation-Title or Implementation-Version" +
-				"or Start-Class or Spring-Boot-Classpath-Index\n")
+				"or Start-Class or Spring-Boot-Classpath-Index")
 		}
 
 		// the spring boot jar is already unzipped
@@ -91,21 +114,21 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		jarName := implementationTitle + "-" + implementationValue + ".jar"
 		createJar(originalJarExplodedDirectory+"/BOOT-INF/classes/", targetUnpackedDirectory+"/application/"+jarName)
 
-		s.Logger.Bodyf("Those are the files we have in the target folder %s", targetUnpackedDirectory)
-		helper.StartOSCommand("", "ls", "-al", targetUnpackedDirectory)
+		s.Logger.Bodyf("Those are the files we have in the target folder %s", targetUnpackedDirectory+"/dependencies")
+		helper.StartOSCommand("", "ls", "-al", targetUnpackedDirectory+"/dependencies")
 
 		// we prepare and create the MANIFEST.MF of the runner-app.jar
 		tempDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
 		os.MkdirAll(tempDirectory+"/META-INF/", 0755)
 		runAppJarManifest, _ := os.Create(tempDirectory + "/META-INF/MANIFEST.MF")
-		writeRunAppJarManifest(originalJarExplodedDirectory, runAppJarManifest, "application/"+jarName, startClassValue, classpathIndex)
+		s.writeRunAppJarManifest(originalJarExplodedDirectory, runAppJarManifest, "application/"+jarName, startClassValue, classpathIndex)
 
 		s.Logger.Bodyf("that's the run-app.jar manifest:\n")
 		helper.StartOSCommand("", "cat", runAppJarManifest.Name())
 		s.Logger.Bodyf("That's the jar we're building: %s in %s", filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/run-app.jar")
 
 		// we create the runner-app.jar that will contain just its MANIFEST
-		createJar(filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/run-app.jar")
+		createJar(filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/runner.jar")
 		//helper.StartOSCommand("", "unzip", "-t", targetUnpackedDirectory+"/run-app.jar")
 		//helper.StartOSCommand("", "jar", "cfm", targetUnpackedDirectory+"/run-app.jar", runAppJarManifest.Name())
 
@@ -130,16 +153,16 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
 		}
 
-		// prepare the training run JVM opts
-		var trainingRunArgs []string
-		if s.AotEnabled {
-			trainingRunArgs = append(trainingRunArgs, "-Dspring.aot.enabled=true")
-			layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", "true")
-		}
 		trainingRunArgs = append(trainingRunArgs,
 			"-Dspring.context.exit=onRefresh",
 			"-XX:ArchiveClassesAtExit=application.jsa",
-			"-jar", "run-app.jar")
+			"-cp",
+			)
+
+		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
+		trainingRunArgs = append(trainingRunArgs, startClassValue)
+		
+		s.Logger.Bodyf("training args %s", strings.Join(trainingRunArgs, ", "))
 
 		// perform the training run, application.dsa, the cache file, will be created
 		if err := s.Executor.Execute(effect.Execution{
@@ -201,8 +224,12 @@ func (s SpringCds) Name() string {
 	return s.LayerContributor.Name
 }
 
-func writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
+func (s SpringCds) writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
 	classPathValue, _ := retrieveClasspathFromIdx(originalJarExplodedDirectory, "dependencies/", relocatedOriginalJar, classpathIdx)
+
+	//for _, lib :=  range s.AdditionalLibs {
+	//	classPathValue = strings.Join([]string{classPathValue, fmt.Sprintf("dependencies/%s", lib)}, " ")
+	//}
 
 	type Manifest struct {
 		MainClass string
