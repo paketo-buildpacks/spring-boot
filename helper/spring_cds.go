@@ -19,11 +19,11 @@ package helper
 import (
 	"bytes"
 	"fmt"
-	"github.com/paketo-buildpacks/libpak/bard"
 	"os"
 	"os/exec"
-	"strconv"
-	"strings"
+
+	"github.com/paketo-buildpacks/libpak/bard"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 type SpringCds struct {
@@ -32,25 +32,24 @@ type SpringCds struct {
 
 func (s SpringCds) Execute() (map[string]string, error) {
 
-	s.Logger.Info("Spring App CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_OPTS")
 	s.Logger.Body("Those are the files we have in the workspace")
 
 	StartOSCommand("", "ls", "-al", "./")
 	StartOSCommand("", "env")
-	var values []string
-	if s, ok := os.LookupEnv("JAVA_TOOL_OPTIONS"); ok {
-		values = append(values, s)
-	}
-	if val, ok := os.LookupEnv("BPL_SPRING_AOT_ENABLED"); ok {
-		enabled, err := strconv.ParseBool(val)
-		if enabled && err == nil {
-			s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_OPTS")
-			values = append(values, "-Dspring.aot.enabled=true")
-		}
-	}
-	values = append(values, "-XX:SharedArchiveFile=application.jsa")
 
-	return map[string]string{"JAVA_TOOL_OPTIONS": strings.Join(values, " ")}, nil
+	opts := sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", "")
+
+	if sherpa.ResolveBool("BPL_SPRING_AOT_ENABLED") {
+		s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_OPTS")
+		opts = sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ",  "-Dspring.aot.enabled=true")
+	}
+
+	if sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") {
+		s.Logger.Info("Spring CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_OPTS")
+		opts = sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ",  "-XX:SharedArchiveFile=application.jsa")
+	}
+
+	return map[string]string{"JAVA_TOOL_OPTIONS": opts}, nil
 }
 
 func StartOSCommand(envVariable string, command string, arguments ...string) {
