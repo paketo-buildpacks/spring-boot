@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-package main
+package fsutil_test
 
 import (
-	"os"
+	"testing"
 
-	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/libpak/sherpa"
-
-	"github.com/paketo-buildpacks/spring-boot/v5/helper"
+	"github.com/sclevine/spec"
+	"github.com/sclevine/spec/report"
 )
 
-func main() {
-	sherpa.Execute(func() error {
-		return sherpa.Helpers(map[string]sherpa.ExecD{
-			"performance":            helper.SpringCds{Logger: bard.NewLogger(os.Stdout)},
-			"spring-cloud-bindings": helper.SpringCloudBindings{Logger: bard.NewLogger(os.Stdout)},
-		})
-	})
+func TestUnit(t *testing.T) {
+	suite := spec.New("fsutil", spec.Report(report.Terminal{}))
+	suite("Walk", testWalk)
+	suite.Run(t)
 }
