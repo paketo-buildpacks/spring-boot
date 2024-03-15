@@ -65,7 +65,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	b.Logger.Body("Those are the files we have in the workspace")
 	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
 	result := libcnb.NewBuildResult()
-	bootJarFound := false
+	bootJarFound, reZipExplodedJar := false, false
 	mainClass := ""
 
 	manifest, err := libjvm.NewManifest(context.Application.Path)
@@ -77,7 +77,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	version, version_found := manifest.Get("Spring-Boot-Version")
 	if !version_found {
-		if context.Application.Path, manifest, err = findSpringBootExecutableJAR(context.Application.Path); err != nil {
+		if context.Application.Path, manifest, err = b.findSpringBootExecutableJAR(context.Application.Path); err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to find Spring Boot Executable Jar\n%w", err)
 		} else if version, version_found = manifest.Get("Spring-Boot-Version"); !version_found {
 			// this isn't a boot app, return without printing title
@@ -85,6 +85,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 		bootJarFound = true
 		mainClass, _ = manifest.Get("Main-Class")
+	}
+	if trainingRun && bootExtractionSupported(version) {
+		reZipExplodedJar = true
 	}
 
 	b.Logger.Title(context.Buildpack)
@@ -202,21 +205,19 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 		helpers = append(helpers, "performance")
 
-		//Boot 3.2 vs 3.3 check here? == unpack ourselves? answer passed as last param to the NewSpringCds call
-
 		if trainingRun {
 			mainClass, _ = manifest.Get("Start-Class")
 			classpathString = "runner.jar"
 			if len(additionalLibs) > 0 {
 				cpLibs := []string{}
 				for _, lib :=  range additionalLibs {
-					cpLibs = append(cpLibs, fmt.Sprintf(":%s","dependencies/"+lib))
+					cpLibs = append(cpLibs, fmt.Sprintf(":%s","dependencies/lib/"+lib))
 				}
 				classpathString = fmt.Sprintf(classpathString+"%s", strings.Join(cpLibs,""))
 			}
 		}
 
-		cdsLayer := NewSpringCds(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, true)
+		cdsLayer := NewSpringCds(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, reZipExplodedJar)
 		cdsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, cdsLayer)
 
@@ -497,7 +498,7 @@ func (b *Build) setProcessTypes(mainClass string, classpathString string) []libc
 	return processes
 }
 
-func findSpringBootExecutableJAR(appPath string) (string, *properties.Properties, error) {
+func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties.Properties, error) {
 
 	props := &properties.Properties{}
 	jarPath := ""
@@ -539,13 +540,31 @@ func findSpringBootExecutableJAR(appPath string) (string, *properties.Properties
 		return "", nil, err
 	}
 
-	tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
-	Unzip(jarPath, tempExplodedJar)
-	os.RemoveAll(appPath)
-	sherpa.CopyDir(tempExplodedJar, appPath)
-	jarPath = appPath
+	//if !cds {
+		tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
+		Unzip(jarPath, tempExplodedJar)
+		os.RemoveAll(appPath)
+		sherpa.CopyDir(tempExplodedJar, appPath)
+		jarPath = appPath
+	//}
+
+	//if doBootExtract := bootExtractSupported(bv); doBootExtract {
+	//	b.springBootJarExtract(jarPath)
+	//}
 
 	return jarPath, props, nil
+}
+
+func bootExtractionSupported(manifestVer string) (bool) {
+	bootThreeThreeConstraint, _ := semver.NewConstraint(">= 3.3.0")
+	bv, err := bootVersion(manifestVer)
+	if err != nil {
+		return false
+	}
+	if bootThreeThreeConstraint.Check(bv) {
+		return true
+	}
+	return false
 }
 
 func Unzip(src, dest string) error {

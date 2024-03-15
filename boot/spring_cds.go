@@ -19,10 +19,6 @@ package boot
 import (
 	"archive/zip"
 	"fmt"
-	"github.com/magiconair/properties"
-	"github.com/paketo-buildpacks/libpak/sherpa"
-	"github.com/paketo-buildpacks/spring-boot/v5/helper"
-	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"path/filepath"
@@ -30,10 +26,15 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/magiconair/properties"
+	"github.com/paketo-buildpacks/spring-boot/v5/helper"
+	"gopkg.in/yaml.v3"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 type SpringCds struct {
@@ -46,10 +47,10 @@ type SpringCds struct {
 	AotEnabled       bool
 	DoTrainingRun    bool
 	ClasspathString	 string
-	Unpack         bool
+	ReZip         bool
 }
 
-func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, unpack bool) SpringCds {
+func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, reZip bool) SpringCds {
 	contributor := libpak.NewLayerContributor("Performance", cache, libcnb.LayerTypes{
 		Build:  true,
 		Launch: true,
@@ -62,7 +63,7 @@ func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *proper
 		AotEnabled:       aotEnabled,
 		DoTrainingRun:	  doTrainingRun,
 		ClasspathString:  classpathString,
-		Unpack: 		  unpack,	
+		ReZip: 		      reZip,	
 	}
 }
 
@@ -72,6 +73,7 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		// prepare the training run JVM opts
 		var trainingRunArgs []string
+		jarPath := s.AppPath
 
 		if s.AotEnabled || s.DoTrainingRun {
 			layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
@@ -85,12 +87,39 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return layer, nil
 		}
 
-		// if unpack == true, follow this (with any updates needed), else (3.3+) run new command, +- touch file timestamps? + skip to training run section below
+		if s.ReZip {
+				jarDestDir := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/jar-dest"
+				if err := os.MkdirAll(jarDestDir, 0755); err != nil {
+					return layer, fmt.Errorf("error creating temp directory for jar\n%w", err)
+				}
+				tempJarPath := filepath.Join(jarDestDir,"runner.jar")
+				helper.StartOSCommand("", "ls", "-al", s.AppPath)
+				helper.StartOSCommand("", "ls", "-al", filepath.Join(s.AppPath,"BOOT-INF", "lib"))
+				if err := createJar(s.AppPath, tempJarPath); err != nil {
+					return layer, fmt.Errorf("error recreating jar\n%w", err)
+				}
+				f, err := os.Open(tempJarPath)
+				if err != nil {
+					return layer, fmt.Errorf("error opening jar\n%w", err)
+				}
+				if err := sherpa.CopyFile(f, filepath.Join(layer.Path, "runner.jar")); err != nil {
+					return layer, fmt.Errorf("error copying jar\n%w", err)
+				}
 
+				return layer, nil
+				jarPath = tempJarPath
+				//os.RemoveAll(s.AppPath)
+		} 
+		if err := s.springBootJarExtract(jarPath); err != nil {
+				return layer, fmt.Errorf("error extracting Boot jar\n%w", err)
+		}
+		// if unpack == true, follow this (with any updates needed), else (3.3+) run new command, +- touch file timestamps? + skip to training run section below
+		startClassValue, _ := s.Manifest.Get("Start-Class")
 		s.Logger.Bodyf("This is the value of AppPath: %s", s.AppPath)
 		s.Logger.Body("Those are the files we have in the workspace")
 		helper.StartOSCommand("", "ls", "-al", s.AppPath)
 
+		/*
 		// we extract the vital information from the Spring Boot app manifest
 		implementationTitle, okIT := s.Manifest.Get("Implementation-Title")
 		implementationValue, okIV := s.Manifest.Get("Implementation-Version")
@@ -134,12 +163,11 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 
 		// we copy all the dependencies libs from the original jar to the dependencies/folder
 		sherpa.CopyDir(originalJarExplodedDirectory+"/BOOT-INF/lib/", targetUnpackedDirectory+"/dependencies/")
+*/
 
-		// we discard the original Spring Boot app jar
-		os.RemoveAll(s.AppPath)
 
 		// we copy the unpack folder to the app path, so that it'll be kept in the layer
-		sherpa.CopyDir(targetUnpackedDirectory, s.AppPath)
+//		sherpa.CopyDir(targetUnpackedDirectory, s.AppPath)
 
 		// we set the creation date to the buildpack default 1980/01/01 date; so that cds will be fine
 		if err := s.Executor.Execute(effect.Execution{
@@ -224,6 +252,34 @@ func (s SpringCds) Name() string {
 	return s.LayerContributor.Name
 }
 
+func (s SpringCds) springBootJarExtract(jarPath string) error {
+	s.Logger.Bodyf("Extracting Jar")
+	if err := effect.NewExecutor().Execute(effect.Execution{
+		Command: "java",
+		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--layers", fmt.Sprintf("--destination=%s",s.AppPath)},
+		Dir:     filepath.Dir(jarPath),
+		Stdout:  s.Logger.InfoWriter(),
+		Stderr:  s.Logger.InfoWriter(),
+	}); err != nil {
+		return fmt.Errorf("error extracting Jar with jarmode\n%w", err)
+	}
+	return nil
+}
+
+/*func (s SpringCds) createJar(jarSource string, jarDest string) error {
+	s.Logger.Bodyf("Creating Jar")
+	if err := effect.NewExecutor().Execute(effect.Execution{
+		Command: "jar",
+		Args:    []string{"-cf", jarDest, jarSource},
+		Dir:     filepath.Dir(jarSource),
+		Stdout:  s.Logger.InfoWriter(),
+		Stderr:  s.Logger.InfoWriter(),
+	}); err != nil {
+		return fmt.Errorf("error creating Jar\n%w", err)
+	}
+	return nil
+}*/
+
 func (s SpringCds) writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
 	classPathValue, _ := retrieveClasspathFromIdx(originalJarExplodedDirectory, "dependencies/", relocatedOriginalJar, classpathIdx)
 
@@ -300,6 +356,7 @@ func retrieveClasspathFromIdx(dir string, relocatedDir string, relocatedOriginal
 	return strings.Join(relocatedLibs, " "), nil
 }
 
+
 // heavily inspired by: https://gosamples.dev/zip-file/
 func createJar(source, target string) error {
 	// 1. Create a ZIP file and zip.Writer
@@ -316,6 +373,24 @@ func createJar(source, target string) error {
 	return filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+		absolutePath := ""
+
+		if info.Mode()&os.ModeSymlink == os.ModeSymlink {   
+			return nil
+			/*if absolutePath, err = filepath.EvalSymlinks(path); err != nil {
+				return fmt.Errorf("unable to eval symlink %s\n%w", absolutePath, err)
+			}
+			os.Stdout.WriteString(fmt.Sprintf("absolute path %s", absolutePath))
+			absolutePath = filepath.Join(absolutePath, filepath.Base(path))
+			os.Stdout.WriteString(fmt.Sprintf("full absolute path %s", absolutePath))
+			if file, err := os.Open(absolutePath); err != nil {
+				return fmt.Errorf("unable to open %s\n%w", absolutePath, err)
+			} else {
+				if info, err = file.Stat(); err != nil {
+				   return fmt.Errorf("unable to stat %s\n%w", absolutePath, err)
+				}
+			}*/
 		}
 
 		// 3. Create a local file header
@@ -344,6 +419,10 @@ func createJar(source, target string) error {
 
 		if info.IsDir() {
 			return nil
+		}
+
+		if absolutePath != "" {
+			path = absolutePath
 		}
 
 		f, err := os.Open(path)
