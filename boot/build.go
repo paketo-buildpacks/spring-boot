@@ -216,7 +216,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			if len(additionalLibs) > 0 {
 				cpLibs := []string{}
 				for _, lib := range additionalLibs {
-					cpLibs = append(cpLibs, fmt.Sprintf(":%s", "dependencies/lib/"+lib))
+					cpLibs = append(cpLibs, fmt.Sprintf(":%s", "lib/"+lib))
 				}
 				classpathString = fmt.Sprintf(classpathString+"%s", strings.Join(cpLibs, ""))
 			}
@@ -261,11 +261,13 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	at.Logger = b.Logger
 	result.Layers = append(result.Layers, at)
 
-	// Slices
-	if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
-		b.Logger.Header("Creating slices from layers index")
-		if result, err = b.createSlices(context.Application.Path, index, result); err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("error creating slices\n%w", err)
+	if !trainingRun {
+		// Slices
+		if index, ok := manifest.Get("Spring-Boot-Layers-Index"); ok {
+			b.Logger.Header("Creating slices from layers index")
+			if result, err = b.createSlices(context.Application.Path, index, result); err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf("error creating slices\n%w", err)
+			}
 		}
 	}
 

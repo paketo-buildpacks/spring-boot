@@ -19,7 +19,9 @@ package boot
 import (
 	"archive/zip"
 	"fmt"
+
 	"github.com/paketo-buildpacks/libpak/sherpa"
+
 	"io"
 	"os"
 	"path/filepath"
@@ -81,7 +83,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		if s.AotEnabled || s.DoTrainingRun {
 			layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
 			if s.DoTrainingRun {
-				trainingRunArgs = append(trainingRunArgs, "-Dspring.aot.enabled=true")
+				trainingRunArgs = append(trainingRunArgs, fmt.Sprintf("-Dspring.aot.enabled=%t", s.AotEnabled))
 				layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", "true")
 			} else {
 				return layer, nil
@@ -99,7 +101,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			tempJarPath := filepath.Join(jarDestDir, "runner.jar")
 			helper.StartOSCommand("", "ls", "-al", s.AppPath)
 			helper.StartOSCommand("", "ls", "-al", filepath.Join(s.AppPath, "BOOT-INF", "lib"))
-			if err := CreateJar(s.AppPath+"/", tempJarPath); err != nil {
+			if err := s.createJar(s.AppPath+"/", tempJarPath); err != nil {
 				return layer, fmt.Errorf("error recreating jar\n%w", err)
 			}
 			f, err := os.Open(tempJarPath)
@@ -110,9 +112,9 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				return layer, fmt.Errorf("error copying jar\n%w", err)
 			}
 
-			return layer, nil
-			//jarPath = tempJarPath
-			//os.RemoveAll(s.AppPath)
+			//return layer, nil
+			jarPath = tempJarPath
+			os.RemoveAll(s.AppPath)
 		}
 		s.Logger.Body("We're gonna extract this one:")
 		helper.StartOSCommand("", "ls", "-al", jarPath)
@@ -261,7 +263,7 @@ func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
 	s.Logger.Bodyf("Extracting Jar")
 	if err := effect.NewExecutor().Execute(effect.Execution{
 		Command: "java",
-		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--layers", fmt.Sprintf("--destination=%s", s.AppPath)},
+		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--destination", s.AppPath},
 		Dir:     filepath.Dir(jarPath),
 		Stdout:  s.Logger.InfoWriter(),
 		Stderr:  s.Logger.InfoWriter(),
@@ -271,11 +273,11 @@ func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
 	return nil
 }
 
-/*func (s SpringPerformance) createJar(jarSource string, jarDest string) error {
+func (s SpringPerformance) createJar(jarSource string, jarDest string) error {
 	s.Logger.Bodyf("Creating Jar")
 	if err := effect.NewExecutor().Execute(effect.Execution{
 		Command: "jar",
-		Args:    []string{"-cf", jarDest, jarSource},
+		Args:    []string{"-cfm0", jarDest, filepath.Join(jarSource, "META-INF", "MANIFEST.MF"), "."},
 		Dir:     filepath.Dir(jarSource),
 		Stdout:  s.Logger.InfoWriter(),
 		Stderr:  s.Logger.InfoWriter(),
@@ -283,7 +285,7 @@ func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
 		return fmt.Errorf("error creating Jar\n%w", err)
 	}
 	return nil
-}*/
+}
 
 func (s SpringPerformance) writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
 	classPathValue, _ := retrieveClasspathFromIdx(originalJarExplodedDirectory, "dependencies/", relocatedOriginalJar, classpathIdx)
@@ -361,8 +363,11 @@ func retrieveClasspathFromIdx(dir string, relocatedDir string, relocatedOriginal
 	return strings.Join(relocatedLibs, " "), nil
 }
 
+
+
 // heavily inspired by: https://gosamples.dev/zip-file/
 func CreateJar(source, target string) error {
+
 	// 1. Create a ZIP file and zip.Writer
 	f, err := os.Create(target)
 	if err != nil {
@@ -405,9 +410,10 @@ func CreateJar(source, target string) error {
 
 		// set compression
 		header.Method = zip.Store
+		
 
 		// 4. Set relative path of a file as the header name
-		header.Name, err = filepath.Rel(filepath.Dir(source), path)
+		header.Name, err = filepath.Rel(source, path)
 		if err != nil {
 			return err
 		}
@@ -436,6 +442,8 @@ func CreateJar(source, target string) error {
 		defer f.Close()
 
 		_, err = io.Copy(headerWriter, f)
+		writer.Flush()
 		return err
 	})
+	
 }
