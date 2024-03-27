@@ -8,6 +8,7 @@ import (
 	"github.com/mholt/archiver/v4"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak/sherpa"
+	"github.com/paketo-buildpacks/spring-boot/v5/boot"
 	"github.com/saracen/fastzip"
 	"gopkg.in/yaml.v3"
 	"io"
@@ -69,7 +70,7 @@ func archiveWithFastZip(source, target string) {
 	defer a.Close()
 
 	// Register a non-default level compressor if required
-	// a.RegisterCompressor(zip.Deflate, fastzip.FlateCompressor(1))
+	//a.RegisterCompressor(zip.Deflate, fastzip.FlateCompressor(1))
 
 	// Walk directory, adding the files we want to add
 	files := make(map[string]os.FileInfo)
@@ -113,7 +114,7 @@ func archiveWithArchiver(source, target string) {
 }
 
 func TestZip(t *testing.T) {
-	archiveWithArchiver("/Users/anthonyd2/workspaces/spring-cds-demo/build/libs/unzip/", "/Users/anthonyd2/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
+	boot.CreateJar("/Users/anthonyd2/workspaces/spring-cds-demo/build/libs/unzip/", "/Users/anthonyd2/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
 }
 
 func zipSource2(source, target string) error {
@@ -140,7 +141,11 @@ func zipSource2(source, target string) error {
 		}
 
 		// set compression
-		header.Method = zip.Deflate
+		if strings.HasSuffix(header.Name, ".jar") {
+			header.Method = zip.Store
+		} else {
+			header.Method = zip.Deflate
+		}
 
 		// 4. Set relative path of a file as the header name
 		header.Name, err = filepath.Rel(filepath.Dir(source), path)

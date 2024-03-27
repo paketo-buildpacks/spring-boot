@@ -33,7 +33,6 @@ const (
 	PlanEntryJVMApplication   = "jvm-application"
 	PlanEntryNativeProcessed  = "native-processed"
 	PlanEntryJRE              = "jre"
-	PlanEntryJDK              = "jdk"
 	MavenConfigActiveProfiles = "BP_MAVEN_ACTIVE_PROFILES"
 )
 
@@ -74,7 +73,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: PlanEntryJVMApplication},
 						{Name: PlanEntrySpringBoot},
-						{Name: PlanEntryJDK, Metadata: map[string]interface{}{"build": true}},
+						{Name: PlanEntryJRE, Metadata: map[string]interface{}{"build": true}},
 					},
 				},
 			},
