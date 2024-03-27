@@ -164,7 +164,7 @@ func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadat
 		if class == "" {
 			continue
 		}
-		classes = append(classes, strings.TrimSpace(class))
+		classes = append(classes, class)
 	}
 
 	m := ConfigurationMetadata{}
