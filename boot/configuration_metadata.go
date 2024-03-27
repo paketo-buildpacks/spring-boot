@@ -160,7 +160,11 @@ func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadat
 
 	var classes []string
 	for _, s := range strings.Split(s, ",") {
-		classes = append(classes, strings.TrimSpace(s))
+		class := strings.TrimSpace(s)
+		if class == "" {
+			continue
+		}
+		classes = append(classes, strings.TrimSpace(class))
 	}
 
 	m := ConfigurationMetadata{}

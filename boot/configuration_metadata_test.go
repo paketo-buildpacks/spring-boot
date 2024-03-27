@@ -77,6 +77,21 @@ func testConfigurationMetadata(t *testing.T, context spec.G, it spec.S) {
 			}))
 		})
 
+		it("returns dataflow decoded contents handling trailing comma correctly", func() {
+			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "spring-configuration-metadata.json"),
+				[]byte(`{ "properties": [ { "name": "alpha", "sourceType": "alpha" }, { "name": "beta" } ] }`), 0644))
+			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "dataflow-configuration-metadata.properties"),
+				[]byte("configuration-properties.classes=alpha,"), 0644))
+
+			cm, err := boot.NewConfigurationMetadataFromPath(path)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(boot.NewDataFlowConfigurationMetadata(path, cm)).To(Equal(boot.ConfigurationMetadata{
+				Properties: []boot.Property{{Name: "alpha", SourceType: "alpha"}},
+			}))
+		})
+
 		it("returns dataflow decoded contents", func() {
 			Expect(os.MkdirAll(filepath.Join(path, "META-INF"), 0755)).To(Succeed())
 			Expect(ioutil.WriteFile(filepath.Join(path, "META-INF", "spring-configuration-metadata.json"),
