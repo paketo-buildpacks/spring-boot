@@ -31,21 +31,14 @@ type SpringPerformance struct {
 }
 
 func (s SpringPerformance) Execute() (map[string]string, error) {
-
-	s.Logger.Body("Those are the files we have in the workspace")
-
-	StartOSCommand("", "ls", "-al", "./")
-	StartOSCommand("", "env")
-
 	var values []string
-
 	if sherpa.ResolveBool("BPL_SPRING_AOT_ENABLED") {
-		s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_OPTS")
+		s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_TOOL_OPTIONS")
 		values = append(values, "-Dspring.aot.enabled=true")
 	}
 
 	if sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") {
-		s.Logger.Info("Spring CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_OPTS")
+		s.Logger.Info("Spring CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_TOOL_OPTIONS")
 		values = append(values, "-XX:SharedArchiveFile=application.jsa")
 	}
 	opts := sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ", values...)
