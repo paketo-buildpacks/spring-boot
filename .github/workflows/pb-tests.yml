@@ -104,21 +104,23 @@ jobs:
 
                 if [[ "${INCLUDE_DEPENDENCIES}" == "true" ]]; then
                   create-package \
-                    --source ${SOURCE_PATH:-.} \
+                    --source "${SOURCE_PATH:-.}" \
                     --cache-location "${HOME}"/carton-cache \
                     --destination "${HOME}"/buildpack \
                     --include-dependencies \
                     --version "${VERSION}"
                 else
                   create-package \
-                    --source ${SOURCE_PATH:-.} \
+                    --source "${SOURCE_PATH:-.}" \
                     --destination "${HOME}"/buildpack \
                     --version "${VERSION}"
                 fi
 
-                PACKAGE_FILE=${SOURCE_PATH:-.}/package.toml
-                [[ -e ${PACKAGE_FILE} ]] && cp ${PACKAGE_FILE} "${HOME}"/package.toml
-                printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}"/buildpack "${OS}" >> "${HOME}"/package.toml
+                PACKAGE_FILE="${SOURCE_PATH:-.}/package.toml"
+                if [ -f "${PACKAGE_FILE}" ]; then
+                  cp "${PACKAGE_FILE}" "${HOME}/buildpack/package.toml"
+                  printf '[buildpack]\nuri = "%s"\n\n[platform]\nos = "%s"\n' "${HOME}/buildpack" "${OS}" >> "${HOME}/buildpack/package.toml"
+                fi
               env:
                 INCLUDE_DEPENDENCIES: "true"
                 OS: linux
@@ -129,11 +131,14 @@ jobs:
 
                 set -euo pipefail
 
-                CONFIG="--config "${HOME}"/package.toml"
-                #TODO with this, we don't need to use the package.toml, because pack exp. does not support it with multi arch yet
-                if ! [ -f "${PWD}/package.toml" ]; then
-                  cd ~/buildpack
-                  CONFIG=""
+                COMPILED_BUILDPACK="${HOME}/buildpack"
+
+                # create-package puts the buildpack here, we need to run from that directory
+                #   for component buildpacks so that pack doesn't need a package.toml
+                cd "${COMPILED_BUILDPACK}"
+                CONFIG=""
+                if [ -f "${COMPILED_BUILDPACK}/package.toml" ]; then
+                  CONFIG="--config ${COMPILED_BUILDPACK}/package.toml"
                 fi
 
                 PACKAGE_LIST=($PACKAGES)
