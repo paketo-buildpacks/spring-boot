@@ -134,15 +134,28 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			"-XX:ArchiveClassesAtExit=application.jsa",
 			"-cp",
 		)
-
 		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
 		trainingRunArgs = append(trainingRunArgs, startClassValue)
-
 		s.Logger.Bodyf("training args %s", strings.Join(trainingRunArgs, ", "))
+
+		javaToolOptions, javaToolOptionsFound := os.LookupEnv("JAVA_TOOL_OPTIONS")
+		javaToolOptionsCds, javaToolOptionsCdsFound := os.LookupEnv("CDS_TRAINING_JAVA_TOOL_OPTIONS")
+		if javaToolOptionsCdsFound {
+			s.Logger.Bodyf("Picked up CDS_TRAINING_JAVA_TOOL_OPTIONS: %s", javaToolOptionsCds)
+			s.Logger.Body("Training run will use this value as JAVA_TOOL_OPTIONS")
+			javaToolOptions = javaToolOptionsCds
+		} else {
+			if javaToolOptionsFound {
+				s.Logger.Bodyf("Picked up JAVA_TOOL_OPTIONS: %s", javaToolOptions)
+			}
+		}
+		var trainingRunEnvVariables []string
+		trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", javaToolOptions))
 
 		// perform the training run, application.dsa, the cache file, will be created
 		if err := s.Executor.Execute(effect.Execution{
 			Command: "java",
+			Env:     trainingRunEnvVariables,
 			Args:    trainingRunArgs,
 			Dir:     s.AppPath,
 			Stdout:  s.Logger.InfoWriter(),
