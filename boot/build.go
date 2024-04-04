@@ -64,7 +64,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
 	result := libcnb.NewBuildResult()
 	bootJarFound, reZipExplodedJar := false, false
-	mainClass := ""
 
 	manifest, err := libjvm.NewManifest(context.Application.Path)
 	if err != nil {
@@ -77,13 +76,16 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if !versionFound {
 		if context.Application.Path, manifest, err = b.findSpringBootExecutableJAR(context.Application.Path); err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to find Spring Boot Executable Jar\n%w", err)
-		} else if version, versionFound = manifest.Get("Spring-Boot-Version"); !versionFound {
-			// this isn't a boot app, return without printing title
-			return libcnb.BuildResult{}, nil
+		} else {
+			if version, versionFound = manifest.Get("Spring-Boot-Version"); !versionFound {
+				// this isn't a boot app, return without printing title
+				return libcnb.BuildResult{}, nil
+			}
 		}
 		bootJarFound = true
-		mainClass, _ = manifest.Get("Main-Class")
 	}
+	mainClass, _ := manifest.Get("Main-Class")
+
 	if trainingRun {
 		if bootCDSExtractionSupported(version) {
 			reZipExplodedJar = true
@@ -199,8 +201,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
 	aotEnabled := false
 	if enabled, _ := sherpa.DirExists(dir); enabled {
-		// TODO: David, we don't need the user to ask for this optimization; if they compiled with AOT, they sure want the image to leverage it at runtime?!
-		//&& sherpa.ResolveBool("BP_SPRING_AOT_ENABLED") {
 		aotEnabled = true
 	}
 
@@ -273,10 +273,12 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	result = b.contributeHelpers(context, result, helpers)
 
-	if (bootJarFound || trainingRun) && mainClass != "" {
-		result.Processes = append(result.Processes, b.setProcessTypes(mainClass, classpathString)...)
-	} else {
-		return libcnb.BuildResult{}, fmt.Errorf("error finding Main-Class or Start-Class manifest entry for Process Type\n%w", err)
+	if bootJarFound || trainingRun {
+		if mainClass != "" {
+			result.Processes = append(result.Processes, b.setProcessTypes(mainClass, classpathString)...)
+		} else {
+			return libcnb.BuildResult{}, fmt.Errorf("error finding Main-Class or Start-Class manifest entry for Process Type\n")
+		}
 	}
 
 	return result, nil
@@ -438,7 +440,7 @@ func bootVersion(version string) (*semver.Version, error) {
 	return semverBoot, nil
 }
 
-func (b Build) createSlices(path string, index string, result libcnb.BuildResult) (libcnb.BuildResult, error) {
+func (b *Build) createSlices(path string, index string, result libcnb.BuildResult) (libcnb.BuildResult, error) {
 
 	file := filepath.Join(path, index)
 	in, err := os.Open(file)
