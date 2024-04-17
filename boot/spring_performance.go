@@ -33,7 +33,6 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
-	"github.com/paketo-buildpacks/spring-boot/v5/helper"
 )
 
 type SpringPerformance struct {
@@ -71,7 +70,6 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 
 		s.Logger.Body("Those are the files we have in the workspace")
-		helper.StartOSCommand("", "ls", "-al", s.AppPath)
 
 		// prepare the training run JVM opts
 		var trainingRunArgs []string
@@ -96,8 +94,6 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				return layer, fmt.Errorf("error creating temp directory for jar\n%w", err)
 			}
 			tempJarPath := filepath.Join(jarDestDir, "runner.jar")
-			helper.StartOSCommand("", "ls", "-al", s.AppPath)
-			helper.StartOSCommand("", "ls", "-al", filepath.Join(s.AppPath, "BOOT-INF", "lib"))
 			if err := CreateJar(s.AppPath+"/", tempJarPath); err != nil {
 				return layer, fmt.Errorf("error recreating jar\n%w", err)
 			}
@@ -114,7 +110,6 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			os.RemoveAll(s.AppPath)
 		}
 		s.Logger.Body("We're gonna extract this one:")
-		helper.StartOSCommand("", "ls", "-al", jarPath)
 		if err := s.springBootJarCDSLayoutExtract(jarPath); err != nil {
 			return layer, fmt.Errorf("error extracting Boot jar at %s\n%w", jarPath, err)
 		}
@@ -122,7 +117,6 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		startClassValue, _ := s.Manifest.Get("Start-Class")
 		s.Logger.Bodyf("This is the value of AppPath: %s", s.AppPath)
 		s.Logger.Body("Those are the files we have in the workspace")
-		helper.StartOSCommand("", "ls", "-al", s.AppPath)
 
 		err := resetCreationTimeWithTouch(s)
 		if err != nil {
@@ -191,7 +185,7 @@ func (s SpringPerformance) Name() string {
 
 func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
 	s.Logger.Bodyf("Extracting Jar")
-	if err := effect.NewExecutor().Execute(effect.Execution{
+	if err := s.Executor.Execute(effect.Execution{
 		Command: "java",
 		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--destination", s.AppPath},
 		Dir:     filepath.Dir(jarPath),

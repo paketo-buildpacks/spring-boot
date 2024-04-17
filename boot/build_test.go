@@ -214,17 +214,17 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
-		Expect(result.Layers[0].Name()).To(Equal("helper"))
-		Expect(result.Layers[0].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
-		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
-		Expect(result.Layers[2].Name()).To(Equal("web-application-type"))
+		Expect(result.Layers[2].Name()).To(Equal("helper"))
+		Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
+		Expect(result.Layers[0].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[1].Name()).To(Equal("web-application-type"))
 
 		Expect(result.BOM.Entries).To(HaveLen(3))
-		Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
-		Expect(result.BOM.Entries[1].Name).To(Equal("helper"))
+		Expect(result.BOM.Entries[1].Name).To(Equal("dependencies"))
+		Expect(result.BOM.Entries[2].Name).To(Equal("helper"))
 		Expect(result.BOM.Entries[1].Launch).To(BeTrue())
 		Expect(result.BOM.Entries[1].Build).To(BeFalse())
-		Expect(result.BOM.Entries[2].Name).To(Equal("spring-cloud-bindings"))
+		Expect(result.BOM.Entries[0].Name).To(Equal("spring-cloud-bindings"))
 		Expect(result.BOM.Entries[2].Launch).To(BeTrue())
 		Expect(result.BOM.Entries[2].Build).To(BeFalse())
 	})
@@ -242,19 +242,19 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Layers).To(HaveLen(3))
-		Expect(result.Layers[0].Name()).To(Equal("helper"))
-		Expect(result.Layers[0].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
-		Expect(result.Layers[1].Name()).To(Equal("spring-cloud-bindings"))
-		Expect(result.Layers[2].Name()).To(Equal("web-application-type"))
+		Expect(result.Layers[2].Name()).To(Equal("helper"))
+		Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"spring-cloud-bindings"}))
+		Expect(result.Layers[0].Name()).To(Equal("spring-cloud-bindings"))
+		Expect(result.Layers[1].Name()).To(Equal("web-application-type"))
 
 		Expect(result.BOM.Entries).To(HaveLen(3))
-		Expect(result.BOM.Entries[0].Name).To(Equal("dependencies"))
-		Expect(result.BOM.Entries[1].Name).To(Equal("helper"))
-		Expect(result.BOM.Entries[1].Launch).To(BeTrue())
-		Expect(result.BOM.Entries[1].Build).To(BeFalse())
-		Expect(result.BOM.Entries[2].Name).To(Equal("spring-cloud-bindings"))
+		Expect(result.BOM.Entries[1].Name).To(Equal("dependencies"))
+		Expect(result.BOM.Entries[2].Name).To(Equal("helper"))
 		Expect(result.BOM.Entries[2].Launch).To(BeTrue())
 		Expect(result.BOM.Entries[2].Build).To(BeFalse())
+		Expect(result.BOM.Entries[0].Name).To(Equal("spring-cloud-bindings"))
+		Expect(result.BOM.Entries[0].Launch).To(BeTrue())
+		Expect(result.BOM.Entries[0].Build).To(BeTrue())
 	})
 
 	it("contributes slices from layers index", func() {
@@ -526,7 +526,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 					},
 				},
 			}
-	    })
+		})
 
 		it("installs the correct bindings version based on the Spring Boot version in manifest (2.x)", func() {
 			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
@@ -534,11 +534,11 @@ Spring-Boot-Lib: BOOT-INF/lib
 						Spring-Boot-Classes: BOOT-INF/classes
 						Spring-Boot-Lib: BOOT-INF/lib
 						`), 0644)).To(Succeed())
-			
+
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
-			
-			Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("1.1.0"))
+
+			Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("1.1.0"))
 
 		})
 
@@ -548,11 +548,11 @@ Spring-Boot-Lib: BOOT-INF/lib
 						Spring-Boot-Classes: BOOT-INF/classes
 						Spring-Boot-Lib: BOOT-INF/lib
 						`), 0644)).To(Succeed())
-			
+
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
-			
-			Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
+
+			Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
 
 		})
 
@@ -565,9 +565,51 @@ Spring-Boot-Lib: BOOT-INF/lib
 			t.Setenv("BP_SPRING_CLOUD_BINDINGS_VERSION", "2")
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
-			
-			Expect(result.Layers[1].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
+
+			Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
 
 		})
+	})
+
+	context("when BP_JVM_CDS_ENABLED is enabled", func() {
+
+		it.Before(func() {
+			t.Setenv("BP_JVM_CDS_ENABLED", "true")
+			t.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")
+		})
+
+		ctx.Buildpack.API = "0.6"
+
+		it("contributes CDS layer & helper for Boot 3.3+ apps", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Start-Class: test-class
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[2].Name()).To(Equal("helper"))
+			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
+		})
+
+		it("does not contribute CDS layer & helper for Boot < 3.3 apps", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.2.1
+			Start-Class: test-class
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(1))
+			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
+		})
+
 	})
 }

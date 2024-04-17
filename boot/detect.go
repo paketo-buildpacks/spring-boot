@@ -18,14 +18,16 @@ package boot
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/magiconair/properties"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"regexp"
-	"strconv"
-	"strings"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 const (
@@ -51,17 +53,17 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 				},
 				Requires: []libcnb.BuildPlanRequire{
 					{Name: PlanEntryJVMApplication},
-					{Name: PlanEntrySpringBoot},
-					{Name: PlanEntryJRE},
-				},
+					{Name: PlanEntrySpringBoot}				},
 			},
 		},
 	}
 
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
-	if cr.ResolveBool("BP_JVM_CDS_ENABLED") {
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
 
-		d.Logger.Bodyf("hello, we're cds enabled, change of plan\n")
+	if sherpa.ResolveBool("BP_JVM_CDS_ENABLED") {
 
 		result = libcnb.DetectResult{
 			Pass: true,
@@ -73,6 +75,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: PlanEntryJVMApplication},
 						{Name: PlanEntrySpringBoot},
+						// Require a JRE at build time to perform CDS training run
 						{Name: PlanEntryJRE, Metadata: map[string]interface{}{"build": true}},
 					},
 				},
@@ -82,10 +85,6 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 	manifest, err := libjvm.NewManifest(context.Application.Path)
 	if err != nil {
 		return libcnb.DetectResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
-	}
-
-	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
 	mavenNativeProfileDetected := isMavenNativeProfileDetected(&cr, &d.Logger)

@@ -38,7 +38,6 @@ import (
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/spring-boot/v5/helper"
 	"github.com/paketo-buildpacks/spring-boot/v5/internal/fsutil"
 	"gopkg.in/yaml.v3"
 )
@@ -59,9 +58,6 @@ type Build struct {
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
-	b.Logger.Bodyf("This is the value of AppPath: %s", context.Application.Path)
-	b.Logger.Body("Those are the files we have in the workspace")
-	helper.StartOSCommand("", "ls", "-al", context.Application.Path)
 	result := libcnb.NewBuildResult()
 	bootJarFound, reZipExplodedJar := false, false
 
@@ -206,8 +202,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	if trainingRun || aotEnabled {
 
-		b.Logger.Bodyf("training %t, aot %t", trainingRun, aotEnabled)
-
 		helpers = append(helpers, "performance")
 
 		if trainingRun {
@@ -271,13 +265,15 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		}
 	}
 
-	result = b.contributeHelpers(context, result, helpers)
+	if len(helpers) > 0 {
+	    result = b.contributeHelpers(context, result, helpers)
+	}
 
 	if bootJarFound || trainingRun {
 		if mainClass != "" {
 			result.Processes = append(result.Processes, b.setProcessTypes(mainClass, classpathString)...)
 		} else {
-			return libcnb.BuildResult{}, fmt.Errorf("error finding Main-Class or Start-Class manifest entry for Process Type\n")
+			return libcnb.BuildResult{}, fmt.Errorf("error finding Main-Class or Start-Class manifest entry for Process Type")
 		}
 	}
 
@@ -467,9 +463,10 @@ func (b *Build) createSlices(path string, index string, result libcnb.BuildResul
 }
 
 func (b *Build) contributeHelpers(context libcnb.BuildContext, result libcnb.BuildResult, helpers []string) libcnb.BuildResult {
-	h := libpak.NewHelperLayerContributor(context.Buildpack, helpers...)
+	h, bom := libpak.NewHelperLayer(context.Buildpack, helpers...)
 	h.Logger = b.Logger
 	result.Layers = append(result.Layers, h)
+	result.BOM.Entries = append(result.BOM.Entries, bom)
 	return result
 }
 

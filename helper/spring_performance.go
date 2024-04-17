@@ -17,10 +17,6 @@
 package helper
 
 import (
-	"bytes"
-	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
@@ -32,34 +28,21 @@ type SpringPerformance struct {
 
 func (s SpringPerformance) Execute() (map[string]string, error) {
 	var values []string
-	if sherpa.ResolveBool("BPL_SPRING_AOT_ENABLED") {
+	aot := sherpa.ResolveBool("BPL_SPRING_AOT_ENABLED")
+	cds := sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") 
+	if !aot && !cds{
+		return nil, nil
+	}
+	
+	if aot {
 		s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_TOOL_OPTIONS")
 		values = append(values, "-Dspring.aot.enabled=true")
 	}
 
-	if sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") {
+	if cds {
 		s.Logger.Info("Spring CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_TOOL_OPTIONS")
 		values = append(values, "-XX:SharedArchiveFile=application.jsa")
 	}
 	opts := sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ", values...)
 	return map[string]string{"JAVA_TOOL_OPTIONS": opts}, nil
-}
-
-func StartOSCommand(envVariable string, command string, arguments ...string) {
-	fmt.Println("StartOSCommand")
-	fmt.Println(command, arguments)
-	cmd := exec.Command(command, arguments...)
-	cmd.Env = os.Environ()
-	if envVariable != "" {
-		cmd.Env = append(cmd.Env, envVariable)
-	}
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil {
-		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
-	}
-	fmt.Println("Result: " + out.String())
 }

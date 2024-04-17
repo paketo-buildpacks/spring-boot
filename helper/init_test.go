@@ -26,5 +26,6 @@ import (
 func TestUnit(t *testing.T) {
 	suite := spec.New("helper", spec.Report(report.Terminal{}))
 	suite("SpringCloudBindings", testSpringCloudBindings)
+	suite("SpringPerformance", testSpringPerformance)
 	suite.Run(t)
 }
