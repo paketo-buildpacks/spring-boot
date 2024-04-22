@@ -18,7 +18,6 @@ package boot_test
 
 import (
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -43,10 +42,10 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		ctx.Application.Path, err = ioutil.TempDir("", "build-application")
+		ctx.Application.Path, err = os.MkdirTemp("", "build-application")
 		Expect(err).NotTo(HaveOccurred())
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "build-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "build-layers")
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
@@ -55,6 +54,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 			"dependencies": []map[string]interface{}{
 				{
 					"id":      "spring-cloud-bindings",
+					"purl":    "pkg:generic/springframework/spring-cloud-bindings@1.1.0",
 					"version": "1.1.0",
 					"stacks":  []interface{}{"test-stack-id"},
 				},
@@ -76,7 +76,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	})
 
 	it("contributes org.springframework.boot.version label", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -89,12 +89,12 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("skips org.springframework.boot.spring-configuration-metadata.json label when DataFlow is not present", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
 			[]byte(`{ "groups": [ { "name": "alpha" } ] }`), 0644))
 
 		result, err := build.Build(ctx)
@@ -107,14 +107,14 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("contributes org.springframework.cloud.dataflow.spring-configuration-metadata.json label", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "spring-configuration-metadata.json"),
 			[]byte(`{ "groups": [ { "name": "alpha", "sourceType": "alpha" } ] }`), 0644))
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "dataflow-configuration-metadata.properties"),
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "dataflow-configuration-metadata.properties"),
 			[]byte("configuration-properties.classes=alpha"), 0644))
 
 		result, err := build.Build(ctx)
@@ -127,7 +127,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("contributes org.opencontainers.image.title label", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -144,7 +144,7 @@ Implementation-Title: test-title
 	})
 
 	it("contributes org.opencontainers.image.version label", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -161,13 +161,13 @@ Implementation-Version: 2.2.2
 	})
 
 	it("contributes dependencies bom entry for API <= 0.6", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
 `), 0644)).To(Succeed())
 		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib"), 0755)).To(Succeed())
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-file-2.2.2.jar"),
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "test-file-2.2.2.jar"),
 			[]byte{}, 0644)).To(Succeed())
 		ctx.Buildpack.API = "0.6"
 
@@ -192,7 +192,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("contributes to the result for API 0.7+", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -230,7 +230,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("contributes to the result for API <= 0.6", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -258,13 +258,13 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("contributes slices from layers index", func() {
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
 Spring-Boot-Layers-Index: layers.idx
 `), 0644)).To(Succeed())
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "layers.idx"), []byte(`
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "layers.idx"), []byte(`
 - "alpha":
   - "alpha-1"
   - "alpha-2"
@@ -291,7 +291,7 @@ Spring-Boot-Layers-Index: layers.idx
 		})
 
 		it("sets the CLASSPATH for the native image build", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -305,7 +305,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("adds no slices to the result", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -349,7 +349,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("contributes to the result for API 0.7+", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -378,7 +378,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("contributes to the result for API <= 0.6", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
 Spring-Boot-Classes: BOOT-INF/classes
 Spring-Boot-Lib: BOOT-INF/lib
@@ -529,7 +529,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("installs the correct bindings version based on the Spring Boot version in manifest (2.x)", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 						Spring-Boot-Version: 2.1.1
 						Spring-Boot-Classes: BOOT-INF/classes
 						Spring-Boot-Lib: BOOT-INF/lib
@@ -543,7 +543,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("installs the correct bindings version based on the Spring Boot version in manifest (3.x)", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 						Spring-Boot-Version: 3.1.0
 						Spring-Boot-Classes: BOOT-INF/classes
 						Spring-Boot-Lib: BOOT-INF/lib
@@ -557,7 +557,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("installs the correct bindings version based on the SCB Configuration Variable", func() {
-			Expect(ioutil.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 						Spring-Boot-Version: 2.1.1
 						Spring-Boot-Classes: BOOT-INF/classes
 						Spring-Boot-Lib: BOOT-INF/lib

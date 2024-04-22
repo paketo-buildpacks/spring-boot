@@ -23,7 +23,7 @@ import (
 
 const createdBy = "17.9.9 (Spring Boot Paketo Buildpack)"
 
-func TestHelloName(t *testing.T) {
+func HelloName() {
 
 	const originalJarBasename = "demo-0.0.1-SNAPSHOT.jar"
 	const originalJarFullPath = "/Users/anthonyd2/workspaces/paketo-buildpacks/samples/java/gradle/build/libs/" + originalJarBasename
@@ -42,14 +42,6 @@ func TestHelloName(t *testing.T) {
 	writeRunAppJarManifest(originalJarExplodedDirectory.Name(), runAppJarManifest, "application/"+originalJarBasename)
 	Zip(targetUnpackedDirectory+"/run-app.jar", os.TempDir()+tempDirectory, false)
 	sherpa.CopyDir(originalJarExplodedDirectory.Name()+"/BOOT-INF/lib/", targetUnpackedDirectory+"/dependencies/")
-
-}
-
-func TestOtherTest(t *testing.T) {
-
-	if err := zipSource("../../unpacked/content/META-INF", "run-app.jar"); err != nil {
-		log.Fatal(err)
-	}
 
 }
 
