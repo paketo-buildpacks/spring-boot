@@ -25,7 +25,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/buildpacks/libcnb"
@@ -69,26 +68,24 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 
-		s.Logger.Body("Those are the files we have in the workspace")
+		layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
 
-		// prepare the training run JVM opts
-		var trainingRunArgs []string
-		jarPath := s.AppPath
-
-		if s.AotEnabled || s.DoTrainingRun {
-			layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
-			if s.DoTrainingRun {
-				trainingRunArgs = append(trainingRunArgs, fmt.Sprintf("-Dspring.aot.enabled=%t", s.AotEnabled))
-				layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", "true")
-			} else {
-				return layer, nil
-			}
-		} else {
+		if !s.DoTrainingRun {
 			return layer, nil
 		}
 
+		layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", s.DoTrainingRun)
+
+		// prepare the training run JVM opts
+		var trainingRunArgs []string
+
+		if s.AotEnabled {
+			trainingRunArgs = append(trainingRunArgs, "-Dspring.aot.enabled=true")
+		}
+
+		jarPath := s.AppPath
+
 		if s.ReZip {
-			s.Logger.Body("Rezipping to run jar tool...")
 			jarDestDir := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/jar-dest"
 			if err := os.MkdirAll(jarDestDir, 0755); err != nil {
 				return layer, fmt.Errorf("error creating temp directory for jar\n%w", err)
@@ -105,22 +102,18 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				return layer, fmt.Errorf("error copying jar\n%w", err)
 			}
 
-			//return layer, nil
 			jarPath = tempJarPath
 			os.RemoveAll(s.AppPath)
 		}
-		s.Logger.Body("We're gonna extract this one:")
+
 		if err := s.springBootJarCDSLayoutExtract(jarPath); err != nil {
 			return layer, fmt.Errorf("error extracting Boot jar at %s\n%w", jarPath, err)
 		}
-		// if unpack == true, follow this (with any updates needed), else (3.3+) run new command, +- touch file timestamps? + skip to training run section below
 		startClassValue, _ := s.Manifest.Get("Start-Class")
-		s.Logger.Bodyf("This is the value of AppPath: %s", s.AppPath)
-		s.Logger.Body("Those are the files we have in the workspace")
 
 		err := resetCreationTimeWithTouch(s)
 		if err != nil {
-			return libcnb.Layer{}, err
+			return libcnb.Layer{}, fmt.Errorf("error resetting file creation time for CDS\n%w", err)
 		}
 
 		trainingRunArgs = append(trainingRunArgs,
@@ -130,9 +123,8 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		)
 		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
 		trainingRunArgs = append(trainingRunArgs, startClassValue)
-		s.Logger.Bodyf("training args %s", strings.Join(trainingRunArgs, ", "))
 
-		javaToolOptions, javaToolOptionsFound := os.LookupEnv("JAVA_TOOL_OPTIONS")
+		/*javaToolOptions, javaToolOptionsFound := os.LookupEnv("JAVA_TOOL_OPTIONS")
 		javaToolOptionsCds, javaToolOptionsCdsFound := os.LookupEnv("CDS_TRAINING_JAVA_TOOL_OPTIONS")
 		if javaToolOptionsCdsFound {
 			s.Logger.Bodyf("Picked up CDS_TRAINING_JAVA_TOOL_OPTIONS: %s", javaToolOptionsCds)
@@ -142,7 +134,11 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			if javaToolOptionsFound {
 				s.Logger.Bodyf("Picked up JAVA_TOOL_OPTIONS: %s", javaToolOptions)
 			}
-		}
+		}*/
+		
+		javaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", ""))
+		s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", javaToolOptions)
+
 		var trainingRunEnvVariables []string
 		trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", javaToolOptions))
 
