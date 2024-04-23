@@ -173,7 +173,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		if scbVer, scbSet = cr.Resolve("BP_SPRING_CLOUD_BINDINGS_VERSION"); !scbSet {
 			if scbVer, err = getSCBVersion(version); err != nil {
 				return libcnb.BuildResult{}, fmt.Errorf(
-					"unable to read the Spring Boot version from META-INF/MANIFEST.MF. " +
+					"unable to parse the Spring Boot version from META-INF/MANIFEST.MF. " +
 						"Please set BP_SPRING_CLOUD_BINDINGS_VERSION to force a version or " +
 						"BP_SPRING_CLOUD_BINDINGS_DISABLED to bypass installing Spring Cloud Bindings")
 			}
