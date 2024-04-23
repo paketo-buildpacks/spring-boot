@@ -266,8 +266,8 @@ Spring-Boot-Layers-Index: layers.idx
 `), 0644)).To(Succeed())
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "layers.idx"), []byte(`
 - "alpha":
-  - "alpha-1"
-  - "alpha-2"
+  - "testdata/alpha/alpha-1"
+  - "testdata/alpha/alpha-2"
 - "bravo":
   - "bravo-1"
   - "bravo-2"
@@ -277,7 +277,7 @@ Spring-Boot-Layers-Index: layers.idx
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(result.Slices).To(ContainElements(
-			libcnb.Slice{Paths: []string{"alpha-1", "alpha-2"}},
+			libcnb.Slice{Paths: []string{"testdata/alpha/alpha-1", "testdata/alpha/alpha-2"}},
 			libcnb.Slice{Paths: []string{"bravo-1", "bravo-2"}},
 		))
 	})
@@ -587,6 +587,31 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Spring-Boot-Classes: BOOT-INF/classes
 			Spring-Boot-Lib: BOOT-INF/lib
 			`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers).To(HaveLen(3))
+			Expect(result.Layers[2].Name()).To(Equal("helper"))
+			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
+		})
+
+		it("contributes CDS layer & helper for Boot 3.3+ apps even when they're jar'ed", func() {
+
+			var Copy = func(name string) {
+				in, err := os.Open(filepath.Join("testdata", "cds", name))
+				Expect(err).NotTo(HaveOccurred())
+				defer in.Close()
+
+				out, err := os.OpenFile(filepath.Join(ctx.Application.Path, name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+				Expect(err).NotTo(HaveOccurred())
+				defer out.Close()
+
+				_, err = io.Copy(out, in)
+				Expect(err).NotTo(HaveOccurred())
+			}
+
+			Copy("spring-app-3.3-no-dependencies.jar")
 
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())

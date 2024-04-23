@@ -266,7 +266,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	if len(helpers) > 0 {
-	    result = b.contributeHelpers(context, result, helpers)
+		result = b.contributeHelpers(context, result, helpers)
 	}
 
 	if bootJarFound || trainingRun {
@@ -546,17 +546,11 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 		return "", nil, err
 	}
 
-	//if !cds {
 	tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
 	Unzip(jarPath, tempExplodedJar)
 	os.RemoveAll(appPath)
 	sherpa.CopyDir(tempExplodedJar, appPath)
 	jarPath = appPath
-	//}
-
-	//if doBootExtract := bootExtractSupported(bv); doBootExtract {
-	//	b.springBootJarCDSLayoutExtract(jarPath)
-	//}
 
 	return jarPath, props, nil
 }
