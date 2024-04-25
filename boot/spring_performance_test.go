@@ -17,6 +17,8 @@
 package boot_test
 
 import (
+	"archive/zip"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -37,8 +39,8 @@ func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx libcnb.BuildContext
-		executor *mocks.Executor
+		ctx        libcnb.BuildContext
+		executor   *mocks.Executor
 		aotEnabled bool
 		cdsEnabled bool
 	)
@@ -94,7 +96,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).To(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
-										  "-XX:ArchiveClassesAtExit=application.jsa","-cp"))
+			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
 		Expect(layer.Build).To(BeTrue())
 
 	})
@@ -159,7 +161,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).NotTo(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
-										  "-XX:ArchiveClassesAtExit=application.jsa","-cp"))
+			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
 
 		Expect(layer.Build).To(BeTrue())
 
@@ -168,7 +170,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 	it("contributes user-provided JAVA_TOOL_OPTIONS to training run", func() {
 		Expect(os.Setenv("JAVA_TOOL_OPTIONS", "default-opt")).To(Succeed())
 		Expect(os.Setenv("CDS_TRAINING_JAVA_TOOL_OPTIONS", "user-cds-opt")).To(Succeed())
-		
+
 		aotEnabled, cdsEnabled = true, true
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
@@ -203,7 +205,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	it("contributes default JAVA_TOOL_OPTIONS to training run", func() {
 		Expect(os.Setenv("JAVA_TOOL_OPTIONS", "default-opt")).To(Succeed())
-		
+
 		aotEnabled, cdsEnabled = true, true
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
@@ -234,4 +236,112 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
 	})
+
+	it("contributes Spring Performance for Boot 3.3+, both CDS & AOT enabled - with SCB symlink", func() {
+		aotEnabled, cdsEnabled = true, true
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).Return(nil)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+	Spring-Boot-Version: 3.3.1
+	Spring-Boot-Classes: BOOT-INF/classes
+	Spring-Boot-Lib: BOOT-INF/lib
+	`), 0644)).To(Succeed())
+
+		cwd, _ := os.Getwd()
+		old := filepath.Join(cwd, "testdata", "spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar")
+		new := filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar")
+		os.Symlink(old, new)
+
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true)
+		s.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("true"))
+		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
+
+		Expect(executor.Calls).To(HaveLen(3))
+		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
+		Expect(ok).To(BeTrue())
+		Expect(e.Args).To(ContainElement("-Dspring.aot.enabled=true"))
+		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
+			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
+
+		unzip(filepath.Join(layer.Path, "runner.jar"), filepath.Join(layer.Path, "extract"))
+		fileInfo, err := os.Lstat(filepath.Join(layer.Path, "extract", "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar"))
+		// SCB jar is included in the jar, but not as a link, as a real file.
+		Expect(fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink).To(BeFalse())
+		Expect(layer.Build).To(BeTrue())
+
+	})
+
+}
+
+func unzip(src, dest string) error {
+	dest = filepath.Clean(dest) + "/"
+
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer CloseOrPanic(r)()
+
+	os.MkdirAll(dest, 0755)
+
+	// Closure to address file descriptors issue with all the deferred .Close() methods
+	extractAndWriteFile := func(f *zip.File) error {
+		path := filepath.Join(dest, f.Name)
+		// Check for ZipSlip: https://snyk.io/research/zip-slip-vulnerability
+		//if !strings.HasPrefix(path, dest) {
+		//	return fmt.Errorf("%s: illegal file path", path)
+		//}
+
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		defer CloseOrPanic(rc)()
+
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(path, f.Mode())
+		} else {
+			os.MkdirAll(filepath.Dir(path), f.Mode())
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+			defer CloseOrPanic(f)()
+
+			_, err = io.Copy(f, rc)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	for _, f := range r.File {
+		err := extractAndWriteFile(f)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func CloseOrPanic(f io.Closer) func() {
+	return func() {
+		if err := f.Close(); err != nil {
+			panic(err)
+		}
+	}
 }

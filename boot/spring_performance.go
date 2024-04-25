@@ -124,18 +124,6 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
 		trainingRunArgs = append(trainingRunArgs, startClassValue)
 
-		/*javaToolOptions, javaToolOptionsFound := os.LookupEnv("JAVA_TOOL_OPTIONS")
-		javaToolOptionsCds, javaToolOptionsCdsFound := os.LookupEnv("CDS_TRAINING_JAVA_TOOL_OPTIONS")
-		if javaToolOptionsCdsFound {
-			s.Logger.Bodyf("Picked up CDS_TRAINING_JAVA_TOOL_OPTIONS: %s", javaToolOptionsCds)
-			s.Logger.Body("Training run will use this value as JAVA_TOOL_OPTIONS")
-			javaToolOptions = javaToolOptionsCds
-		} else {
-			if javaToolOptionsFound {
-				s.Logger.Bodyf("Picked up JAVA_TOOL_OPTIONS: %s", javaToolOptions)
-			}
-		}*/
-		
 		javaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", ""))
 		s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", javaToolOptions)
 

@@ -26,12 +26,12 @@ const createdBy = "17.9.9 (Spring Boot Paketo Buildpack)"
 func HelloName() {
 
 	const originalJarBasename = "demo-0.0.1-SNAPSHOT.jar"
-	const originalJarFullPath = "/Users/anthonyd2/workspaces/paketo-buildpacks/samples/java/gradle/build/libs/" + originalJarBasename
-	const targetUnpackedDirectory = "/Users/anthonyd2/workspaces/paketo-buildpacks/spring-boot/unpacked"
+	const originalJarFullPath = "~/workspaces/paketo-buildpacks/samples/java/gradle/build/libs/" + originalJarBasename
+	const targetUnpackedDirectory = "~/workspaces/paketo-buildpacks/spring-boot/unpacked"
 	originalJarExplodedDirectory, _ := os.CreateTemp("", "unpack")
 
 	os.RemoveAll(originalJarExplodedDirectory.Name() + "/")
-	Unzip(originalJarFullPath, originalJarExplodedDirectory.Name())
+	//Unzip(originalJarFullPath, originalJarExplodedDirectory.Name())
 	os.MkdirAll(targetUnpackedDirectory+"/application", 0755)
 	os.MkdirAll(targetUnpackedDirectory+"/dependencies", 0755)
 	Zip(targetUnpackedDirectory+"/application/"+originalJarBasename, originalJarExplodedDirectory.Name()+"/BOOT-INF/classes/", true)
@@ -106,7 +106,7 @@ func archiveWithArchiver(source, target string) {
 }
 
 func TestZip(t *testing.T) {
-	boot.CreateJar("/Users/anthonyd2/workspaces/spring-cds-demo/build/libs/unzip/", "/Users/anthonyd2/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
+	boot.CreateJar("~/workspaces/spring-cds-demo/build/libs/unzip/", "~/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
 }
 
 func zipSource2(source, target string) error {
@@ -416,66 +416,6 @@ Created-By: 17.0.8 (Spring Boot Paketo Buildpack)
 }
 
 // heavily inspired by https://stackoverflow.com/a/58192644/24069
-func Unzip(src, dest string) error {
-	dest = filepath.Clean(dest) + "/"
-
-	r, err := zip.OpenReader(src)
-	if err != nil {
-		return err
-	}
-	defer CloseOrPanic(r)()
-
-	os.MkdirAll(dest, 0755)
-
-	// Closure to address file descriptors issue with all the deferred .Close() methods
-	extractAndWriteFile := func(f *zip.File) error {
-		path := filepath.Join(dest, f.Name)
-		// Check for ZipSlip: https://snyk.io/research/zip-slip-vulnerability
-		if !strings.HasPrefix(path, dest) {
-			return fmt.Errorf("%s: illegal file path", path)
-		}
-
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer CloseOrPanic(rc)()
-
-		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
-		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-			if err != nil {
-				return err
-			}
-			defer CloseOrPanic(f)()
-
-			_, err = io.Copy(f, rc)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	for _, f := range r.File {
-		err := extractAndWriteFile(f)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func CloseOrPanic(f io.Closer) func() {
-	return func() {
-		if err := f.Close(); err != nil {
-			panic(err)
-		}
-	}
-}
 
 func resetAllFilesMtimeAndATime(root string, date time.Time) ([]string, error) {
 	println("Entering resetAllFIles")
