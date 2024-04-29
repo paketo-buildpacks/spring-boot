@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
-	github.com/buildpacks/libcnb v1.30.1
+	github.com/buildpacks/libcnb v1.30.3
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.7
 	github.com/onsi/gomega v1.33.0
