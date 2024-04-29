@@ -55,6 +55,30 @@ api = "0.7"
     description = "default version of Spring Cloud Bindings library to contribute"
     name = "BP_SPRING_CLOUD_BINDINGS_VERSION"
 
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "whether to enable Spring AOT"
+    name = "BP_SPRING_AOT_ENABLED"
+
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "whether to enable Spring AOT at runtime"
+    name = "BPL_SPRING_AOT_ENABLED"
+  
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "whether to enable CDS & perform JVM training run"
+    name = "BP_JVM_CDS_ENABLED"
+
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "whether to enable CDS optimizations at runtime"
+    name = "BPL_JVM_CDS_ENABLED"
+
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:vmware:spring_cloud_bindings:1.13.0:*:*:*:*:*:*:*"]
     id = "spring-cloud-bindings"

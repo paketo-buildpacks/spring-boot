@@ -196,8 +196,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
 	aotEnabled := false
-	if enabled, _ := sherpa.DirExists(dir); enabled {
+	aotBuild := sherpa.ResolveBool("BP_SPRING_AOT_ENABLED")
+	if aotDirExists, _ := sherpa.DirExists(dir); aotDirExists && aotBuild {
 		aotEnabled = true
+	} else if !aotDirExists && aotBuild {
+		b.Logger.Bodyf("unable to find AOT processed dir %s, however BP_SPRING_AOT_ENABLED has been set to true. Ensure that your app is AOT processed", dir)
 	}
 
 	if trainingRun || aotEnabled {
