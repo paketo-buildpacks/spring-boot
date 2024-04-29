@@ -28,6 +28,9 @@ The buildpack will do the following:
       * Contributes application slices as defined by the layer's index
     * If the application is a reactive web application
       * Configures `$BPL_JVM_THREAD_COUNT` to 50
+    * If the application is AOT instrumented (presence of `META-INF/native-image` folder) AND `BP_SPRING_AOT_ENABLED` is set to `true`
+      * set `BPL_SPRING_AOT_ENABLED` to true
+      * add `-Dspring.aot.enabled=true` to `JAVA_TOOL_OPTIONS` at runtime
 * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Native-Processed` entry OR if `$BP_MAVEN_ACTIVE_PROFILES` contains the `native` profile:
   * A build plan entry is provided, `native-image-application`, which can be required by the `native-image` [buildpack](https://github.com/paketo-buildpacks/native-image) to automatically trigger a native image build
 * When contributing to a native image application:
@@ -38,12 +41,15 @@ The buildpack will do the following:
 
 ## Configuration
 | Environment Variable                  | Description                                                                                                                                                                                                                                                             |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `$BP_SPRING_CLOUD_BINDINGS_DISABLED`  | Whether to contribute Spring Cloud Bindings support to the image at build time.  Defaults to false.                                                                                                                                                                     |
 | `$BPL_SPRING_CLOUD_BINDINGS_DISABLED` | Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to false.                                                               |
 | `$BPL_SPRING_CLOUD_BINDINGS_ENABLED`  | Deprecated in favour of `$BPL_SPRING_CLOUD_BINDINGS_DISABLED`. Whether to auto-configure Spring Boot environment properties from bindings at runtime. This requires Spring Cloud Bindings to have been installed at build time or it will do nothing. Defaults to true. |
-| `$BP_SPRING_CLOUD_BINDINGS_VERSION`  | Explicit version of Spring Cloud Bindings library to install. 
-
+| `$BP_SPRING_CLOUD_BINDINGS_VERSION`   | Explicit version of Spring Cloud Bindings library to install.                                                                                                                                                                                                           |
+| `$BP_SPRING_AOT_ENABLED`              | Whether to contribute `$BPL_SPRING_AOT_ENABLED` at runtime. Beware that the Spring Boot app needs to have been AOT instrumented (presence of `META-INF/native-image`) too. Defaults to false.                                                                           |
+| `$BPL_SPRING_AOT_ENABLED`             | Whether to contribute `-Dspring.aot.enabled=true` to `JAVA_TOOL_OPTIONS` at runtime. Defaults to yes if the above conditions were met; false otherwise                                                                                                                  |                                                                                                           
+| `$BP_JVM_CDS_ENABLED`                 | Whether to perform the CDS training run (that will generate the caching file `application.jsa`). Defaults to false.                                                                                                                                                     |
+| `$BPL_JVM_CDS_ENABLED`                | Whether to load the CDS caching file (`-XX:SharedArchiveFile=application.jsa`) that was generated during the CDS training run. Defaults to the value of `BP_JVM_CDS_ENABLED`                                                                                            |
 ## Bindings
 The buildpack optionally accepts the following bindings:
 
