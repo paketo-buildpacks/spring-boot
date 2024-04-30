@@ -124,11 +124,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
 		trainingRunArgs = append(trainingRunArgs, startClassValue)
 
-		javaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", ""))
-		s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", javaToolOptions)
-
 		var trainingRunEnvVariables []string
-		trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", javaToolOptions))
+
+		javaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", ""))
+		if javaToolOptions != "" {
+			s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", javaToolOptions)
+			trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", javaToolOptions))
+		}
 
 		// perform the training run, application.dsa, the cache file, will be created
 		if err := s.Executor.Execute(effect.Execution{
@@ -192,10 +194,6 @@ func CreateJar(source, target string) error {
 	defer f.Close()
 
 	writer := zip.NewWriter(f)
-	// Register a custom Deflate compressor.
-	//writer.RegisterCompressor(zip.Deflate, func(out io.Writer) (io.WriteCloser, error) {
-	//	return flate.NewWriter(out, flate.NoCompression)
-	//})
 	defer writer.Close()
 
 	// 2. Go through all the files of the source
