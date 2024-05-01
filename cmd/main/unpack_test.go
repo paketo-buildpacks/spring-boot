@@ -2,14 +2,11 @@ package main
 
 import (
 	"archive/zip"
-	"context"
 	"fmt"
 	"github.com/magiconair/properties"
-	"github.com/mholt/archiver/v4"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 	"github.com/paketo-buildpacks/spring-boot/v5/boot"
-	"github.com/saracen/fastzip"
 	"gopkg.in/yaml.v3"
 	"io"
 	"log"
@@ -45,65 +42,65 @@ func HelloName() {
 
 }
 
-func archiveWithFastZip(source, target string) {
-	// Create archiveWithFastZip file
-	w, err := os.Create(target)
-	if err != nil {
-		panic(err)
-	}
-	defer w.Close()
-
-	// Create new Archiver
-	//var options ArchiverOption = nil
-	a, err := fastzip.NewArchiver(w, source, fastzip.WithArchiverMethod(zip.Deflate))
-	if err != nil {
-		panic(err)
-	}
-	defer a.Close()
-
-	// Register a non-default level compressor if required
-	//a.RegisterCompressor(zip.Deflate, fastzip.FlateCompressor(1))
-
-	// Walk directory, adding the files we want to add
-	files := make(map[string]os.FileInfo)
-	err = filepath.Walk(source, func(pathname string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-		files[pathname] = info
-		return nil
-	})
-
-	// Archive
-	if err = a.Archive(context.Background(), files); err != nil {
-		panic(err)
-	}
-}
-
-func archiveWithArchiver(source, target string) {
-
-	walkedFiles := make(map[string]string)
-	_ = filepath.Walk(source, func(pathname string, info os.FileInfo, err error) error {
-		if info.IsDir() {
-			return nil
-		}
-		walkedFiles[pathname], _ = filepath.Rel(filepath.Dir(source), pathname)
-		return nil
-	})
-
-	files, _ := archiver.FilesFromDisk(nil, walkedFiles)
-	out, _ := os.Create(target)
-	defer out.Close()
-
-	format := archiver.Zip{
-		SelectiveCompression: false,
-		Compression:          zip.Store,
-		ContinueOnError:      false,
-		TextEncoding:         "UTF8",
-	}
-	format.Archive(context.Background(), out, files)
-
-}
+//func archiveWithFastZip(source, target string) {
+//	// Create archiveWithFastZip file
+//	w, err := os.Create(target)
+//	if err != nil {
+//		panic(err)
+//	}
+//	defer w.Close()
+//
+//	// Create new Archiver
+//	//var options ArchiverOption = nil
+//	a, err := fastzip.NewArchiver(w, source, fastzip.WithArchiverMethod(zip.Deflate))
+//	if err != nil {
+//		panic(err)
+//	}
+//	defer a.Close()
+//
+//	// Register a non-default level compressor if required
+//	//a.RegisterCompressor(zip.Deflate, fastzip.FlateCompressor(1))
+//
+//	// Walk directory, adding the files we want to add
+//	files := make(map[string]os.FileInfo)
+//	err = filepath.Walk(source, func(pathname string, info os.FileInfo, err error) error {
+//		if info.IsDir() {
+//			return nil
+//		}
+//		files[pathname] = info
+//		return nil
+//	})
+//
+//	// Archive
+//	if err = a.Archive(context.Background(), files); err != nil {
+//		panic(err)
+//	}
+//}
+//
+//func archiveWithArchiver(source, target string) {
+//
+//	walkedFiles := make(map[string]string)
+//	_ = filepath.Walk(source, func(pathname string, info os.FileInfo, err error) error {
+//		if info.IsDir() {
+//			return nil
+//		}
+//		walkedFiles[pathname], _ = filepath.Rel(filepath.Dir(source), pathname)
+//		return nil
+//	})
+//
+//	files, _ := archiver.FilesFromDisk(nil, walkedFiles)
+//	out, _ := os.Create(target)
+//	defer out.Close()
+//
+//	format := archiver.Zip{
+//		SelectiveCompression: false,
+//		Compression:          zip.Store,
+//		ContinueOnError:      false,
+//		TextEncoding:         "UTF8",
+//	}
+//	format.Archive(context.Background(), out, files)
+//
+//}
 
 func TestZip(t *testing.T) {
 	boot.CreateJar("~/workspaces/spring-cds-demo/build/libs/unzip/", "~/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
