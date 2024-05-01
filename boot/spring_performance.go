@@ -19,6 +19,7 @@ package boot
 import (
 	"archive/zip"
 	"fmt"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 	"io"
 	"os"
 	"path/filepath"
@@ -34,10 +35,9 @@ import (
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/effect"
-	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
-type SpringCds struct {
+type SpringPerformance struct {
 	Dependency       libpak.BuildpackDependency
 	LayerContributor libpak.LayerContributor
 	Logger           bard.Logger
@@ -46,30 +46,33 @@ type SpringCds struct {
 	Manifest         *properties.Properties
 	AotEnabled       bool
 	DoTrainingRun    bool
-	ClasspathString	 string
-	ReZip         bool
+	ClasspathString  string
+	ReZip            bool
 }
 
-func NewSpringCds(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, reZip bool) SpringCds {
+func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, reZip bool) SpringPerformance {
 	contributor := libpak.NewLayerContributor("Performance", cache, libcnb.LayerTypes{
 		Build:  true,
 		Launch: true,
 	})
-	return SpringCds{
+	return SpringPerformance{
 		LayerContributor: contributor,
 		Executor:         effect.NewExecutor(),
 		AppPath:          appPath,
 		Manifest:         manifest,
 		AotEnabled:       aotEnabled,
-		DoTrainingRun:	  doTrainingRun,
+		DoTrainingRun:    doTrainingRun,
 		ClasspathString:  classpathString,
-		ReZip: 		      reZip,	
+		ReZip:            reZip,
 	}
 }
 
-func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
+func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
+
+		s.Logger.Body("Those are the files we have in the workspace")
+		helper.StartOSCommand("", "ls", "-al", s.AppPath)
 
 		// prepare the training run JVM opts
 		var trainingRunArgs []string
@@ -87,31 +90,34 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			return layer, nil
 		}
 
+		s.Logger.Bodyf("Are we gonna rezip? : %t", s.ReZip)
 		if s.ReZip {
-				jarDestDir := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/jar-dest"
-				if err := os.MkdirAll(jarDestDir, 0755); err != nil {
-					return layer, fmt.Errorf("error creating temp directory for jar\n%w", err)
-				}
-				tempJarPath := filepath.Join(jarDestDir,"runner.jar")
-				helper.StartOSCommand("", "ls", "-al", s.AppPath)
-				helper.StartOSCommand("", "ls", "-al", filepath.Join(s.AppPath,"BOOT-INF", "lib"))
-				if err := createJar(s.AppPath, tempJarPath); err != nil {
-					return layer, fmt.Errorf("error recreating jar\n%w", err)
-				}
-				f, err := os.Open(tempJarPath)
-				if err != nil {
-					return layer, fmt.Errorf("error opening jar\n%w", err)
-				}
-				if err := sherpa.CopyFile(f, filepath.Join(layer.Path, "runner.jar")); err != nil {
-					return layer, fmt.Errorf("error copying jar\n%w", err)
-				}
+			jarDestDir := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/jar-dest"
+			if err := os.MkdirAll(jarDestDir, 0755); err != nil {
+				return layer, fmt.Errorf("error creating temp directory for jar\n%w", err)
+			}
+			tempJarPath := filepath.Join(jarDestDir, "runner.jar")
+			helper.StartOSCommand("", "ls", "-al", s.AppPath)
+			helper.StartOSCommand("", "ls", "-al", filepath.Join(s.AppPath, "BOOT-INF", "lib"))
+			if err := CreateJar(s.AppPath+"/", tempJarPath); err != nil {
+				return layer, fmt.Errorf("error recreating jar\n%w", err)
+			}
+			f, err := os.Open(tempJarPath)
+			if err != nil {
+				return layer, fmt.Errorf("error opening jar\n%w", err)
+			}
+			if err := sherpa.CopyFile(f, filepath.Join(layer.Path, "runner.jar")); err != nil {
+				return layer, fmt.Errorf("error copying jar\n%w", err)
+			}
 
-				return layer, nil
-				jarPath = tempJarPath
-				//os.RemoveAll(s.AppPath)
-		} 
-		if err := s.springBootJarExtract(jarPath); err != nil {
-				return layer, fmt.Errorf("error extracting Boot jar\n%w", err)
+			return layer, nil
+			//jarPath = tempJarPath
+			//os.RemoveAll(s.AppPath)
+		}
+		s.Logger.Body("We're gonna extract this one:")
+		helper.StartOSCommand("", "ls", "-al", jarPath)
+		if err := s.springBootJarCDSLayoutExtract(jarPath); err != nil {
+			return layer, fmt.Errorf("error extracting Boot jar at %s\n%w", jarPath, err)
 		}
 		// if unpack == true, follow this (with any updates needed), else (3.3+) run new command, +- touch file timestamps? + skip to training run section below
 		startClassValue, _ := s.Manifest.Get("Start-Class")
@@ -120,54 +126,53 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 		helper.StartOSCommand("", "ls", "-al", s.AppPath)
 
 		/*
-		// we extract the vital information from the Spring Boot app manifest
-		implementationTitle, okIT := s.Manifest.Get("Implementation-Title")
-		implementationValue, okIV := s.Manifest.Get("Implementation-Version")
-		startClassValue, okSC := s.Manifest.Get("Start-Class")
-		classpathIndex, okSI := s.Manifest.Get("Spring-Boot-Classpath-Index")
-		if !(okIT && okIV && okSC && okSI) {
-			return layer, fmt.Errorf("unable to contribute spring-cds layer - " +
-				"missing Spring Boot Manifest entries, Implementation-Title or Implementation-Version" +
-				"or Start-Class or Spring-Boot-Classpath-Index")
-		}
+			// we extract the vital information from the Spring Boot app manifest
+			implementationTitle, okIT := s.Manifest.Get("Implementation-Title")
+			implementationValue, okIV := s.Manifest.Get("Implementation-Version")
+			startClassValue, okSC := s.Manifest.Get("Start-Class")
+			classpathIndex, okSI := s.Manifest.Get("Spring-Boot-Classpath-Index")
+			if !(okIT && okIV && okSC && okSI) {
+				return layer, fmt.Errorf("unable to contribute spring-cds layer - " +
+					"missing Spring Boot Manifest entries, Implementation-Title or Implementation-Version" +
+					"or Start-Class or Spring-Boot-Classpath-Index")
+			}
 
-		// the spring boot jar is already unzipped
-		originalJarExplodedDirectory := s.AppPath
+			// the spring boot jar is already unzipped
+			originalJarExplodedDirectory := s.AppPath
 
-		// we prepare a location for the unpacked version
-		targetUnpackedDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/unpacked"
-		os.MkdirAll(targetUnpackedDirectory+"/application", 0755)
-		os.MkdirAll(targetUnpackedDirectory+"/dependencies", 0755)
+			// we prepare a location for the unpacked version
+			targetUnpackedDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/unpacked"
+			os.MkdirAll(targetUnpackedDirectory+"/application", 0755)
+			os.MkdirAll(targetUnpackedDirectory+"/dependencies", 0755)
 
-		// we create the application jar: the one that contains the user classes
-		jarName := implementationTitle + "-" + implementationValue + ".jar"
-		createJar(originalJarExplodedDirectory+"/BOOT-INF/classes/", targetUnpackedDirectory+"/application/"+jarName)
+			// we create the application jar: the one that contains the user classes
+			jarName := implementationTitle + "-" + implementationValue + ".jar"
+			createJar(originalJarExplodedDirectory+"/BOOT-INF/classes/", targetUnpackedDirectory+"/application/"+jarName)
 
-		s.Logger.Bodyf("Those are the files we have in the target folder %s", targetUnpackedDirectory+"/dependencies")
-		helper.StartOSCommand("", "ls", "-al", targetUnpackedDirectory+"/dependencies")
+			s.Logger.Bodyf("Those are the files we have in the target folder %s", targetUnpackedDirectory+"/dependencies")
+			helper.StartOSCommand("", "ls", "-al", targetUnpackedDirectory+"/dependencies")
 
-		// we prepare and create the MANIFEST.MF of the runner-app.jar
-		tempDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
-		os.MkdirAll(tempDirectory+"/META-INF/", 0755)
-		runAppJarManifest, _ := os.Create(tempDirectory + "/META-INF/MANIFEST.MF")
-		s.writeRunAppJarManifest(originalJarExplodedDirectory, runAppJarManifest, "application/"+jarName, startClassValue, classpathIndex)
+			// we prepare and create the MANIFEST.MF of the runner-app.jar
+			tempDirectory := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
+			os.MkdirAll(tempDirectory+"/META-INF/", 0755)
+			runAppJarManifest, _ := os.Create(tempDirectory + "/META-INF/MANIFEST.MF")
+			s.writeRunAppJarManifest(originalJarExplodedDirectory, runAppJarManifest, "application/"+jarName, startClassValue, classpathIndex)
 
-		s.Logger.Bodyf("that's the run-app.jar manifest:\n")
-		helper.StartOSCommand("", "cat", runAppJarManifest.Name())
-		s.Logger.Bodyf("That's the jar we're building: %s in %s", filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/run-app.jar")
+			s.Logger.Bodyf("that's the run-app.jar manifest:\n")
+			helper.StartOSCommand("", "cat", runAppJarManifest.Name())
+			s.Logger.Bodyf("That's the jar we're building: %s in %s", filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/run-app.jar")
 
-		// we create the runner-app.jar that will contain just its MANIFEST
-		createJar(filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/runner.jar")
-		//helper.StartOSCommand("", "unzip", "-t", targetUnpackedDirectory+"/run-app.jar")
-		//helper.StartOSCommand("", "jar", "cfm", targetUnpackedDirectory+"/run-app.jar", runAppJarManifest.Name())
+			// we create the runner-app.jar that will contain just its MANIFEST
+			createJar(filepath.Dir(runAppJarManifest.Name()), targetUnpackedDirectory+"/runner.jar")
+			//helper.StartOSCommand("", "unzip", "-t", targetUnpackedDirectory+"/run-app.jar")
+			//helper.StartOSCommand("", "jar", "cfm", targetUnpackedDirectory+"/run-app.jar", runAppJarManifest.Name())
 
-		// we copy all the dependencies libs from the original jar to the dependencies/folder
-		sherpa.CopyDir(originalJarExplodedDirectory+"/BOOT-INF/lib/", targetUnpackedDirectory+"/dependencies/")
-*/
-
+			// we copy all the dependencies libs from the original jar to the dependencies/folder
+			sherpa.CopyDir(originalJarExplodedDirectory+"/BOOT-INF/lib/", targetUnpackedDirectory+"/dependencies/")
+		*/
 
 		// we copy the unpack folder to the app path, so that it'll be kept in the layer
-//		sherpa.CopyDir(targetUnpackedDirectory, s.AppPath)
+		//		sherpa.CopyDir(targetUnpackedDirectory, s.AppPath)
 
 		// we set the creation date to the buildpack default 1980/01/01 date; so that cds will be fine
 		if err := s.Executor.Execute(effect.Execution{
@@ -185,11 +190,11 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 			"-Dspring.context.exit=onRefresh",
 			"-XX:ArchiveClassesAtExit=application.jsa",
 			"-cp",
-			)
+		)
 
 		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
 		trainingRunArgs = append(trainingRunArgs, startClassValue)
-		
+
 		s.Logger.Bodyf("training args %s", strings.Join(trainingRunArgs, ", "))
 
 		// perform the training run, application.dsa, the cache file, will be created
@@ -213,7 +218,7 @@ func (s SpringCds) Contribute(layer libcnb.Layer) (libcnb.Layer, error) {
 }
 
 // OldContribute TODO: this function could still be interesting when an unpack'ed Spring Boot app was provided (run-app.jar was found)
-func (s SpringCds) OldContribute(layer libcnb.Layer) (libcnb.Layer, error) {
+func (s SpringPerformance) OldContribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	s.LayerContributor.Logger = s.Logger
 	layer, err := s.LayerContributor.Contribute(layer, func() (libcnb.Layer, error) {
 		s.Logger.Body("Those are the files we have in the workspace BEFORE the training run", layer.Path)
@@ -248,15 +253,15 @@ func (s SpringCds) OldContribute(layer libcnb.Layer) (libcnb.Layer, error) {
 	return layer, nil
 }
 
-func (s SpringCds) Name() string {
+func (s SpringPerformance) Name() string {
 	return s.LayerContributor.Name
 }
 
-func (s SpringCds) springBootJarExtract(jarPath string) error {
+func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
 	s.Logger.Bodyf("Extracting Jar")
 	if err := effect.NewExecutor().Execute(effect.Execution{
 		Command: "java",
-		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--layers", fmt.Sprintf("--destination=%s",s.AppPath)},
+		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--layers", fmt.Sprintf("--destination=%s", s.AppPath)},
 		Dir:     filepath.Dir(jarPath),
 		Stdout:  s.Logger.InfoWriter(),
 		Stderr:  s.Logger.InfoWriter(),
@@ -266,7 +271,7 @@ func (s SpringCds) springBootJarExtract(jarPath string) error {
 	return nil
 }
 
-/*func (s SpringCds) createJar(jarSource string, jarDest string) error {
+/*func (s SpringPerformance) createJar(jarSource string, jarDest string) error {
 	s.Logger.Bodyf("Creating Jar")
 	if err := effect.NewExecutor().Execute(effect.Execution{
 		Command: "jar",
@@ -280,7 +285,7 @@ func (s SpringCds) springBootJarExtract(jarPath string) error {
 	return nil
 }*/
 
-func (s SpringCds) writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
+func (s SpringPerformance) writeRunAppJarManifest(originalJarExplodedDirectory string, runAppJarManifest *os.File, relocatedOriginalJar string, startClassValue string, classpathIdx string) {
 	classPathValue, _ := retrieveClasspathFromIdx(originalJarExplodedDirectory, "dependencies/", relocatedOriginalJar, classpathIdx)
 
 	//for _, lib :=  range s.AdditionalLibs {
@@ -356,9 +361,8 @@ func retrieveClasspathFromIdx(dir string, relocatedDir string, relocatedOriginal
 	return strings.Join(relocatedLibs, " "), nil
 }
 
-
 // heavily inspired by: https://gosamples.dev/zip-file/
-func createJar(source, target string) error {
+func CreateJar(source, target string) error {
 	// 1. Create a ZIP file and zip.Writer
 	f, err := os.Create(target)
 	if err != nil {
@@ -367,6 +371,10 @@ func createJar(source, target string) error {
 	defer f.Close()
 
 	writer := zip.NewWriter(f)
+	// Register a custom Deflate compressor.
+	//writer.RegisterCompressor(zip.Deflate, func(out io.Writer) (io.WriteCloser, error) {
+	//	return flate.NewWriter(out, flate.NoCompression)
+	//})
 	defer writer.Close()
 
 	// 2. Go through all the files of the source
@@ -376,21 +384,17 @@ func createJar(source, target string) error {
 		}
 		absolutePath := ""
 
-		if info.Mode()&os.ModeSymlink == os.ModeSymlink {   
-			return nil
-			/*if absolutePath, err = filepath.EvalSymlinks(path); err != nil {
+		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
+			if absolutePath, err = filepath.EvalSymlinks(path); err != nil {
 				return fmt.Errorf("unable to eval symlink %s\n%w", absolutePath, err)
 			}
-			os.Stdout.WriteString(fmt.Sprintf("absolute path %s", absolutePath))
-			absolutePath = filepath.Join(absolutePath, filepath.Base(path))
-			os.Stdout.WriteString(fmt.Sprintf("full absolute path %s", absolutePath))
 			if file, err := os.Open(absolutePath); err != nil {
 				return fmt.Errorf("unable to open %s\n%w", absolutePath, err)
 			} else {
 				if info, err = file.Stat(); err != nil {
-				   return fmt.Errorf("unable to stat %s\n%w", absolutePath, err)
+					return fmt.Errorf("unable to stat %s\n%w", absolutePath, err)
 				}
-			}*/
+			}
 		}
 
 		// 3. Create a local file header

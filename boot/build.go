@@ -57,8 +57,6 @@ type Build struct {
 	Logger bard.Logger
 }
 
-
-
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	b.Logger.Bodyf("This is the value of AppPath: %s", context.Application.Path)
@@ -75,19 +73,25 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	trainingRun := sherpa.ResolveBool("BP_JVM_CDS_ENABLED")
 
-	version, version_found := manifest.Get("Spring-Boot-Version")
-	if !version_found {
+	version, versionFound := manifest.Get("Spring-Boot-Version")
+	if !versionFound {
 		if context.Application.Path, manifest, err = b.findSpringBootExecutableJAR(context.Application.Path); err != nil {
 			return libcnb.BuildResult{}, fmt.Errorf("unable to find Spring Boot Executable Jar\n%w", err)
-		} else if version, version_found = manifest.Get("Spring-Boot-Version"); !version_found {
+		} else if version, versionFound = manifest.Get("Spring-Boot-Version"); !versionFound {
 			// this isn't a boot app, return without printing title
 			return libcnb.BuildResult{}, nil
 		}
 		bootJarFound = true
 		mainClass, _ = manifest.Get("Main-Class")
 	}
-	if trainingRun && bootExtractionSupported(version) {
-		reZipExplodedJar = true
+	if trainingRun {
+		if bootCDSExtractionSupported(version) {
+			reZipExplodedJar = true
+		} else {
+			b.Logger.Bodyf("You enabled CDS optimization with BP_JVM_CDS_ENABLED=true but your Spring Boot app version is: %s, you need to upgrade to Spring Boot >= 3.3 first!\nCancelling CDS optimization", version)
+			trainingRun = false
+		}
+
 	}
 
 	b.Logger.Title(context.Buildpack)
@@ -123,7 +127,6 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	if !ok {
 		return libcnb.BuildResult{}, fmt.Errorf("manifest does not contain Spring-Boot-Lib")
 	}
-
 
 	// gather libraries
 	d, err := libjvm.NewMavenJARListing(filepath.Join(context.Application.Path, lib))
@@ -195,7 +198,9 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
 	aotEnabled := false
-	if enabled, _ := sherpa.DirExists(dir); enabled && sherpa.ResolveBool("BP_SPRING_AOT_ENABLED") {
+	if enabled, _ := sherpa.DirExists(dir); enabled {
+		// TODO: David, we don't need the user to ask for this optimization; if they compiled with AOT, they sure want the image to leverage it at runtime?!
+		//&& sherpa.ResolveBool("BP_SPRING_AOT_ENABLED") {
 		aotEnabled = true
 	}
 
@@ -210,14 +215,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			classpathString = "runner.jar"
 			if len(additionalLibs) > 0 {
 				cpLibs := []string{}
-				for _, lib :=  range additionalLibs {
-					cpLibs = append(cpLibs, fmt.Sprintf(":%s","dependencies/lib/"+lib))
+				for _, lib := range additionalLibs {
+					cpLibs = append(cpLibs, fmt.Sprintf(":%s", "dependencies/lib/"+lib))
 				}
-				classpathString = fmt.Sprintf(classpathString+"%s", strings.Join(cpLibs,""))
+				classpathString = fmt.Sprintf(classpathString+"%s", strings.Join(cpLibs, ""))
 			}
 		}
 
-		cdsLayer := NewSpringCds(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, reZipExplodedJar)
+		cdsLayer := NewSpringPerformance(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, reZipExplodedJar)
 		cdsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, cdsLayer)
 
@@ -472,7 +477,7 @@ func (b *Build) setProcessTypes(mainClass string, classpathString string) []libc
 		arguments = append(arguments, "-cp")
 		arguments = append(arguments, classpathString)
 	}
-	arguments = append(arguments,mainClass)
+	arguments = append(arguments, mainClass)
 
 	processes := []libcnb.Process{}
 	processes = append(processes,
@@ -541,21 +546,21 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 	}
 
 	//if !cds {
-		tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
-		Unzip(jarPath, tempExplodedJar)
-		os.RemoveAll(appPath)
-		sherpa.CopyDir(tempExplodedJar, appPath)
-		jarPath = appPath
+	tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
+	Unzip(jarPath, tempExplodedJar)
+	os.RemoveAll(appPath)
+	sherpa.CopyDir(tempExplodedJar, appPath)
+	jarPath = appPath
 	//}
 
 	//if doBootExtract := bootExtractSupported(bv); doBootExtract {
-	//	b.springBootJarExtract(jarPath)
+	//	b.springBootJarCDSLayoutExtract(jarPath)
 	//}
 
 	return jarPath, props, nil
 }
 
-func bootExtractionSupported(manifestVer string) (bool) {
+func bootCDSExtractionSupported(manifestVer string) bool {
 	bootThreeThreeConstraint, _ := semver.NewConstraint(">= 3.3.0")
 	bv, err := bootVersion(manifestVer)
 	if err != nil {
