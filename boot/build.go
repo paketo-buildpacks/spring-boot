@@ -38,7 +38,6 @@ import (
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"github.com/paketo-buildpacks/spring-boot/v5/internal/fsutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -513,13 +512,14 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 	jarPath := ""
 	stopWalk := errors.New("stop walking")
 
-	err := fsutil.Walk(appPath, func(path string, info os.FileInfo, err error) error {
+	fileSystem := os.DirFS(appPath)
+	err := fs.WalkDir(fileSystem, ".", func(path string, dirEntry fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
 		// make sure it is a file
-		if info.IsDir() {
+		if dirEntry.IsDir() {
 			return nil
 		}
 
@@ -528,8 +528,9 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 			return nil
 		}
 
+		fullPath := appPath + "/" + path
 		// get the MANIFEST of the JAR file
-		props, err = libjvm.NewManifestFromJAR(path)
+		props, err = libjvm.NewManifestFromJAR(fullPath)
 		if err != nil {
 			return fmt.Errorf("unable to load manifest\n%w", err)
 		}
@@ -538,7 +539,7 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 		_, okMC := props.Get("Main-Class")
 		_, okSBV := props.Get("Spring-Boot-Version")
 		if okMC && okSBV {
-			jarPath = path
+			jarPath = fullPath
 			return stopWalk
 		}
 
