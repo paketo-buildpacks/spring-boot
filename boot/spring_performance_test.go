@@ -91,8 +91,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("true"))
 		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
 
-		Expect(executor.Calls).To(HaveLen(3))
-		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(2))
+		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).To(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
@@ -155,9 +155,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("false"))
 		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
-		Expect(executor.Calls).To(HaveLen(3))
+		Expect(executor.Calls).To(HaveLen(2))
 
-		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
+		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).NotTo(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
@@ -192,8 +192,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		layer, err = s.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(executor.Calls).To(HaveLen(3))
-		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(2))
+		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 
 		Expect(e.Env).To(ContainElement("JAVA_TOOL_OPTIONS=user-cds-opt"))
@@ -227,8 +227,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		layer, err = s.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(executor.Calls).To(HaveLen(3))
-		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(2))
+		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 
 		Expect(e.Env).To(ContainElement("JAVA_TOOL_OPTIONS=default-opt"))
@@ -268,8 +268,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("true"))
 		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
 
-		Expect(executor.Calls).To(HaveLen(3))
-		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(2))
+		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).To(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
@@ -277,6 +277,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		unzip(filepath.Join(layer.Path, "runner.jar"), filepath.Join(layer.Path, "extract"))
 		fileInfo, err := os.Lstat(filepath.Join(layer.Path, "extract", "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar"))
+		Expect(err).NotTo(HaveOccurred())
 		// SCB jar is included in the jar, but not as a link, as a real file.
 		Expect(fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink).To(BeFalse())
 		Expect(layer.Build).To(BeTrue())

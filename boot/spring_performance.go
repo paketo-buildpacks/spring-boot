@@ -19,6 +19,7 @@ package boot
 import (
 	"archive/zip"
 	"fmt"
+	"io/fs"
 
 	"github.com/paketo-buildpacks/libpak/sherpa"
 
@@ -111,10 +112,18 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		}
 		startClassValue, _ := s.Manifest.Get("Start-Class")
 
-		err := resetCreationTimeWithTouch(s)
-		if err != nil {
-			return libcnb.Layer{}, fmt.Errorf("error resetting file creation time for CDS\n%w", err)
+		if err := fs.WalkDir(os.DirFS(s.AppPath), ".", func(path string, d fs.DirEntry, err error) error {
+			if time, err := time.Parse(time.DateTime, "1980-01-01 00:00:01"); err != nil {
+				return fmt.Errorf("error parsing date-time\n%w", err)
+			} else if err := os.Chtimes(path, time, time); err != nil {
+				return fmt.Errorf("error resetting file times\n%w", err)
+			}
+			return nil
+		}); err != nil {
+			return libcnb.Layer{}, err
 		}
+		
+		
 
 		trainingRunArgs = append(trainingRunArgs,
 			"-Dspring.context.exit=onRefresh",
@@ -151,18 +160,6 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cds layer\n%w", err)
 	}
 	return layer, nil
-}
-
-func resetCreationTimeWithTouch(s SpringPerformance) error {
-	// we set the creation date to the buildpack default 1980/01/01 date; the date the layer will appear to be created at
-	return s.Executor.Execute(effect.Execution{
-		Command: "find",
-		Env:     []string{"TZ=UTC"},
-		Args:    []string{"./", "-exec", "touch", "-t", "198001010000.01", "{}", ";"},
-		Dir:     s.AppPath,
-		Stdout:  s.Logger.InfoWriter(),
-		Stderr:  s.Logger.InfoWriter(),
-	})
 }
 
 func (s SpringPerformance) Name() string {
