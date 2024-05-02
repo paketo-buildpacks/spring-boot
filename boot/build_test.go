@@ -70,7 +70,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	it("does nothing without Spring-Boot-Version", func() {
 		result, err := build.Build(ctx)
-		Expect(err).NotTo(HaveOccurred())
+		Expect(err).To(MatchError(HavePrefix("unable to find Spring Boot Executable Jar")))
 
 		Expect(result).To(BeZero())
 	})

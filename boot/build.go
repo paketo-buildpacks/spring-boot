@@ -17,12 +17,11 @@
 package boot
 
 import (
-	"archive/zip"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"github.com/paketo-buildpacks/libpak/crush"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -551,7 +550,13 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 	}
 
 	tempExplodedJar := os.TempDir() + "/" + fmt.Sprint(time.Now().UnixMilli()) + "/"
-	Unzip(jarPath, tempExplodedJar)
+
+	jar, err := os.Open(jarPath)
+	if err != nil {
+		return "", nil, err
+	}
+	defer jar.Close()
+	crush.Extract(jar, tempExplodedJar, 0)
 	os.RemoveAll(appPath)
 	sherpa.CopyDir(tempExplodedJar, appPath)
 	jarPath = appPath
@@ -569,65 +574,4 @@ func bootCDSExtractionSupported(manifestVer string) bool {
 		return true
 	}
 	return false
-}
-
-func Unzip(src, dest string) error {
-	dest = filepath.Clean(dest) + "/"
-
-	r, err := zip.OpenReader(src)
-	if err != nil {
-		return err
-	}
-	defer CloseOrPanic(r)()
-
-	os.MkdirAll(dest, 0755)
-
-	// Closure to address file descriptors issue with all the deferred .Close() methods
-	extractAndWriteFile := func(f *zip.File) error {
-		path := filepath.Join(dest, f.Name)
-		// Check for ZipSlip: https://snyk.io/research/zip-slip-vulnerability
-		if !strings.HasPrefix(path, dest) {
-			return fmt.Errorf("%s: illegal file path", path)
-		}
-
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer CloseOrPanic(rc)()
-
-		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
-		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-			if err != nil {
-				return err
-			}
-			defer CloseOrPanic(f)()
-
-			_, err = io.Copy(f, rc)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	for _, f := range r.File {
-		err := extractAndWriteFile(f)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func CloseOrPanic(f io.Closer) func() {
-	return func() {
-		if err := f.Close(); err != nil {
-			panic(err)
-		}
-	}
 }
