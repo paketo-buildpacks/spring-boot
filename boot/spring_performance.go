@@ -17,13 +17,12 @@
 package boot
 
 import (
-	"archive/zip"
 	"fmt"
 	"io/fs"
 
+	"github.com/paketo-buildpacks/libpak/crush"
 	"github.com/paketo-buildpacks/libpak/sherpa"
 
-	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -92,7 +91,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				return layer, fmt.Errorf("error creating temp directory for jar\n%w", err)
 			}
 			tempJarPath := filepath.Join(jarDestDir, "runner.jar")
-			if err := CreateJar(s.AppPath+"/", tempJarPath); err != nil {
+			if err := crush.CreateJar(s.AppPath+"/", tempJarPath); err != nil {
 				return layer, fmt.Errorf("error recreating jar\n%w", err)
 			}
 			f, err := os.Open(tempJarPath)
@@ -113,17 +112,15 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		startClassValue, _ := s.Manifest.Get("Start-Class")
 
 		if err := fs.WalkDir(os.DirFS(s.AppPath), ".", func(path string, d fs.DirEntry, err error) error {
-			if time, err := time.Parse(time.DateTime, "1980-01-01 00:00:01"); err != nil {
+			if baseTime, err := time.Parse(time.DateTime, "1980-01-01 00:00:01"); err != nil {
 				return fmt.Errorf("error parsing date-time\n%w", err)
-			} else if err := os.Chtimes(path, time, time); err != nil {
+			} else if err := os.Chtimes(path, baseTime, baseTime); err != nil {
 				return fmt.Errorf("error resetting file times\n%w", err)
 			}
 			return nil
 		}); err != nil {
 			return libcnb.Layer{}, err
 		}
-		
-		
 
 		trainingRunArgs = append(trainingRunArgs,
 			"-Dspring.context.exit=onRefresh",
@@ -178,81 +175,4 @@ func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
 		return fmt.Errorf("error extracting Jar with jarmode\n%w", err)
 	}
 	return nil
-}
-
-// CreateJar heavily inspired by: https://gosamples.dev/zip-file/
-func CreateJar(source, target string) error {
-
-	// 1. Create a ZIP file and zip.Writer
-	f, err := os.Create(target)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	writer := zip.NewWriter(f)
-	defer writer.Close()
-
-	// 2. Go through all the files of the source
-	return filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		absolutePath := ""
-
-		if info.Mode()&os.ModeSymlink == os.ModeSymlink {
-			if absolutePath, err = filepath.EvalSymlinks(path); err != nil {
-				return fmt.Errorf("unable to eval symlink %s\n%w", absolutePath, err)
-			}
-			if file, err := os.Open(absolutePath); err != nil {
-				return fmt.Errorf("unable to open %s\n%w", absolutePath, err)
-			} else {
-				if info, err = file.Stat(); err != nil {
-					return fmt.Errorf("unable to stat %s\n%w", absolutePath, err)
-				}
-			}
-		}
-
-		// 3. Create a local file header
-		header, err := zip.FileInfoHeader(info)
-		if err != nil {
-			return err
-		}
-
-		// set compression
-		header.Method = zip.Store
-		// 4. Set relative path of a file as the header name
-		header.Name, err = filepath.Rel(source, path)
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			header.Name += "/"
-		}
-
-		// 5. Create writer for the file header and save content of the file
-		headerWriter, err := writer.CreateHeader(header)
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		if absolutePath != "" {
-			path = absolutePath
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		_, err = io.Copy(headerWriter, f)
-		writer.Flush()
-		return err
-	})
-
 }

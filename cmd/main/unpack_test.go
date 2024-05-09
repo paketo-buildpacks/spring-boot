@@ -6,17 +6,18 @@ import (
 	"github.com/magiconair/properties"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak/sherpa"
-	"github.com/paketo-buildpacks/spring-boot/v5/boot"
 	"gopkg.in/yaml.v3"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
-	"testing"
 	"text/template"
 	"time"
 )
+
+// This file was a place to experiment with zipping / unzipping in a proper Jar fashion
+// Not an actual test file
 
 const createdBy = "17.9.9 (Spring Boot Paketo Buildpack)"
 
@@ -102,9 +103,9 @@ func HelloName() {
 //
 //}
 
-func TestZip(t *testing.T) {
-	boot.CreateJar("~/workspaces/spring-cds-demo/build/libs/unzip/", "~/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
-}
+//func TestZip(t *testing.T) {
+//	boot.CreateJar("~/workspaces/spring-cds-demo/build/libs/unzip/", "~/workspaces/spring-cds-demo/build/libs/spring-cds-demo-1.0.0-SNAPSHOT-rezip.jar")
+//}
 
 func zipSource2(source, target string) error {
 	// 1. Create a ZIP file and zip.Writer
