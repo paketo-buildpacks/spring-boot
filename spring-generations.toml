@@ -149,6 +149,11 @@
     Name = "3.2.x"
     OSS = "2024-11-23"
 
+  [[Projects.Generations]]
+    Commercial = "2026-08-23"
+    Name = "3.3.x"
+    OSS = "2025-05-23"
+
 [[Projects]]
   Name = "Spring CLI"
   Slug = "spring-cli"
@@ -760,9 +765,9 @@
     OSS = "2023-02-24"
 
   [[Projects.Generations]]
-    Commercial = "2026-02-28"
+    Commercial = "2026-02-23"
     Name = "2022.0.x"
-    OSS = "2024-10-28"
+    OSS = "2024-11-23"
 
 [[Projects]]
   Name = "Spring Cloud Stream Kafka Binder"
