@@ -37,6 +37,7 @@ type SpringCloudBindings struct {
 func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDependency, cache libpak.DependencyCache) (SpringCloudBindings, libcnb.BOMEntry) {
 	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
 		Launch: true,
+		Cache:  true,
 	})
 	return SpringCloudBindings{
 		Dependency:       dependency,

@@ -28,6 +28,7 @@ import (
 func main() {
 	sherpa.Execute(func() error {
 		return sherpa.Helpers(map[string]sherpa.ExecD{
+			"performance":           helper.SpringPerformance{Logger: bard.NewLogger(os.Stdout)},
 			"spring-cloud-bindings": helper.SpringCloudBindings{Logger: bard.NewLogger(os.Stdout)},
 		})
 	})

@@ -2,9 +2,9 @@
 set -euo pipefail
 
 GOMOD=$(head -1 go.mod | awk '{print $2}')
-GOOS="linux" go build -ldflags='-s -w' -o "linux/amd64/bin/helper" "$GOMOD/cmd/helper"
+GOOS="linux" GOARCH="amd64" go build -ldflags='-s -w' -o "linux/amd64/bin/helper" "$GOMOD/cmd/helper"
 GOOS="linux" GOARCH="arm64" go build -ldflags='-s -w' -o "linux/arm64/bin/helper" "$GOMOD/cmd/helper"
-GOOS="linux" go build -ldflags='-s -w' -o linux/amd64/bin/main "$GOMOD/cmd/main"
+GOOS="linux" GOARCH="amd64" go build -ldflags='-s -w' -o linux/amd64/bin/main "$GOMOD/cmd/main"
 GOOS="linux" GOARCH="arm64" go build -ldflags='-s -w' -o linux/arm64/bin/main "$GOMOD/cmd/main"
 
 if [ "${STRIP:-false}" != "false" ]; then

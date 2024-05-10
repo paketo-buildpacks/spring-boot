@@ -18,20 +18,23 @@ package boot
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
 	"github.com/buildpacks/libcnb"
 	"github.com/magiconair/properties"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
 	"github.com/paketo-buildpacks/libpak/bard"
-	"regexp"
-	"strconv"
-	"strings"
+	"github.com/paketo-buildpacks/libpak/sherpa"
 )
 
 const (
 	PlanEntrySpringBoot       = "spring-boot"
 	PlanEntryJVMApplication   = "jvm-application"
 	PlanEntryNativeProcessed  = "native-processed"
+	PlanEntryJRE              = "jre"
 	MavenConfigActiveProfiles = "BP_MAVEN_ACTIVE_PROFILES"
 )
 
@@ -40,6 +43,7 @@ type Detect struct {
 }
 
 func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error) {
+
 	result := libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
@@ -49,19 +53,38 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 				},
 				Requires: []libcnb.BuildPlanRequire{
 					{Name: PlanEntryJVMApplication},
-					{Name: PlanEntrySpringBoot},
-				},
+					{Name: PlanEntrySpringBoot}				},
 			},
 		},
-	}
-	manifest, err := libjvm.NewManifest(context.Application.Path)
-	if err != nil {
-		return libcnb.DetectResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
 	}
 
 	cr, err := libpak.NewConfigurationResolver(context.Buildpack, nil)
 	if err != nil {
 		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
+	}
+
+	if sherpa.ResolveBool("BP_JVM_CDS_ENABLED") {
+
+		result = libcnb.DetectResult{
+			Pass: true,
+			Plans: []libcnb.BuildPlan{
+				{
+					Provides: []libcnb.BuildPlanProvide{
+						{Name: PlanEntrySpringBoot},
+					},
+					Requires: []libcnb.BuildPlanRequire{
+						{Name: PlanEntryJVMApplication},
+						{Name: PlanEntrySpringBoot},
+						// Require a JRE at build time to perform CDS training run
+						{Name: PlanEntryJRE, Metadata: map[string]interface{}{"build": true}},
+					},
+				},
+			},
+		}
+	}
+	manifest, err := libjvm.NewManifest(context.Application.Path)
+	if err != nil {
+		return libcnb.DetectResult{}, fmt.Errorf("unable to read manifest in %s\n%w", context.Application.Path, err)
 	}
 
 	mavenNativeProfileDetected := isMavenNativeProfileDetected(&cr, &d.Logger)
