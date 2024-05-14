@@ -510,6 +510,7 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 	props := &properties.Properties{}
 	jarPath := ""
 	stopWalk := errors.New("stop walking")
+	noJar := errors.New("unable to find a jar file")
 
 	fileSystem := os.DirFS(appPath)
 	err := fs.WalkDir(fileSystem, ".", func(path string, dirEntry fs.DirEntry, err error) error {
@@ -541,9 +542,12 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 			jarPath = fullPath
 			return stopWalk
 		}
-
-		return nil
+		return noJar
 	})
+
+	if errors.Is(err, noJar) || err == nil{
+		return "", &properties.Properties{}, nil
+	}
 
 	if err != nil && !errors.Is(err, stopWalk) {
 		return "", nil, err
