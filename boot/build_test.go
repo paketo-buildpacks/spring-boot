@@ -39,6 +39,19 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 		build boot.Build
 	)
 
+	var Copy = func(srcPath string, name string, dstPath string) {
+		in, err := os.Open(filepath.Join("testdata", srcPath, name))
+		Expect(err).NotTo(HaveOccurred())
+		defer in.Close()
+
+		out, err := os.OpenFile(filepath.Join(ctx.Application.Path, dstPath, name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+		Expect(err).NotTo(HaveOccurred())
+		defer out.Close()
+
+		_, err = io.Copy(out, in)
+		Expect(err).NotTo(HaveOccurred())
+	}
+
 	it.Before(func() {
 		var err error
 
@@ -70,7 +83,7 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 
 	it("does nothing without Spring-Boot-Version", func() {
 		result, err := build.Build(ctx)
-		Expect(err).To(MatchError(HavePrefix("unable to find Spring Boot Executable Jar")))
+		Expect(err).To(BeNil())
 
 		Expect(result).To(BeZero())
 	})
@@ -438,22 +451,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	context("when the Spring Boot lib folder already contains a spring-cloud-bindings jar", func() {
 
-		var Copy = func(name string) {
-			in, err := os.Open(filepath.Join("testdata", "spring-cloud-bindings", name))
-			Expect(err).NotTo(HaveOccurred())
-			defer in.Close()
-
-			out, err := os.OpenFile(filepath.Join(ctx.Application.Path, "BOOT-INF/lib", name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-			Expect(err).NotTo(HaveOccurred())
-			defer out.Close()
-
-			_, err = io.Copy(out, in)
-			Expect(err).NotTo(HaveOccurred())
-		}
-
 		it("contributes to the result for API 0.7+", func() {
 			os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
-			Copy("spring-cloud-bindings-1.2.3.jar")
+			Copy("spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar", "BOOT-INF/lib")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
@@ -485,7 +485,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		it("contributes to the result for API <= 0.6", func() {
 			os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
-			Copy("spring-cloud-bindings-1.2.3.jar")
+			Copy("spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar", "BOOT-INF/lib")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 1.1.1
@@ -578,6 +578,11 @@ Spring-Boot-Lib: BOOT-INF/lib
 			t.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")
 		})
 
+		it.After(func() {
+			os.Unsetenv("BP_JVM_CDS_ENABLED")
+			os.Unsetenv("BP_SPRING_CLOUD_BINDINGS_DISABLED")
+		})
+
 		ctx.Buildpack.API = "0.6"
 
 		it("contributes CDS layer & helper for Boot 3.3+ apps", func() {
@@ -598,20 +603,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		it("contributes CDS layer & helper for Boot 3.3+ apps even when they're jar'ed", func() {
 
-			var Copy = func(name string) {
-				in, err := os.Open(filepath.Join("testdata", "cds", name))
-				Expect(err).NotTo(HaveOccurred())
-				defer in.Close()
-
-				out, err := os.OpenFile(filepath.Join(ctx.Application.Path, name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-				Expect(err).NotTo(HaveOccurred())
-				defer out.Close()
-
-				_, err = io.Copy(out, in)
-				Expect(err).NotTo(HaveOccurred())
-			}
-
-			Copy("spring-app-3.3-no-dependencies.jar")
+			Copy("cds", "spring-app-3.3-no-dependencies.jar", "")
 
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
@@ -636,5 +628,46 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
 		})
 
+	})
+
+	context("when there is a non-exploded jar passed to the buildpack", func() {
+
+		it.Before(func() {
+			t.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")
+			os.Remove(filepath.Join(ctx.Application.Path, "META-INF"))
+		})
+
+		it("finds and extracts a jar that exists", func(){
+
+			Copy("cds","spring-app-3.3-no-dependencies.jar", "")
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "other-file"), []byte(`
+			stuff
+			`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+		})
+
+		it("returns silently if no jar is found", func(){
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "other-file"), []byte(`
+			stuff
+			`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.BuildResult{}))
+		})
+
+		it("returns silently if only a non-boot jar is found", func(){
+
+			Copy("","stub-empty.jar", "")
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result).To(Equal(libcnb.BuildResult{}))
+		})
 	})
 }
