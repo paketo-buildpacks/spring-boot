@@ -17,7 +17,7 @@ jobs:
         steps:
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.20"
+                go-version: "1.22"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -178,6 +178,7 @@ jobs:
               env:
                 FORMAT: image
                 PACKAGES: test
+                TTL_SH_PUBLISH: "false"
                 VERSION: ${{ steps.version.outputs.version }}
     unit:
         name: Unit Test
@@ -192,7 +193,7 @@ jobs:
                 restore-keys: ${{ runner.os }}-go-
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.20"
+                go-version: "1.22"
             - name: Install richgo
               run: |
                 #!/usr/bin/env bash
