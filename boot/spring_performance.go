@@ -106,7 +106,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			os.RemoveAll(s.AppPath)
 		}
 
-		if err := s.springBootJarCDSLayoutExtract(jarPath); err != nil {
+		javaCommand := "java"
+		jreHome := sherpa.GetEnvWithDefault("JRE_HOME", sherpa.GetEnvWithDefault("JAVA_HOME", ""))
+		if jreHome != "" {
+			javaCommand = jreHome + "/bin/java"
+		}
+
+		if err := s.springBootJarCDSLayoutExtract(javaCommand, jarPath); err != nil {
 			return layer, fmt.Errorf("error extracting Boot jar at %s\n%w", jarPath, err)
 		}
 		startClassValue, _ := s.Manifest.Get("Start-Class")
@@ -140,7 +146,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		// perform the training run, application.dsa, the cache file, will be created
 		if err := s.Executor.Execute(effect.Execution{
-			Command: "java",
+			Command: javaCommand,
 			Env:     trainingRunEnvVariables,
 			Args:    trainingRunArgs,
 			Dir:     s.AppPath,
@@ -163,10 +169,10 @@ func (s SpringPerformance) Name() string {
 	return s.LayerContributor.Name
 }
 
-func (s SpringPerformance) springBootJarCDSLayoutExtract(jarPath string) error {
+func (s SpringPerformance) springBootJarCDSLayoutExtract(javaCommand string, jarPath string) error {
 	s.Logger.Bodyf("Extracting Jar")
 	if err := s.Executor.Execute(effect.Execution{
-		Command: "java",
+		Command: javaCommand,
 		Args:    []string{"-Djarmode=tools", "-jar", jarPath, "extract", "--destination", s.AppPath},
 		Dir:     filepath.Dir(jarPath),
 		Stdout:  s.Logger.InfoWriter(),
