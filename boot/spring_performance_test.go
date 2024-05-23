@@ -250,8 +250,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		cwd, _ := os.Getwd()
 		old := filepath.Join(cwd, "testdata", "spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar")
-		new := filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar")
-		os.Symlink(old, new)
+		now := filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar")
+		os.Symlink(old, now)
 
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
@@ -282,6 +282,40 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink).To(BeFalse())
 		Expect(layer.Build).To(BeTrue())
 
+	})
+
+	it("fails with a non existing JRE_HOME path", func() {
+		Expect(os.Setenv("JRE_HOME", "/that/does/not/exist")).To(Succeed())
+
+		aotEnabled, cdsEnabled = true, true
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).Return(nil)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.3.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true)
+		s.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(executor.Calls).To(HaveLen(2))
+		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
+		Expect(ok).To(BeTrue())
+
+		Expect(e.Command).To(Equal("/that/does/not/exist/bin/java"))
+		Expect(layer.Build).To(BeTrue())
+
+		Expect(os.Unsetenv("JRE_HOME")).To(Succeed())
 	})
 
 }
