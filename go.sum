@@ -1,5 +1,5 @@
-github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
-github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0=
+github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/Masterminds/semver/v3 v3.2.1 h1:RN9w6+7QoMeJVGyfmbcgs28Br8cvmnucEXnY0rYXWg0=
 github.com/Masterminds/semver/v3 v3.2.1/go.mod h1:qvl/7zhW3nngYb5+80sSMF+FG2BjYrf8m9wsX0PNOMQ=
 github.com/buildpacks/libcnb v1.30.3 h1:JtFMFPO2450uDLzpE1b50TvmM1GEZa8YT9cQ2ZZtHqA=
@@ -44,8 +44,8 @@ github.com/onsi/ginkgo/v2 v2.17.2 h1:7eMhcy3GimbsA3hEnVKdw/PQM9XN9krpKVXsZdph0/g
 github.com/onsi/ginkgo/v2 v2.17.2/go.mod h1:nP2DPOQoNsQmsVyv5rDA8JkXQoCs6goXIvr/PRJ1eCc=
 github.com/onsi/gomega v1.33.1 h1:dsYjIxxSR755MDmKVsaFQTE22ChNBcuuTWgkUDSubOk=
 github.com/onsi/gomega v1.33.1/go.mod h1:U4R44UsT+9eLIaYRB2a5qajjtQYn0hauxvRm16AVYg0=
-github.com/paketo-buildpacks/libjvm v1.44.4 h1:FVzd3unTUVRSdu143JGhFSt1ItILSb+0AquA+unaI08=
-github.com/paketo-buildpacks/libjvm v1.44.4/go.mod h1:K7CTaBZrOxnuBpw93spYgevh13QImcNJFdffYHlbzTc=
+github.com/paketo-buildpacks/libjvm v1.45.0 h1:j6uPzw6NqLKQhtD/0mNSHWaDdNqoNvNkpYEP15eotcE=
+github.com/paketo-buildpacks/libjvm v1.45.0/go.mod h1:WqnhqdGlfnMOiSQhDKeloWAUvdlKWBrrG4cmhT8yJjE=
 github.com/paketo-buildpacks/libpak v1.70.0 h1:J2Vo4lkqfrkEhOsbJbTpAHjRCszEprHjdnrLlLkL3c8=
 github.com/paketo-buildpacks/libpak v1.70.0/go.mod h1:VJpKQDq1ajyi3JIjfqIyg1Dgf/ayd4jzkO38bbqgQLc=
 github.com/pavlo-v-chernykh/keystore-go/v4 v4.5.0 h1:2nosf3P75OZv2/ZO/9Px5ZgZ5gbKrzA3joN1QMfOGMQ=
