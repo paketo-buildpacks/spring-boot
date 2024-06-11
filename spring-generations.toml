@@ -1034,6 +1034,11 @@
     Name = "4.2.x"
     OSS = "2024-11-17"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "4.3.x"
+    OSS = "2025-05-17"
+
 [[Projects]]
   Name = "Spring Data Couchbase"
   Slug = "spring-data-couchbase"
@@ -1194,6 +1199,11 @@
     Name = "3.2.x"
     OSS = "2024-11-17"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "3.3.x"
+    OSS = "2025-05-17"
+
 [[Projects]]
   Name = "Spring Data JDBC Extensions"
   Slug = "spring-data-jdbc-ext"
@@ -1248,6 +1258,11 @@
     Commercial = "2026-03-17"
     Name = "3.2.x"
     OSS = "2024-11-17"
+
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "3.3.x"
+    OSS = "2025-05-17"
 
 [[Projects]]
   Name = "Spring Data LDAP"
@@ -1304,6 +1319,11 @@
     Name = "3.2.x"
     OSS = "2024-11-17"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "3.3.x"
+    OSS = "2025-05-17"
+
 [[Projects]]
   Name = "Spring Data MongoDB"
   Slug = "spring-data-mongodb"
@@ -1359,6 +1379,11 @@
     Name = "4.2.x"
     OSS = "2024-11-17"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "4.3.x"
+    OSS = "2025-05-17"
+
 [[Projects]]
   Name = "Spring Data Neo4j"
   Slug = "spring-data-neo4j"
@@ -1408,6 +1433,11 @@
     Commercial = "2026-03-17"
     Name = "3.2.x"
     OSS = "2024-11-17"
+
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "3.3.x"
+    OSS = "2025-05-17"
 
 [[Projects]]
   Name = "Spring Data Redis"
@@ -1464,6 +1494,11 @@
     Name = "3.2.x"
     OSS = "2024-11-17"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "3.3.x"
+    OSS = "2025-05-17"
+
 [[Projects]]
   Name = "Spring Data REST"
   Slug = "spring-data-rest"
@@ -1518,6 +1553,11 @@
     Commercial = "2026-03-17"
     Name = "4.2.x"
     OSS = "2024-11-17"
+
+  [[Projects.Generations]]
+    Commercial = "2026-09-17"
+    Name = "4.3.x"
+    OSS = "2025-05-17"
 
 [[Projects]]
   Name = "Spring Data for Apache Solr"
@@ -1929,6 +1969,11 @@
     Name = "2021.0.x"
     OSS = "2022-05-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-21"
+    Name = "3.3.x"
+    OSS = "2025-05-21"
+
 [[Projects]]
   Name = "Spring Session for Apache Geode"
   Slug = "spring-session-data-geode"
@@ -1973,6 +2018,11 @@
     Commercial = "2026-05-03"
     Name = "3.2.x"
     OSS = "2025-01-03"
+
+  [[Projects.Generations]]
+    Commercial = "2026-10-04"
+    Name = "3.3.x"
+    OSS = "2025-06-04"
 
 [[Projects]]
   Name = "Spring Social"
