@@ -48,6 +48,8 @@ const (
 	LabelDataFlowConfigurationMetadata = "org.springframework.cloud.dataflow.spring-configuration-metadata.json"
 	SpringCloudBindingsBoot2           = "1"
 	SpringCloudBindingsBoot3           = "2"
+	FileSystemProvider                 = "java.nio.file.spi.FileSystemProvider"
+	NestedFileSystemProvider           = "org.springframework.boot.loader.nio.file.NestedFileSystemProvider"
 )
 
 type Build struct {
@@ -149,6 +151,14 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	if buildNativeImage {
+		// Fix for https://github.com/paketo-buildpacks/spring-boot/issues/488
+		if versionFound && versionRespectsConstraint(version, ">= 3.2.0") {
+			err = lookForServicesFileSystemProviderAndRemoveNested(context)
+			if err != nil {
+				return libcnb.BuildResult{}, err
+			}
+		}
+
 		// set CLASSPATH for native image build
 		classpathLayer, err := NewNativeImageClasspath(context.Application.Path, manifest)
 		if err != nil {
@@ -279,6 +289,43 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	return result, nil
+}
+
+func lookForServicesFileSystemProviderAndRemoveNested(context libcnb.BuildContext) error {
+	dir := filepath.Join(context.Application.Path, "META-INF", "services")
+	if servicesFolderExists, err := sherpa.DirExists(dir); err != nil {
+		return fmt.Errorf("unable to check directory %s\n%w", dir, err)
+	} else if servicesFolderExists {
+		fileSystemProvider := filepath.Join(dir, FileSystemProvider)
+
+		content, err := os.ReadFile(fileSystemProvider)
+		if os.IsNotExist(err) {
+			return nil
+		} else if err != nil {
+			return fmt.Errorf("unable to read %s\n%w", fileSystemProvider, err)
+		}
+		originalLines := bytes.Split(content, []byte("\n"))
+		var newLines [][]byte
+		for _, line := range originalLines {
+			if !bytes.Contains(line, []byte(NestedFileSystemProvider)) {
+				newLines = append(newLines, line)
+			}
+		}
+
+		if len(newLines) > 0 {
+			err = os.WriteFile(fileSystemProvider, bytes.Join(newLines, []byte("\n")), 0644)
+			if err != nil {
+				return fmt.Errorf("unable to write to %s\n%w", fileSystemProvider, err)
+			}
+		} else {
+			err = os.Remove(fileSystemProvider)
+			if err != nil {
+				return fmt.Errorf("unable to delete file %s\n%w", fileSystemProvider, err)
+			}
+		}
+
+	}
+	return nil
 }
 
 func labels(jarPath string, manifest *properties.Properties) ([]libcnb.Label, error) {
@@ -545,7 +592,7 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 		return noJar
 	})
 
-	if errors.Is(err, noJar) || err == nil{
+	if errors.Is(err, noJar) || err == nil {
 		return "", &properties.Properties{}, nil
 	}
 
@@ -569,7 +616,11 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 }
 
 func bootCDSExtractionSupported(manifestVer string) bool {
-	bootThreeThreeConstraint, _ := semver.NewConstraint(">= 3.3.0")
+	return versionRespectsConstraint(manifestVer, ">= 3.3.0")
+}
+
+func versionRespectsConstraint(manifestVer string, constraint string) bool {
+	bootThreeThreeConstraint, _ := semver.NewConstraint(constraint)
 	bv, err := bootVersion(manifestVer)
 	if err != nil {
 		return false
