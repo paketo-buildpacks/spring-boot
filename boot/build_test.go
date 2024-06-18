@@ -329,6 +329,94 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 			Expect(result.Slices).To(HaveLen(0))
 		})
+
+		it("does not change META-INF/services if FileSystemProvider exists but Spring Boot < 3.2", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 1.1.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			Expect(os.Mkdir(filepath.Join(ctx.Application.Path, "META-INF", "services"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "services", "java.nio.file.spi.FileSystemProvider"),
+				[]byte(`org.springframework.boot.loader.nio.file.NestedFileSystemProvider`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+
+			fileBytes, err := os.ReadFile(filepath.Join(ctx.Application.Path, "META-INF", "services", "java.nio.file.spi.FileSystemProvider"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(fileBytes)).To(Equal("org.springframework.boot.loader.nio.file.NestedFileSystemProvider"))
+
+		})
+
+		it("does not blow up if META-INF/services does not exist and Spring Boot >= 3.2", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.2.0
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+		})
+
+		it("does not blow up if META-INF/services/java.nio.file.spi.FileSystemProvider does not exist and Spring Boot >= 3.2", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.2.0
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+			Expect(os.Mkdir(filepath.Join(ctx.Application.Path, "META-INF", "services"), 0755)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+		})
+
+		it("changes META-INF/services removing FileSystemProvider if Spring Boot >= 3.2 and only line is NestedFileSystemProvider", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.2.0
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			Expect(os.Mkdir(filepath.Join(ctx.Application.Path, "META-INF", "services"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "services", "java.nio.file.spi.FileSystemProvider"),
+				[]byte(`org.springframework.boot.loader.nio.file.NestedFileSystemProvider`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+
+			_, err = os.Stat(filepath.Join(ctx.Application.Path, "META-INF", "services", "java.nio.file.spi.FileSystemProvider"))
+			Expect(err).To(HaveOccurred())
+			Expect(os.IsNotExist(err)).To(BeTrue())
+		})
+
+		it("changes META-INF/services removing line NestedFileSystemProvider from FileSystemProvider if Spring Boot >= 3.2", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.2.0
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+
+			Expect(os.Mkdir(filepath.Join(ctx.Application.Path, "META-INF", "services"), 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "services", "java.nio.file.spi.FileSystemProvider"),
+				[]byte(`org.springframework.boot.loader.nio.file.NestedFileSystemProvider
+jdk.nio.zipfs.ZipFileSystemProvider`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+
+			fileBytes, err := os.ReadFile(filepath.Join(ctx.Application.Path, "META-INF", "services", "java.nio.file.spi.FileSystemProvider"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(fileBytes)).To(Equal("jdk.nio.zipfs.ZipFileSystemProvider"))
+		})
+
 	})
 
 	context("when a native-processed BuildPlanEntry is found with a native-image sub entry", func() {
@@ -637,9 +725,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 			os.Remove(filepath.Join(ctx.Application.Path, "META-INF"))
 		})
 
-		it("finds and extracts a jar that exists", func(){
+		it("finds and extracts a jar that exists", func() {
 
-			Copy("cds","spring-app-3.3-no-dependencies.jar", "")
+			Copy("cds", "spring-app-3.3-no-dependencies.jar", "")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "other-file"), []byte(`
 			stuff
@@ -650,7 +738,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers).To(HaveLen(1))
 		})
 
-		it("returns silently if no jar is found", func(){
+		it("returns silently if no jar is found", func() {
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "other-file"), []byte(`
 			stuff
@@ -661,9 +749,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result).To(Equal(libcnb.BuildResult{}))
 		})
 
-		it("returns silently if only a non-boot jar is found", func(){
+		it("returns silently if only a non-boot jar is found", func() {
 
-			Copy("","stub-empty.jar", "")
+			Copy("", "stub-empty.jar", "")
 
 			result, err := build.Build(ctx)
 			Expect(err).NotTo(HaveOccurred())
