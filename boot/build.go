@@ -304,16 +304,16 @@ func lookForServicesFileSystemProviderAndRemoveNested(context libcnb.BuildContex
 		} else if err != nil {
 			return fmt.Errorf("unable to read %s\n%w", fileSystemProvider, err)
 		}
-		originalLines := strings.Split(string(content), "\n")
-		var newLines []string
+		originalLines := bytes.Split(content, []byte("\n"))
+		var newLines [][]byte
 		for _, line := range originalLines {
-			if !strings.Contains(line, NestedFileSystemProvider) {
+			if !bytes.Contains(line, []byte(NestedFileSystemProvider)) {
 				newLines = append(newLines, line)
 			}
 		}
 
 		if len(newLines) > 0 {
-			err = os.WriteFile(fileSystemProvider, []byte(strings.Join(newLines, "\n")), 0644)
+			err = os.WriteFile(fileSystemProvider, bytes.Join(newLines, []byte("\n")), 0644)
 			if err != nil {
 				return fmt.Errorf("unable to write to %s\n%w", fileSystemProvider, err)
 			}
