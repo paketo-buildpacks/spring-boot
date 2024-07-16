@@ -31,6 +31,9 @@ The buildpack will do the following:
     * If the application is AOT instrumented (presence of `META-INF/native-image` folder) AND `BP_SPRING_AOT_ENABLED` is set to `true`
       * set `BPL_SPRING_AOT_ENABLED` to true
       * add `-Dspring.aot.enabled=true` to `JAVA_TOOL_OPTIONS` at runtime
+    * If the application is AOT instrumented (presence of `META-INF/native-image` folder) AND `BP_SPRING_AOT_ENABLED` is set to `true` AND `CDS_TRAINING_JAVA_TOOL_OPTIONS` is set
+      * fail the build with "build failed because of invalid user configuration" - the reason being is that the AOT classes used during training run won't be compatible with a different set of `JAVA_TOOL_OPTIONS` at runtime
+      * the Spring team explains this issue in detail here: https://github.com/spring-projects/spring-boot/issues/41348
 * If `<APPLICATION_ROOT>/META-INF/MANIFEST.MF` contains a `Spring-Boot-Native-Processed` entry OR if `$BP_MAVEN_ACTIVE_PROFILES` contains the `native` profile:
   * A build plan entry is provided, `native-image-application`, which can be required by the `native-image` [buildpack](https://github.com/paketo-buildpacks/native-image) to automatically trigger a native image build
 * When contributing to a native image application:
