@@ -87,4 +87,21 @@ func testSpringCloudBindings(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
+	context("$JAVA_TOOL_OPTIONS", func() {
+		it.Before(func() {
+			Expect(os.Setenv("JAVA_TOOL_OPTIONS", "test-java-tool-options"),
+				os.Setenv("BPL_SPRING_CLOUD_BINDINGS_DISABLED", "true")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("JAVA_TOOL_OPTIONS"), os.Unsetenv("BPL_SPRING_CLOUD_BINDINGS_DISABLED")).To(Succeed())
+		})
+
+		it("contributes configuration appended to existing $JAVA_TOOL_OPTIONS", func() {
+			Expect(s.Execute()).To(Equal(map[string]string{
+				"JAVA_TOOL_OPTIONS": "test-java-tool-options -Dorg.springframework.cloud.bindings.boot.enable=false",
+			}))
+		})
+	})
+
 }
