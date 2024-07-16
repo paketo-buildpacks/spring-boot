@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/heroku/color"
 	"github.com/paketo-buildpacks/libpak/crush"
 	"io/fs"
 	"os"
@@ -211,9 +212,22 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		b.Logger.Bodyf("unable to find AOT processed dir %s, however BP_SPRING_AOT_ENABLED has been set to true. Ensure that your app is AOT processed", dir)
 	}
 
+	cdsTrainingJavaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", "")
 	if trainingRun || aotEnabled {
 
 		helpers = append(helpers, "performance")
+
+		cdsTrainingJavaToolOptionsProvided := cdsTrainingJavaToolOptions != ""
+		if cdsTrainingJavaToolOptionsProvided && trainingRun && aotEnabled {
+			b.Logger.Infof(color.RedString("ERROR: CDS_TRAINING_JAVA_TOOL_OPTIONS is not compatible with BP_SPRING_AOT_ENABLED - as the AOT classes used during training run won't be compatible with a different set of JAVA_TOOL_OPTIONS at runtime \n" +
+				"The Spring team explains this issue in detail here: https://github.com/spring-projects/spring-boot/issues/41348 \n" +
+				"If you need to provide CDS_TRAINING_JAVA_TOOL_OPTIONS (to disable a connection to a remote service for example), you need to disable BP_SPRING_AOT_ENABLED "))
+			return libcnb.BuildResult{}, fmt.Errorf("build failed because of invalid user configuration")
+		}
+		if !cdsTrainingJavaToolOptionsProvided {
+			// in case CDS_TRAINING_JAVA_TOOL_OPTIONS was not set, we pick up JAVA_TOOL_OPTIONS by default
+			cdsTrainingJavaToolOptions = sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", "")
+		}
 
 		if trainingRun {
 			mainClass, _ = manifest.Get("Start-Class")
@@ -227,7 +241,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			}
 		}
 
-		cdsLayer := NewSpringPerformance(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, reZipExplodedJar)
+		cdsLayer := NewSpringPerformance(dc, context.Application.Path, manifest, aotEnabled, trainingRun, classpathString, reZipExplodedJar, cdsTrainingJavaToolOptions)
 		cdsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, cdsLayer)
 

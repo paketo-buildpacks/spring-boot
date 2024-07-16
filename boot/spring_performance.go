@@ -35,32 +35,34 @@ import (
 )
 
 type SpringPerformance struct {
-	Dependency       libpak.BuildpackDependency
-	LayerContributor libpak.LayerContributor
-	Logger           bard.Logger
-	Executor         effect.Executor
-	AppPath          string
-	Manifest         *properties.Properties
-	AotEnabled       bool
-	DoTrainingRun    bool
-	ClasspathString  string
-	ReZip            bool
+	Dependency                 libpak.BuildpackDependency
+	LayerContributor           libpak.LayerContributor
+	Logger                     bard.Logger
+	Executor                   effect.Executor
+	AppPath                    string
+	Manifest                   *properties.Properties
+	AotEnabled                 bool
+	DoTrainingRun              bool
+	ClasspathString            string
+	ReZip                      bool
+	TrainingRunJavaToolOptions string
 }
 
-func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, reZip bool) SpringPerformance {
+func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, reZip bool, trainingRunJavaToolOptions string) SpringPerformance {
 	contributor := libpak.NewLayerContributor("Performance", cache, libcnb.LayerTypes{
 		Build:  true,
 		Launch: true,
 	})
 	return SpringPerformance{
-		LayerContributor: contributor,
-		Executor:         effect.NewExecutor(),
-		AppPath:          appPath,
-		Manifest:         manifest,
-		AotEnabled:       aotEnabled,
-		DoTrainingRun:    doTrainingRun,
-		ClasspathString:  classpathString,
-		ReZip:            reZip,
+		LayerContributor:           contributor,
+		Executor:                   effect.NewExecutor(),
+		AppPath:                    appPath,
+		Manifest:                   manifest,
+		AotEnabled:                 aotEnabled,
+		DoTrainingRun:              doTrainingRun,
+		TrainingRunJavaToolOptions: trainingRunJavaToolOptions,
+		ClasspathString:            classpathString,
+		ReZip:                      reZip,
 	}
 }
 
@@ -138,10 +140,9 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		var trainingRunEnvVariables []string
 
-		javaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", ""))
-		if javaToolOptions != "" {
-			s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", javaToolOptions)
-			trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", javaToolOptions))
+		if s.TrainingRunJavaToolOptions != "" {
+			s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", s.TrainingRunJavaToolOptions)
+			trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", s.TrainingRunJavaToolOptions))
 		}
 
 		// perform the training run, application.dsa, the cache file, will be created
