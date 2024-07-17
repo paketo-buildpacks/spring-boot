@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/paketo-buildpacks/libpak/sherpa"
 
@@ -37,7 +36,7 @@ func (s SpringCloudBindings) Execute() (map[string]string, error) {
 	
 	var err error
 	enabled := true
-	opts := []string{}
+	var opt string
 
 	if val, ok := os.LookupEnv("BPL_SPRING_CLOUD_BINDINGS_ENABLED"); ok {
 		s.Logger.Infof(color.YellowString("WARNING: BPL_SPRING_CLOUD_BINDINGS_ENABLED is deprecated, support will be removed in a coming release. Use BPL_SPRING_CLOUD_BINDINGS_DISABLED instead"))
@@ -48,15 +47,13 @@ func (s SpringCloudBindings) Execute() (map[string]string, error) {
 	}
 	// Switching from "BPL_SPRING_CLOUD_BINDINGS_ENABLED" to "BPL_SPRING_CLOUD_BINDINGS_DISABLED" which defaults to 'false' to follow convention
 	if sherpa.ResolveBool("BPL_SPRING_CLOUD_BINDINGS_DISABLED") || !enabled {
-		opts = append(opts, "-Dorg.springframework.cloud.bindings.boot.enable=false")
-		return map[string]string{"JAVA_TOOL_OPTIONS": strings.Join(opts, " ")}, nil
+		opt = "-Dorg.springframework.cloud.bindings.boot.enable=false"
+	} else {
+		opt = "-Dorg.springframework.cloud.bindings.boot.enable=true"
+		s.Logger.Info("Spring Cloud Bindings Enabled")
 	}
 
-	s.Logger.Info("Spring Cloud Bindings Enabled")
-
-	opts = append(opts, "-Dorg.springframework.cloud.bindings.boot.enable=true")
-
-	values := sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ", opts...)
+	values := sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ", opt)
 
 	return map[string]string{"JAVA_TOOL_OPTIONS": values}, nil
 }
