@@ -159,6 +159,11 @@
     Name = "3.3.x"
     OSS = "2025-05-23"
 
+  [[Projects.Generations]]
+    Commercial = "2027-02-21"
+    Name = "3.4.x"
+    OSS = "2025-11-21"
+
 [[Projects]]
   Name = "Spring CLI"
   Slug = "spring-cli"
@@ -633,6 +638,11 @@
     Commercial = "2026-08-11"
     Name = "4.2.x"
     OSS = "2025-04-11"
+
+  [[Projects.Generations]]
+    Commercial = "2026-11-12"
+    Name = "4.3.x"
+    OSS = "2025-07-12"
 
 [[Projects]]
   Name = "Spring Cloud OpenFeign"
