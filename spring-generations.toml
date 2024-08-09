@@ -1955,6 +1955,11 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
+    Commercial = "2026-09-21"
+    Name = "3.3.x"
+    OSS = "2025-05-21"
+
+  [[Projects.Generations]]
     Commercial = "2026-03-21"
     Name = "3.2.x"
     OSS = "2024-11-21"
@@ -1983,11 +1988,6 @@
     Commercial = "2023-09-19"
     Name = "2021.0.x"
     OSS = "2022-05-19"
-
-  [[Projects.Generations]]
-    Commercial = "2026-09-21"
-    Name = "3.3.x"
-    OSS = "2025-05-21"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
@@ -2137,7 +2137,7 @@
   [[Projects.Generations]]
     Commercial = "2025-11-12"
     Name = "3.0.0"
-    OSS = "2024-07-12"
+    OSS = "2024-11-12"
 
 [[Projects]]
   Name = "Spring Web Services"
