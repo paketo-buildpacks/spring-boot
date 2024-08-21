@@ -33,24 +33,13 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package@latest
-            - uses: buildpacks/github-actions/setup-tools@v5.6.0
+            - uses: buildpacks/github-actions/setup-tools@v5.7.2
               with:
                 crane-version: 0.19.1
                 yj-version: 5.1.0
-            - name: Install pack
-              run: |
-                #!/usr/bin/env bash
-                # this is coming from a copy of https://github.com/buildpacks/pack/actions/runs/8118576298 stored on box
-                # TODO to revisit when the official one is out
-                set -euo pipefail
-
-                echo "Installing pack experimental"
-
-                mkdir -p "${HOME}"/bin
-                echo "${HOME}/bin" >> "${GITHUB_PATH}"
-
-                curl -L "https://ent.box.com/shared/static/j4d1bfe9uk1sb0i7zjvci0md9xmy41u4" -o ${HOME}/bin/pack
-                chmod +x "${HOME}"/bin/pack
+            - uses: buildpacks/github-actions/setup-pack@v5.7.2
+              with:
+                pack-version: 0.34.2
             - name: Enable pack Experimental
               if: ${{ false }}
               run: |
@@ -219,7 +208,7 @@ jobs:
                 DIGEST: ${{ steps.package.outputs.digest }}
                 GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
             - if: ${{ true }}
-              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:5.6.0
+              uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry:5.7.2
               with:
                 address: docker.io/paketobuildpacks/spring-boot@${{ steps.package.outputs.digest }}
                 id: paketo-buildpacks/spring-boot
