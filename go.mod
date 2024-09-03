@@ -3,11 +3,11 @@ module github.com/paketo-buildpacks/spring-boot/v5
 go 1.22
 
 require (
-	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/Masterminds/semver/v3 v3.3.0
 	github.com/buildpacks/libcnb v1.30.3
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.7
-	github.com/onsi/gomega v1.34.1
+	github.com/onsi/gomega v1.34.2
 	github.com/paketo-buildpacks/libjvm v1.45.0
 	github.com/paketo-buildpacks/libpak v1.71.0
 	github.com/pelletier/go-toml v1.9.5
@@ -33,7 +33,6 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.26.0 // indirect
-	golang.org/x/exp v0.0.0-20240823005443-9b4947da3948 // indirect
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect
 	golang.org/x/text v0.17.0 // indirect
