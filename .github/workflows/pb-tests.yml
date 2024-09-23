@@ -17,7 +17,7 @@ jobs:
         steps:
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.22"
+                go-version: "1.23"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -182,7 +182,7 @@ jobs:
                 restore-keys: ${{ runner.os }}-go-
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.22"
+                go-version: "1.23"
             - name: Install richgo
               run: |
                 #!/usr/bin/env bash
