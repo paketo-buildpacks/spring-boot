@@ -153,25 +153,40 @@ func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadat
 		return ConfigurationMetadata{}, fmt.Errorf("unable to load properties from %s\n%w", file, err)
 	}
 
+	// Load classes
 	s, ok := p.Get("configuration-properties.classes")
-	if !ok {
-		return ConfigurationMetadata{}, nil
+	var classes []string
+	if ok {
+		for _, s := range strings.Split(s, ",") {
+			class := strings.TrimSpace(s)
+			if class != "" {
+				classes = append(classes, class)
+			}
+		}
 	}
 
-	var classes []string
-	for _, s := range strings.Split(s, ",") {
-		class := strings.TrimSpace(s)
-		if class == "" {
-			continue
+	// Load names
+	s, ok = p.Get("configuration-properties.names")
+	var names []string
+	if ok {
+		for _, s := range strings.Split(s, ",") {
+			name := strings.TrimSpace(s)
+			if name != "" {
+				names = append(names, name)
+			}
 		}
-		classes = append(classes, class)
 	}
+
+	// Merge classes and names
+	var combined []string
+	combined = append(combined, classes...)
+	combined = append(combined, names...)
 
 	m := ConfigurationMetadata{}
 
 	for _, g := range metadata.Groups {
-		for _, c := range classes {
-			if c == g.SourceType {
+		for _, c := range combined {
+			if c == g.SourceType || c == g.Name {
 				m.Groups = append(m.Groups, g)
 				break
 			}
@@ -179,8 +194,8 @@ func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadat
 	}
 
 	for _, p := range metadata.Properties {
-		for _, c := range classes {
-			if c == p.SourceType {
+		for _, c := range combined {
+			if c == p.SourceType || c == p.Name {
 				m.Properties = append(m.Properties, p)
 				break
 			}
