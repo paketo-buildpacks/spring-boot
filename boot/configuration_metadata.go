@@ -20,7 +20,6 @@ import (
 	"archive/zip"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -135,10 +134,10 @@ func DataFlowConfigurationExists(path string) (bool, error) {
 
 func NewDataFlowConfigurationMetadata(path string, metadata ConfigurationMetadata) (ConfigurationMetadata, error) {
 	file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata.properties")
-	b, err := ioutil.ReadFile(file)
+	b, err := os.ReadFile(file)
 	if os.IsNotExist(err) {
 		file := filepath.Join(path, "META-INF", "dataflow-configuration-metadata-whitelist.properties")
-		b, err = ioutil.ReadFile(file)
+		b, err = os.ReadFile(file)
 		if os.IsNotExist(err) {
 			return ConfigurationMetadata{}, nil
 		} else if err != nil {
