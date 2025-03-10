@@ -35,7 +35,7 @@
     OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-18"
+    Commercial = "2032-06-30"
     Name = "3.2.x"
     OSS = "2026-06-30"
 
@@ -100,7 +100,7 @@
     OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-02-20"
+    Commercial = "2032-06-30"
     Name = "5.2.x"
     OSS = "2026-06-30"
 
@@ -1959,6 +1959,11 @@
     Name = "6.4.x"
     OSS = "2025-11-19"
 
+  [[Projects.Generations]]
+    Commercial = "2026-09-20"
+    Name = "6.5.x"
+    OSS = "2026-05-20"
+
 [[Projects]]
   Name = "Spring Integration Groovy DSL"
   Slug = "spring-integration-dsl-groovy"
@@ -2010,9 +2015,9 @@
     OSS = "2025-05-20"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-18"
+    Commercial = "2032-06-30"
     Name = "3.3.x"
-    OSS = "2025-11-18"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring LDAP"
