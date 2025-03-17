@@ -50,29 +50,29 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-21"
+    Commercial = "2024-12-31"
     Name = "1.0.x"
-    OSS = "2023-11-21"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-16"
+    Commercial = "2025-06-30"
     Name = "1.1.x"
-    OSS = "2024-05-16"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-21"
+    Commercial = "2025-12-31"
     Name = "1.2.x"
-    OSS = "2024-11-21"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-21"
+    Commercial = "2026-06-30"
     Name = "1.3.x"
-    OSS = "2025-05-21"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-19"
+    Commercial = "2026-12-31"
     Name = "1.4.x"
-    OSS = "2025-11-19"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Batch"
@@ -150,39 +150,39 @@
     OSS = "2022-11-24"
 
   [[Projects.Generations]]
-    Commercial = "2023-08-19"
+    Commercial = "2029-06-30"
     Name = "2.7.x"
-    OSS = "2023-05-19"
+    OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-02-24"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-24"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-08-18"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-18"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-02-23"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-23"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-08-23"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-23"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-02-21"
+    Commercial = "2026-12-31"
     Name = "3.4.x"
-    OSS = "2025-11-21"
+    OSS = "2025-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2026-08-22"
+    Commercial = "2032-06-30"
     Name = "3.5.x"
-    OSS = "2026-05-22"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring CLI"
@@ -205,14 +205,14 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-01-14"
+    Commercial = "2024-01-31"
     Name = "1.4.x"
-    OSS = "2023-01-14"
+    OSS = "2023-01-31"
 
   [[Projects.Generations]]
-    Commercial = "2023-02-08"
+    Commercial = "2024-02-29"
     Name = "1.5.x"
-    OSS = "2023-02-08"
+    OSS = "2023-02-28"
 
   [[Projects.Generations]]
     Commercial = "2029-06-30"
@@ -572,12 +572,12 @@
   [[Projects.Generations]]
     Commercial = "2029-06-30"
     Name = "2.11.x"
-    OSS = "2024-09-20"
+    OSS = "2024-09-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-11-27"
+    Commercial = "2027-11-30"
     Name = "3.0.x"
-    OSS = "2026-11-27"
+    OSS = "2026-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Function"
@@ -745,39 +745,39 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2022-12-10"
+    Commercial = "2023-12-31"
     Name = "3.4.x"
-    OSS = "2022-12-10"
+    OSS = "2022-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2023-02-07"
+    Commercial = "2024-02-29"
     Name = "3.5.x"
-    OSS = "2023-02-07"
+    OSS = "2023-02-28"
 
   [[Projects.Generations]]
     Commercial = "2029-06-30"
     Name = "3.6.x"
-    OSS = "2024-02-01"
+    OSS = "2024-02-29"
 
   [[Projects.Generations]]
     Commercial = "2024-12-31"
     Name = "4.0.x"
-    OSS = "2024-04-14"
+    OSS = "2024-04-30"
 
   [[Projects.Generations]]
     Commercial = "2025-06-30"
     Name = "4.1.x"
-    OSS = "2024-10-10"
+    OSS = "2024-10-31"
 
   [[Projects.Generations]]
     Commercial = "2025-12-31"
     Name = "4.2.x"
-    OSS = "2025-04-11"
+    OSS = "2025-04-30"
 
   [[Projects.Generations]]
     Commercial = "2026-06-30"
     Name = "4.3.x"
-    OSS = "2025-07-12"
+    OSS = "2025-07-31"
 
 [[Projects]]
   Name = "Spring Cloud OpenFeign"
@@ -865,9 +865,9 @@
     OSS = "2024-09-20"
 
   [[Projects.Generations]]
-    Commercial = "2026-11-27"
+    Commercial = "2027-11-30"
     Name = "3.0.x"
-    OSS = "2026-11-27"
+    OSS = "2026-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Sleuth"
@@ -950,14 +950,14 @@
     OSS = "2024-11-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-06-03"
+    Commercial = "2026-06-30"
     Name = "2024.0.x"
-    OSS = "2025-06-03"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-01-29"
+    Commercial = "2027-01-31"
     Name = "2025.0.x"
-    OSS = "2026-01-29"
+    OSS = "2026-01-31"
 
 [[Projects]]
   Name = "Spring Cloud Stream Kafka Binder"
@@ -1150,14 +1150,14 @@
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-06-02"
+    Commercial = "2025-03-31"
     Name = "3.0.x"
-    OSS = "2024-02-02"
+    OSS = "2024-03-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-02-10"
+    Commercial = "2025-11-30"
     Name = "3.1.x"
-    OSS = "2024-10-10"
+    OSS = "2024-11-30"
 
 [[Projects]]
   Name = "Spring Data"
@@ -1170,7 +1170,7 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-01"
+    Commercial = "2029-06-30"
     Name = "3.4.x"
     OSS = "2023-06-30"
 
@@ -1205,29 +1205,29 @@
     OSS = "2019-09-21"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "4.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "4.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "4.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "4.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "4.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data Couchbase"
@@ -1270,9 +1270,9 @@
     OSS = "2020-09-30"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-13"
+    Commercial = "2029-06-30"
     Name = "2.7.x"
-    OSS = "2023-05-13"
+    OSS = "2023-06-30"
 
 [[Projects]]
   Name = "Spring Data for VMware GemFire"
@@ -1305,9 +1305,9 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-01"
+    Commercial = "2029-06-30"
     Name = "2.7.x"
-    OSS = "2023-05-01"
+    OSS = "2023-06-30"
 
   [[Projects.Generations]]
     Commercial = "2024-03-12"
@@ -1380,24 +1380,24 @@
     OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "3.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data JDBC Extensions"
@@ -1440,29 +1440,29 @@
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "3.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data LDAP"
@@ -1505,29 +1505,29 @@
     OSS = "2019-09-21"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "3.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data MongoDB"
@@ -1570,29 +1570,29 @@
     OSS = "2019-09-21"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "4.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "4.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "4.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "4.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "4.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data Neo4j"
@@ -1625,34 +1625,34 @@
     OSS = "2020-09-30"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-13"
+    Commercial = "2024-06-30"
     Name = "1.5.x"
-    OSS = "2023-05-13"
+    OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "3.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data Redis"
@@ -1695,29 +1695,29 @@
     OSS = "2019-09-21"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "3.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data REST"
@@ -1725,7 +1725,7 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-13"
+    Commercial = "2029-06-30"
     Name = "3.7.x"
     OSS = "2023-06-30"
 
@@ -1760,29 +1760,29 @@
     OSS = "2019-09-21"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "4.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-12"
+    Commercial = "2025-06-30"
     Name = "4.1.x"
-    OSS = "2024-05-12"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-17"
+    Commercial = "2025-12-31"
     Name = "4.2.x"
-    OSS = "2024-11-17"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-17"
+    Commercial = "2026-06-30"
     Name = "4.3.x"
-    OSS = "2025-05-17"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "4.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Data for Apache Solr"
@@ -1855,29 +1855,29 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2023-09-18"
+    Commercial = "2024-06-30"
     Name = "1.0.x"
-    OSS = "2023-05-18"
+    OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-22"
+    Commercial = "2024-12-31"
     Name = "1.1.x"
-    OSS = "2023-11-22"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-17"
+    Commercial = "2025-06-30"
     Name = "1.2.x"
-    OSS = "2024-05-17"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-21"
+    Commercial = "2026-06-30"
     Name = "1.3.x"
-    OSS = "2025-05-21"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-09-20"
+    Commercial = "2032-06-30"
     Name = "1.4.x"
-    OSS = "2026-05-20"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring for Apache Hadoop"
@@ -1895,29 +1895,29 @@
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-16"
+    Commercial = "2024-12-31"
     Name = "2.0.x"
-    OSS = "2023-11-16"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-11"
+    Commercial = "2025-06-30"
     Name = "2.1.x"
-    OSS = "2024-05-11"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-16"
+    Commercial = "2025-12-31"
     Name = "2.2.x"
-    OSS = "2024-11-16"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-16"
+    Commercial = "2026-06-30"
     Name = "2.3.x"
-    OSS = "2025-05-16"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-15"
+    Commercial = "2026-12-31"
     Name = "2.4.x"
-    OSS = "2025-11-15"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Integration"
@@ -1935,34 +1935,34 @@
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-22"
+    Commercial = "2024-12-31"
     Name = "6.0.x"
-    OSS = "2023-11-22"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-16"
+    Commercial = "2025-06-30"
     Name = "6.1.x"
-    OSS = "2024-05-16"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-21"
+    Commercial = "2025-12-31"
     Name = "6.2.x"
-    OSS = "2024-11-21"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-21"
+    Commercial = "2026-06-30"
     Name = "6.3.x"
-    OSS = "2025-05-21"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-19"
+    Commercial = "2026-12-31"
     Name = "6.4.x"
-    OSS = "2025-11-19"
+    OSS = "2025-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2026-09-20"
+    Commercial = "2032-06-30"
     Name = "6.5.x"
-    OSS = "2026-05-20"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring Integration Groovy DSL"
@@ -2010,9 +2010,9 @@
     OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-20"
+    Commercial = "2026-06-30"
     Name = "3.2.x"
-    OSS = "2025-05-20"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
     Commercial = "2032-06-30"
@@ -2035,14 +2035,14 @@
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-18"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-18"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-11"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-11"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
     Commercial = "2027-12-16"
@@ -2070,19 +2070,19 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-20"
+    Commercial = "2025-12-31"
     Name = "1.0.x"
-    OSS = "2024-11-20"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-20"
+    Commercial = "2026-06-30"
     Name = "1.1.x"
-    OSS = "2025-05-20"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-18"
+    Commercial = "2026-12-31"
     Name = "1.2.x"
-    OSS = "2025-11-18"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring REST Docs"
@@ -2140,29 +2140,29 @@
     OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-21"
+    Commercial = "2024-12-31"
     Name = "6.0.x"
-    OSS = "2023-11-21"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-15"
+    Commercial = "2025-06-30"
     Name = "6.1.x"
-    OSS = "2024-05-15"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-20"
+    Commercial = "2025-12-31"
     Name = "6.2.x"
-    OSS = "2024-11-20"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-20"
+    Commercial = "2026-06-30"
     Name = "6.3.x"
-    OSS = "2025-05-20"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-03-18"
+    Commercial = "2026-12-31"
     Name = "6.4.x"
-    OSS = "2025-11-18"
+    OSS = "2025-12-31"
 
 [[Projects]]
   Name = "Spring Security Kerberos"
@@ -2172,7 +2172,7 @@
   [[Projects.Generations]]
     Commercial = "2029-06-30"
     Name = "2.0.x"
-    OSS = "2024-06-05"
+    OSS = "2024-07-31"
 
 [[Projects]]
   Name = "Spring Security OAuth"
@@ -2200,24 +2200,24 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2025-09-21"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-05-21"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2025-03-21"
+    Commercial = "2025-12-31"
     Name = "3.2.x"
-    OSS = "2024-11-21"
+    OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-16"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-16"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2024-03-22"
+    Commercial = "2024-12-31"
     Name = "3.0.x"
-    OSS = "2023-11-22"
+    OSS = "2023-12-31"
 
   [[Projects.Generations]]
     Commercial = "2029-06-30"
@@ -2225,9 +2225,9 @@
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2023-03-17"
+    Commercial = "2023-12-31"
     Name = "2021.1.x"
-    OSS = "2022-11-17"
+    OSS = "2022-12-31"
 
   [[Projects.Generations]]
     Commercial = "2023-09-19"
@@ -2270,9 +2270,9 @@
     OSS = "2023-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2024-09-25"
+    Commercial = "2025-06-30"
     Name = "3.1.x"
-    OSS = "2024-05-25"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
     Commercial = "2025-12-31"
@@ -2280,9 +2280,9 @@
     OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2025-10-04"
+    Commercial = "2026-07-31"
     Name = "3.3.x"
-    OSS = "2025-06-04"
+    OSS = "2025-07-31"
 
   [[Projects.Generations]]
     Commercial = "2026-12-31"
