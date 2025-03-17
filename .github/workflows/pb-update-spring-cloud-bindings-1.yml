@@ -11,7 +11,7 @@ jobs:
         steps:
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.23"
+                go-version: "1.24"
             - name: Install update-buildpack-dependency
               run: |
                 #!/usr/bin/env bash
@@ -19,9 +19,9 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/update-buildpack-dependency@latest
-            - uses: buildpacks/github-actions/setup-tools@v5.7.2
+            - uses: buildpacks/github-actions/setup-tools@v5.8.9
               with:
-                crane-version: 0.19.1
+                crane-version: 0.20.3
                 yj-version: 5.1.0
             - uses: actions/checkout@v4
             - id: dependency
