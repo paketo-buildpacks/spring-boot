@@ -2047,7 +2047,7 @@
   [[Projects.Generations]]
     Commercial = "2027-12-16"
     Name = "3.2.x"
-    OSS = "2025-09-11"
+    OSS = "2025-06-30"
 
 [[Projects]]
   Name = "Spring Mobile"
@@ -2408,6 +2408,11 @@
     Commercial = "2026-12-31"
     Name = "4.0.x"
     OSS = "2025-12-31"
+
+  [[Projects.Generations]]
+    Commercial = "2032-06-30"
+    Name = "4.1.x"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring XD"
