@@ -1,4 +1,8 @@
-# `gcr.io/paketo-buildpacks/spring-boot`
+# Paketo Buildpack for Spring Boot
+
+## Buildpack ID: `paketo-buildpacks/spring-boot`
+## Registry URLs: `docker.io/paketobuildpacks/spring-boot`
+
 The Paketo Buildpack for Spring Boot is a Cloud Native Buildpack that contributes Spring Boot dependency information and slices an application into multiple layers.
 
 ## Behavior
