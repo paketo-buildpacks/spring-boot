@@ -574,11 +574,6 @@
     Name = "2.11.x"
     OSS = "2024-09-30"
 
-  [[Projects.Generations]]
-    Commercial = "2027-11-30"
-    Name = "3.0.x"
-    OSS = "2026-11-30"
-
 [[Projects]]
   Name = "Spring Cloud Function"
   Slug = "spring-cloud-function"
@@ -863,11 +858,6 @@
     Commercial = "2029-06-30"
     Name = "2.11.x"
     OSS = "2024-09-20"
-
-  [[Projects.Generations]]
-    Commercial = "2027-11-30"
-    Name = "3.0.x"
-    OSS = "2026-11-30"
 
 [[Projects]]
   Name = "Spring Cloud Sleuth"
@@ -2047,7 +2037,7 @@
   [[Projects.Generations]]
     Commercial = "2027-12-16"
     Name = "3.2.x"
-    OSS = "2025-09-11"
+    OSS = "2025-06-30"
 
 [[Projects]]
   Name = "Spring Mobile"
@@ -2280,14 +2270,14 @@
     OSS = "2024-12-31"
 
   [[Projects.Generations]]
-    Commercial = "2026-07-31"
+    Commercial = "2026-06-30"
     Name = "3.3.x"
-    OSS = "2025-07-31"
+    OSS = "2025-06-30"
 
   [[Projects.Generations]]
-    Commercial = "2026-12-31"
+    Commercial = "2032-06-30"
     Name = "3.4.x"
-    OSS = "2025-12-31"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring Social"
@@ -2379,6 +2369,16 @@
     Name = "3.1.x"
     OSS = "2025-12-31"
 
+  [[Projects.Generations]]
+    Commercial = "2027-06-30"
+    Name = "3.2.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Commercial = "2027-12-31"
+    Name = "4.0.x"
+    OSS = "2026-12-31"
+
 [[Projects]]
   Name = "Spring Web Flow"
   Slug = "spring-webflow"
@@ -2408,6 +2408,11 @@
     Commercial = "2026-12-31"
     Name = "4.0.x"
     OSS = "2025-12-31"
+
+  [[Projects.Generations]]
+    Commercial = "2032-06-30"
+    Name = "4.1.x"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring XD"
