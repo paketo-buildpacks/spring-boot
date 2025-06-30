@@ -3,7 +3,7 @@ module github.com/paketo-buildpacks/spring-boot/v5
 go 1.24
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/buildpacks/libcnb v1.30.4
 	github.com/heroku/color v0.0.6
 	github.com/magiconair/properties v1.8.10
