@@ -29,16 +29,13 @@ jobs:
               with:
                 pack-version: 0.36.4
             - name: Enable pack Experimental
-              if: ${{ false }}
               run: |
                 #!/usr/bin/env bash
 
                 set -euo pipefail
 
                 echo "Enabling pack experimental features"
-
-                mkdir -p "${HOME}"/.pack
-                echo "experimental = true" >> "${HOME}"/.pack/config.toml
+                pack config experimental true
             - uses: actions/checkout@v4
             - uses: actions/cache@v4
               with:
@@ -127,7 +124,7 @@ jobs:
                 cd "${COMPILED_BUILDPACK}"
                 CONFIG=""
                 if [ -f "${COMPILED_BUILDPACK}/package.toml" ]; then
-                  CONFIG="--config ${COMPILED_BUILDPACK}/package.toml"
+                  CONFIG="--config ${COMPILED_BUILDPACK}/package.toml --flatten"
                 fi
 
                 PACKAGE_LIST=($PACKAGES)
@@ -158,11 +155,16 @@ jobs:
                         crane tag "${P}:${VERSION}" latest
                       fi
                     done
-
                 else
-                  pack -v buildpack package \
-                    "${PACKAGE}:${VERSION}" ${CONFIG} \
-                    --format "${FORMAT}" $([ -n "$TTL_SH_PUBLISH" ] && [ "$TTL_SH_PUBLISH" = "true" ] && echo "--publish")
+                  if [ -n "$TTL_SH_PUBLISH" ] && [ "$TTL_SH_PUBLISH" = "true" ]; then
+                    TAG="${PACKAGE}-$(mktemp -u XXXXX | awk '{print tolower($0)}'):${VERSION}"
+                    pack -v buildpack package "${TAG}" ${CONFIG} --format "${FORMAT}" --publish
+                  else
+                    TAG="${PACKAGE}:${VERSION}"
+                    pack -v buildpack package "${TAG}" ${CONFIG} --format "${FORMAT}"
+                  fi
+
+                  echo "ttl-image-tag=${TAG:-}" >> "$GITHUB_OUTPUT"
                 fi
               env:
                 FORMAT: image
