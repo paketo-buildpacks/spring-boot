@@ -18,7 +18,6 @@ package boot
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"time"
@@ -38,9 +37,8 @@ var (
 )
 
 type Generation struct {
-	Name       *semver.Constraints `toml:"name"`
-	OSS        time.Time           `toml:"oss"`
-	Commercial time.Time           `toml:"commercial"`
+	Name *semver.Constraints `toml:"Name"`
+	OSS  time.Time           `toml:"OSS"`
 }
 
 func (g *Generation) UnmarshalTOML(data interface{}) error {
@@ -51,11 +49,11 @@ func (g *Generation) UnmarshalTOML(data interface{}) error {
 		return fmt.Errorf("unable to cast data")
 	}
 
-	if g.Name, err = semver.NewConstraint(d["name"].(string)); err != nil {
-		return fmt.Errorf("unable to parse %s to constraint\n%w", d["name"], err)
-	}
+	// it's possible if Name is formatted like Finchley.x, such as spring cloud, an error is returned
+	// not really a problem; it just means this version won't be considered, fine for spring cloud
+	g.Name, _ = semver.NewConstraint(d["Name"].(string))
 
-	oss := d["oss"].(string)
+	oss := d["OSS"].(string)
 	if len(oss) > 0 {
 		if g.OSS, err = time.Parse(DatePattern, oss); err != nil {
 			return fmt.Errorf("unable to parse %s to date\n%w", oss, err)
@@ -64,27 +62,18 @@ func (g *Generation) UnmarshalTOML(data interface{}) error {
 		g.OSS = MaxDate
 	}
 
-	commercial := d["commercial"].(string)
-	if len(commercial) > 0 {
-		if g.Commercial, err = time.Parse(DatePattern, commercial); err != nil {
-			return fmt.Errorf("unable to parse %s to date\n%w", commercial, err)
-		}
-	} else {
-		g.Commercial = MaxDate
-	}
-
 	return nil
 }
 
 type Project struct {
-	Name        string       `toml:"name"`
-	Slug        string       `toml:"slug"`
-	Status      string       `toml:"status"`
-	Generations []Generation `toml:"generations"`
+	Name        string       `toml:"Name"`
+	Slug        string       `toml:"Slug"`
+	Status      string       `toml:"Status"`
+	Generations []Generation `toml:"Generations"`
 }
 
 type Projects struct {
-	Projects []Project `toml:"projects"`
+	Projects []Project `toml:"Projects"`
 }
 
 type GenerationValidator struct {
@@ -93,7 +82,7 @@ type GenerationValidator struct {
 }
 
 func NewGenerationValidator(path string) (GenerationValidator, error) {
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
 		return GenerationValidator{}, fmt.Errorf("unable to read %s\n%w", path, err)
 	}
@@ -122,11 +111,7 @@ func (v GenerationValidator) Validate(slug string, version string) error {
 			for _, g := range p.Generations {
 				if g.Name.Check(ver) {
 					t := time.Now()
-
-					if t.After(g.Commercial) {
-						v.Logger.Header(Warningf("This application uses %s %s. Commercial updates for %s ended on %s.",
-							p.Name, version, g.Name, g.Commercial.Format(DatePattern)))
-					} else if t.After(g.OSS) {
+					if t.After(g.OSS) {
 						v.Logger.Header(Warningf("This application uses %s %s. Open Source updates for %s ended on %s.",
 							p.Name, version, g.Name, g.OSS.Format(DatePattern)))
 					}
