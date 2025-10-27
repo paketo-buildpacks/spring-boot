@@ -10,8 +10,13 @@
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Commercial = "2032-06-30"
+    Commercial = "2027-06-30"
     Name = "1.0.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Commercial = "2032-06-30"
+    Name = "1.1.x"
     OSS = "2026-06-30"
 
 [[Projects]]
@@ -108,11 +113,6 @@
     Commercial = "2032-06-30"
     Name = "1.5.x"
     OSS = "2026-06-30"
-
-  [[Projects.Generations]]
-    Commercial = "2027-12-31"
-    Name = "2.0.x"
-    OSS = "2026-12-31"
 
 [[Projects]]
   Name = "Spring Batch"
@@ -1084,31 +1084,6 @@
   Slug = "spring-cloud-skipper"
   Status = "END_OF_LIFE"
 
-  [[Projects.Generations]]
-    Commercial = "2022-11-30"
-    Name = "2.7.x"
-    OSS = "2021-11-30"
-
-  [[Projects.Generations]]
-    Commercial = "2023-06-30"
-    Name = "2.8.x"
-    OSS = "2022-06-30"
-
-  [[Projects.Generations]]
-    Commercial = "2023-12-31"
-    Name = "2.9.x"
-    OSS = "2022-10-31"
-
-  [[Projects.Generations]]
-    Commercial = "2024-11-30"
-    Name = "2.10.x"
-    OSS = "2023-11-30"
-
-  [[Projects.Generations]]
-    Commercial = "2029-06-30"
-    Name = "2.11.x"
-    OSS = "2024-09-30"
-
 [[Projects]]
   Name = "Spring Cloud Sleuth"
   Slug = "spring-cloud-sleuth"
@@ -1649,70 +1624,10 @@
   Slug = "spring-data-gemfire"
   Status = "END_OF_LIFE"
 
-  [[Projects.Generations]]
-    Commercial = "2020-02-29"
-    Name = "2.0.x"
-    OSS = "2018-10-31"
-
-  [[Projects.Generations]]
-    Commercial = "2021-02-28"
-    Name = "2.1.x"
-    OSS = "2019-10-31"
-
-  [[Projects.Generations]]
-    Commercial = "2022-01-31"
-    Name = "2.2.x"
-    OSS = "2020-09-30"
-
-  [[Projects.Generations]]
-    Commercial = "2022-09-30"
-    Name = "2.3.x"
-    OSS = "2021-05-31"
-
 [[Projects]]
   Name = "Spring Data for Apache Geode"
   Slug = "spring-data-geode"
-  Status = "ACTIVE"
-
-  [[Projects.Generations]]
-    Commercial = "2020-06-30"
-    Name = "2.0.x"
-    OSS = "2019-03-31"
-
-  [[Projects.Generations]]
-    Commercial = "2021-01-31"
-    Name = "2.1.x"
-    OSS = "2019-10-31"
-
-  [[Projects.Generations]]
-    Commercial = "2022-01-31"
-    Name = "2.2.x"
-    OSS = "2020-10-31"
-
-  [[Projects.Generations]]
-    Commercial = "2022-08-31"
-    Name = "2.3.x"
-    OSS = "2021-05-31"
-
-  [[Projects.Generations]]
-    Commercial = "2023-02-28"
-    Name = "2.4.x"
-    OSS = "2021-11-30"
-
-  [[Projects.Generations]]
-    Commercial = "2023-08-31"
-    Name = "2.5.x"
-    OSS = "2022-05-31"
-
-  [[Projects.Generations]]
-    Commercial = "2024-02-29"
-    Name = "2.6.x"
-    OSS = "2022-11-30"
-
-  [[Projects.Generations]]
-    Commercial = "2029-06-30"
-    Name = "2.7.x"
-    OSS = "2023-06-30"
+  Status = "END_OF_LIFE"
 
 [[Projects]]
   Name = "Spring Data JDBC"
@@ -2675,6 +2590,41 @@
   Status = "END_OF_LIFE"
 
 [[Projects]]
+  Name = "Spring Modulith"
+  Slug = "spring-modulith"
+  Status = "ACTIVE_UNSUPPORTED"
+
+  [[Projects.Generations]]
+    Commercial = ""
+    Name = "1.0.x"
+    OSS = ""
+
+  [[Projects.Generations]]
+    Commercial = ""
+    Name = "1.1.x"
+    OSS = ""
+
+  [[Projects.Generations]]
+    Commercial = ""
+    Name = "1.2.x"
+    OSS = ""
+
+  [[Projects.Generations]]
+    Commercial = ""
+    Name = "1.3.x"
+    OSS = ""
+
+  [[Projects.Generations]]
+    Commercial = ""
+    Name = "1.4.x"
+    OSS = ""
+
+  [[Projects.Generations]]
+    Commercial = ""
+    Name = "2.0.x"
+    OSS = ""
+
+[[Projects]]
   Name = "Spring Plugin"
   Slug = "spring-plugin"
   Status = "INCUBATING"
@@ -2849,20 +2799,10 @@
   Slug = "spring-security-oauth"
   Status = "END_OF_LIFE"
 
-  [[Projects.Generations]]
-    Commercial = "2022-05-31"
-    Name = "2.5.x"
-    OSS = "2022-05-31"
-
 [[Projects]]
   Name = "Spring Security SAML"
   Slug = "spring-security-saml"
   Status = "END_OF_LIFE"
-
-  [[Projects.Generations]]
-    Commercial = "2021-10-31"
-    Name = "1.0.x"
-    OSS = "2019-11-30"
 
 [[Projects]]
   Name = "Spring Session"
@@ -3023,6 +2963,11 @@
     Commercial = "2032-06-30"
     Name = "3.4.x"
     OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Commercial = "2027-12-31"
+    Name = "4.0.x"
+    OSS = "2026-12-31"
 
 [[Projects]]
   Name = "Spring Social"
