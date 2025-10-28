@@ -1,34 +1,47 @@
-[[projects]]
-  name = "Spring Boot"
-  slug = "spring-boot"
-  status = "ACTIVE"
+[[Projects]]
+  Name = "Spring AI"
+  Slug = "spring-ai"
+  Status = "ACTIVE"
 
-  [[projects.generations]]
-    name = "1.5.x"
-    oss = "2019-08-01"
-    commercial = "2019-09-01"
+  [[Projects.Generations]]
+    Commercial = "2032-06-30"
+    Name = "1.0.x"
+    OSS = "2026-06-30"
 
-  [[projects.generations]]
-    name = "2.0.x"
-    oss = "2019-04-03"
-    commercial = "2020-04-01"
+[[Projects]]
+  Name = "Spring Boot"
+  Slug = "spring-boot"
+  Status = "ACTIVE"
 
-  [[projects.generations]]
-    name = "2.1.x"
-    oss = "2019-10-01"
-    commercial = "2021-04-01"
+  [[Projects.Generations]]
+    Name = "1.5.x"
+    OSS = "2019-08-31"
 
-  [[projects.generations]]
-    name = "2.2.x"
-    oss = "2021-10-01"
-    commercial = "2032-11-15"
+  [[Projects.Generations]]
+    Name = "2.0.x"
+    OSS = "2019-03-31"
 
-  [[projects.generations]]
-    name = "2.3.x"
-    oss = "2021-05-15"
-    commercial = ""
+  [[Projects.Generations]]
+    Name = "2.5.x"
+    OSS = "2022-05-31"
 
-  [[projects.generations]]
-    name = "2.4.x"
-    oss = "2021-11-15"
-    commercial = ""
+  [[Projects.Generations]]
+    Name = "2.6.x"
+    OSS = "2022-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.7.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.5.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "4.0.x"
+    OSS = "2026-12-31"
+
+[[Projects]]
+  Name = "Spring CLI"
+  Slug = "spring-cli"
+  Status = "END_OF_LIFE"
