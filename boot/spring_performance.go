@@ -108,11 +108,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			os.RemoveAll(s.AppPath)
 		}
 
-		javaCommand := "java"
-		jreHome := sherpa.GetEnvWithDefault("JRE_HOME", sherpa.GetEnvWithDefault("JAVA_HOME", ""))
-		if jreHome != "" {
-			javaCommand = jreHome + "/bin/java"
-		}
+		javaCommand := JavaCommand()
 
 		if err := s.springBootJarCDSLayoutExtract(javaCommand, jarPath); err != nil {
 			return layer, fmt.Errorf("error extracting Boot jar at %s\n%w", jarPath, err)

@@ -25,14 +25,15 @@ import (
 
 func TestUnit(t *testing.T) {
 	suite := spec.New("boot", spec.Report(report.Terminal{}))
- 	suite("Build", testBuild)
+	suite("Build", testBuild)
 	suite("ConfigurationMetadata", testConfigurationMetadata)
 	suite("Detect", testDetect)
 	suite("GenerationValidator", testGenerationValidator)
 	suite("SpringCloudBindings", testSpringCloudBindings)
 	suite("SpringPerformance", testSpringPerformance)
- 	suite("WebApplicationType", testWebApplicationType)
+	suite("WebApplicationType", testWebApplicationType)
 	suite("WebApplicationTypeResolver", testWebApplicationTypeResolver)
-	suite("NativeImage", testNativeImage) 
+	suite("NativeImage", testNativeImage)
+	suite("JavaVersion", testJavaMajorVersion)
 	suite.Run(t)
 }

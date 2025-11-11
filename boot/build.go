@@ -21,14 +21,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/heroku/color"
-	"github.com/paketo-buildpacks/libpak/crush"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/heroku/color"
+	"github.com/paketo-buildpacks/libpak/crush"
+	"github.com/paketo-buildpacks/libpak/effect"
 
 	"github.com/paketo-buildpacks/libpak/sherpa"
 
@@ -54,10 +56,15 @@ const (
 )
 
 type Build struct {
-	Logger bard.Logger
+	Logger   bard.Logger
+	Executor effect.Executor
 }
 
 func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
+
+	if b.Executor == nil {
+		b.Executor = effect.NewExecutor()
+	}
 
 	result := libcnb.NewBuildResult()
 	bootJarFound, reZipExplodedJar := false, false
@@ -152,8 +159,21 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 
 	if buildNativeImage {
+
+		javaMajorVersion, err := JavaMajorVersionFromJRE(b.Executor)
+		if err != nil {
+			b.Logger.Infof("Impossible to determine the Java version from the JRE, here is the error: %s", err)
+			b.Logger.Infof("Continuing with the build, considering the Java version unknown")
+		} else {
+			b.Logger.Infof("Java Major version from the JRE: %d", javaMajorVersion)
+
+			if versionRespectsConstraint(version, ">= 4.0.0") && javaMajorVersion < 25 {
+				return libcnb.BuildResult{}, fmt.Errorf("the Java version from the downloaded NIK/GraalVM is lower than 25 and the Spring Boot version is >= 4.0.0; this is not supported, more info at https://github.com/paketo-buildpacks/spring-boot/issues/562 - you can force the NIK JVM version using BP_JVM_VERSION=25, or with .sdkmanrc, etc")
+			}
+		}
+
 		// Fix for https://github.com/paketo-buildpacks/spring-boot/issues/488
-		if versionFound && versionRespectsConstraint(version, ">= 3.2.0") {
+		if versionRespectsConstraint(version, ">= 3.2.0") {
 			err = lookForServicesFileSystemProviderAndRemoveNested(context)
 			if err != nil {
 				return libcnb.BuildResult{}, err

@@ -26,17 +26,20 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/paketo-buildpacks/libjvm"
 	"github.com/paketo-buildpacks/libpak"
-	"github.com/sclevine/spec"
-
+	"github.com/paketo-buildpacks/libpak/effect"
+	"github.com/paketo-buildpacks/libpak/effect/mocks"
 	"github.com/paketo-buildpacks/spring-boot/v5/boot"
+	"github.com/sclevine/spec"
+	"github.com/stretchr/testify/mock"
 )
 
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx   libcnb.BuildContext
-		build boot.Build
+		ctx      libcnb.BuildContext
+		build    boot.Build
+		executor *mocks.Executor
 	)
 
 	var Copy = func(srcPath string, name string, dstPath string) {
@@ -845,4 +848,78 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result).To(Equal(libcnb.BuildResult{}))
 		})
 	})
+
+	context("when we build a native app. with Spring Boot 4", func() {
+
+		it.Before(func() {
+			ctx.Plan.Entries = append(ctx.Plan.Entries, libcnb.BuildpackPlanEntry{
+				Name:     "spring-boot",
+				Metadata: map[string]interface{}{"native-image": true},
+			})
+			executor = &mocks.Executor{}
+		})
+
+		it("fails with a NIK JVM version < 25", func() {
+			Expect(os.Setenv("JRE_HOME", "/that/does/not/exist")).To(Succeed())
+
+			executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, `openjdk version "21" 2025-09-16 LTS
+OpenJDK Runtime Environment Liberica-NIK-21.0.0-1 (build 21+37-LTS)
+OpenJDK 64-Bit Server VM Liberica-NIK-21.0.0-1 (build 21+37-LTS, mixed mode, sharing)`)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 4.0.0
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+			_, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			build.Executor = executor
+
+			result, err := build.Build(ctx)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("the Java version from the downloaded NIK/GraalVM is lower than 25 and the Spring Boot version is >= 4.0.0; this is not supported, more info at https://github.com/paketo-buildpacks/spring-boot/issues/562 - you can force the NIK JVM version using BP_JVM_VERSION=25, or with .sdkmanrc, etc"))
+			Expect(result.Layers).To(HaveLen(0))
+
+			Expect(os.Unsetenv("JRE_HOME")).To(Succeed())
+		})
+
+		it("succeeds with a NIK JVN version >= 25", func() {
+			Expect(os.Setenv("JRE_HOME", "/that/does/not/exist")).To(Succeed())
+
+			executor.On("Execute", mock.Anything).Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, `openjdk version "25" 2025-09-16 LTS
+OpenJDK Runtime Environment Liberica-NIK-25.0.0-1 (build 25+37-LTS)
+OpenJDK 64-Bit Server VM Liberica-NIK-25.0.0-1 (build 25+37-LTS, mixed mode, sharing)`)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 4.0.0
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+			_, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			build.Executor = executor
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Layers).To(HaveLen(1))
+
+			Expect(os.Unsetenv("JRE_HOME")).To(Succeed())
+		})
+
+	})
+
 }
