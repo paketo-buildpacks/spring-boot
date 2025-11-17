@@ -42,13 +42,13 @@ type SpringPerformance struct {
 	AppPath                    string
 	Manifest                   *properties.Properties
 	AotEnabled                 bool
-	DoTrainingRun              bool
+	PerformanceType            SpringPerformanceType
 	ClasspathString            string
 	ReZip                      bool
 	TrainingRunJavaToolOptions string
 }
 
-func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, doTrainingRun bool, classpathString string, reZip bool, trainingRunJavaToolOptions string) SpringPerformance {
+func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, performanceType SpringPerformanceType, classpathString string, reZip bool, trainingRunJavaToolOptions string) SpringPerformance {
 	contributor := libpak.NewLayerContributor("Performance", cache, libcnb.LayerTypes{
 		Build:  true,
 		Launch: true,
@@ -59,7 +59,7 @@ func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest
 		AppPath:                    appPath,
 		Manifest:                   manifest,
 		AotEnabled:                 aotEnabled,
-		DoTrainingRun:              doTrainingRun,
+		PerformanceType:            performanceType,
 		TrainingRunJavaToolOptions: trainingRunJavaToolOptions,
 		ClasspathString:            classpathString,
 		ReZip:                      reZip,
@@ -72,11 +72,11 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
 
-		if !s.DoTrainingRun {
+		if s.PerformanceType == Without {
 			return layer, nil
+		} else if s.PerformanceType == CDS {
+			layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", true)
 		}
-
-		layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", s.DoTrainingRun)
 
 		// prepare the training run JVM opts
 		var trainingRunArgs []string
@@ -110,9 +110,14 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		javaCommand := JavaCommand()
 
-		if err := s.springBootJarCDSLayoutExtract(javaCommand, jarPath); err != nil {
+		if err := s.springBootJarLayoutExtract(javaCommand, jarPath); err != nil {
 			return layer, fmt.Errorf("error extracting Boot jar at %s\n%w", jarPath, err)
 		}
+
+		if s.PerformanceType == ExtractLayout {
+			return layer, nil
+		}
+
 		startClassValue, _ := s.Manifest.Get("Start-Class")
 
 		if err := fs.WalkDir(os.DirFS(s.AppPath), ".", func(path string, d fs.DirEntry, err error) error {
@@ -157,7 +162,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 	})
 
 	if err != nil {
-		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-cds layer\n%w", err)
+		return libcnb.Layer{}, fmt.Errorf("unable to contribute spring-performance layer\n%w", err)
 	}
 	return layer, nil
 }
@@ -166,7 +171,7 @@ func (s SpringPerformance) Name() string {
 	return s.LayerContributor.Name
 }
 
-func (s SpringPerformance) springBootJarCDSLayoutExtract(javaCommand string, jarPath string) error {
+func (s SpringPerformance) springBootJarLayoutExtract(javaCommand string, jarPath string) error {
 	s.Logger.Bodyf("Extracting Jar")
 	if err := s.Executor.Execute(effect.Execution{
 		Command: javaCommand,
