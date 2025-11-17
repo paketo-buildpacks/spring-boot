@@ -53,7 +53,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 				},
 				Requires: []libcnb.BuildPlanRequire{
 					{Name: PlanEntryJVMApplication},
-					{Name: PlanEntrySpringBoot}				},
+					{Name: PlanEntrySpringBoot}},
 			},
 		},
 	}
@@ -75,7 +75,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: PlanEntryJVMApplication},
 						{Name: PlanEntrySpringBoot},
-						// Require a JRE at build time to perform CDS training run
+						// Require a JRE at build time to perform CdsAotCache training run
 						{Name: PlanEntryJRE, Metadata: map[string]interface{}{"build": true}},
 					},
 				},

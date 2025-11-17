@@ -67,9 +67,9 @@ func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 		performanceType = boot.Without
 	})
 
-	it("contributes Spring Performance for Boot 3.3+, both CDS & AOT enabled", func() {
+	it("contributes Spring Performance for Boot 3.3+, both CdsAotCache & AOT enabled", func() {
 		aotEnabled = true
-		performanceType = boot.CDS
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
@@ -172,9 +172,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	})
 
-	it("contributes Spring Performance for Boot 3.3+, CDS only enabled", func() {
+	it("contributes Spring Performance for Boot 3.3+, CdsAotCache only enabled", func() {
 		aotEnabled = false
-		performanceType = boot.CDS
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
@@ -212,7 +212,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 	it("contributes user-provided JAVA_TOOL_OPTIONS to training run", func() {
 		Expect(os.Setenv("JAVA_TOOL_OPTIONS", "default-opt")).To(Succeed())
 		aotEnabled = false
-		performanceType = boot.CDS
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
@@ -244,9 +244,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(os.Unsetenv("CDS_TRAINING_JAVA_TOOL_OPTIONS")).To(Succeed())
 	})
 
-	it("contributes Spring Performance for Boot 3.3+, both CDS & AOT enabled - with SCB symlink", func() {
+	it("contributes Spring Performance for Boot 3.3+, both CdsAotCache & AOT enabled - with SCB symlink", func() {
 		aotEnabled = true
-		performanceType = boot.CDS
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
@@ -296,7 +296,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(os.Setenv("JRE_HOME", "/that/does/not/exist")).To(Succeed())
 
 		aotEnabled = true
-		performanceType = boot.CDS
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
