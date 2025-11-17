@@ -678,7 +678,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		ctx.Buildpack.API = "0.6"
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps", func() {
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
 			Start-Class: test-class
@@ -694,7 +694,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps even when they're jar'ed", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps even when they're jar'ed", func() {
 
 			Copy("cds", "spring-app-3.3-no-dependencies.jar", "")
 
@@ -706,7 +706,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("does not contribute CDS layer & helper for Boot < 3.3 apps", func() {
+		it("does not contribute CdsAotCache layer & helper for Boot < 3.3 apps", func() {
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.2.1
 			Start-Class: test-class
@@ -721,7 +721,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and CDS_TRAINING_JAVA_TOOL_OPTIONS not set", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and CDS_TRAINING_JAVA_TOOL_OPTIONS not set", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "true")
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -756,7 +756,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(err.Error()).To(Equal("build failed because of invalid user configuration"))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps with CDS_TRAINING_JAVA_TOOL_OPTIONS but BP_SPRING_AOT_ENABLED is disabled", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps with CDS_TRAINING_JAVA_TOOL_OPTIONS but BP_SPRING_AOT_ENABLED is disabled", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "false")
 			t.Setenv("CDS_TRAINING_JAVA_TOOL_OPTIONS", "user-cds-opt")
 
@@ -782,7 +782,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and JAVA_TOOL_OPTIONS set", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and JAVA_TOOL_OPTIONS set", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "true")
 			t.Setenv("CDS_TRAINING_JAVA_TOOL_OPTIONS", "default-opt")
 
