@@ -60,7 +60,7 @@ type SpringPerformanceType int
 const (
 	Without SpringPerformanceType = iota
 	ExtractLayout
-	CDS
+	CdsAotCache
 )
 
 type Build struct {
@@ -87,8 +87,8 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		performanceType = ExtractLayout
 	}
 
-	if sherpa.ResolveBool("BP_JVM_CDS_ENABLED") {
-		performanceType = CDS
+	if sherpa.ResolveBool("BP_JVM_CDS_ENABLED") || sherpa.ResolveBool("BP_JVM_AOTCACHE_ENABLED") {
+		performanceType = CdsAotCache
 	}
 
 	version, versionFound := manifest.Get("Spring-Boot-Version")
@@ -105,11 +105,11 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 	}
 	mainClass, _ := manifest.Get("Main-Class")
 
-	if performanceType == CDS || performanceType == ExtractLayout {
+	if performanceType == CdsAotCache || performanceType == ExtractLayout {
 		if bootCDSExtractionSupported(version) {
 			reZipExplodedJar = true
 		} else {
-			b.Logger.Bodyf("You enabled CDS optimization or extract mode only but your Spring Boot app version is: %s, you need to upgrade to Spring Boot >= 3.3 first!\nCancelling performance optimization", version)
+			b.Logger.Bodyf("You enabled CDS_AOTCACHE optimization or extract mode only but your Spring Boot app version is: %s, you need to upgrade to Spring Boot >= 3.3 first!\nCancelling performance optimization", version)
 			performanceType = Without
 		}
 
@@ -247,24 +247,24 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		b.Logger.Bodyf("unable to find AOT processed dir %s, however BP_SPRING_AOT_ENABLED has been set to true. Ensure that your app is AOT processed", dir)
 	}
 
-	cdsTrainingJavaToolOptions := sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", "")
-	if aotEnabled || performanceType == CDS || performanceType == ExtractLayout {
+	cdsTrainingJavaToolOptions := sherpa.GetEnvWithDefault("TRAINING_RUN_JAVA_TOOL_OPTIONS", sherpa.GetEnvWithDefault("CDS_TRAINING_JAVA_TOOL_OPTIONS", ""))
+	if aotEnabled || performanceType == CdsAotCache || performanceType == ExtractLayout {
 
 		helpers = append(helpers, "performance")
 
 		cdsTrainingJavaToolOptionsProvided := cdsTrainingJavaToolOptions != ""
-		if cdsTrainingJavaToolOptionsProvided && performanceType == CDS && aotEnabled {
-			b.Logger.Infof(color.RedString("ERROR: CDS_TRAINING_JAVA_TOOL_OPTIONS is not compatible with BP_SPRING_AOT_ENABLED - as the AOT classes used during training run won't be compatible with a different set of JAVA_TOOL_OPTIONS at runtime \n" +
+		if cdsTrainingJavaToolOptionsProvided && performanceType == CdsAotCache && aotEnabled {
+			b.Logger.Infof(color.RedString("ERROR: TRAINING_RUN_JAVA_TOOL_OPTIONS (or deprecated CDS_TRAINING_JAVA_TOOL_OPTIONS) is not compatible with BP_SPRING_AOT_ENABLED - as the AOT classes used during training run won't be compatible with a different set of JAVA_TOOL_OPTIONS at runtime \n" +
 				"The Spring team explains this issue in detail here: https://github.com/spring-projects/spring-boot/issues/41348 \n" +
-				"If you need to provide CDS_TRAINING_JAVA_TOOL_OPTIONS (to disable a connection to a remote service for example), you need to disable BP_SPRING_AOT_ENABLED "))
+				"If you need to provide TRAINING_JAVA_TOOL_OPTIONS (to disable a connection to a remote service for example), you need to disable BP_SPRING_AOT_ENABLED "))
 			return libcnb.BuildResult{}, fmt.Errorf("build failed because of invalid user configuration")
 		}
 		if !cdsTrainingJavaToolOptionsProvided {
-			// in case CDS_TRAINING_JAVA_TOOL_OPTIONS was not set, we pick up JAVA_TOOL_OPTIONS by default
+			// in case TRAINING_RUN_JAVA_TOOL_OPTIONS was not set, we pick up JAVA_TOOL_OPTIONS by default
 			cdsTrainingJavaToolOptions = sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", "")
 		}
 
-		if performanceType == CDS || performanceType == ExtractLayout {
+		if performanceType == CdsAotCache || performanceType == ExtractLayout {
 			mainClass, _ = manifest.Get("Start-Class")
 			classpathString = "runner.jar"
 			if len(additionalLibs) > 0 {
@@ -329,7 +329,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		result = b.contributeHelpers(context, result, helpers)
 	}
 
-	if bootJarFound || performanceType == CDS || performanceType == ExtractLayout {
+	if bootJarFound || performanceType == CdsAotCache || performanceType == ExtractLayout {
 		if mainClass != "" {
 			result.Processes = append(result.Processes, b.setProcessTypes(mainClass, classpathString)...)
 		} else {

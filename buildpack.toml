@@ -85,6 +85,18 @@ api = "0.7"
     description = "whether to enable CDS optimizations at runtime"
     name = "BPL_JVM_CDS_ENABLED"
 
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "whether to enable Spring AOT Cache & perform JVM training run"
+    name = "BP_JVM_AOTCACHE_ENABLED"
+
+  [[metadata.configurations]]
+    build = true
+    default = "false"
+    description = "whether to enable Spring AOT Cache optimizations at runtime"
+    name = "BPL_JVM_AOTCACHE_ENABLED"
+
   [[metadata.dependencies]]
     cpes = ["cpe:2.3:a:vmware:spring_cloud_bindings:1.13.0:*:*:*:*:*:*:*"]
     id = "spring-cloud-bindings"

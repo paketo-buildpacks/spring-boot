@@ -74,8 +74,8 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		if s.PerformanceType == Without {
 			return layer, nil
-		} else if s.PerformanceType == CDS {
-			layer.LaunchEnvironment.Default("BPL_JVM_CDS_ENABLED", true)
+		} else if s.PerformanceType == CdsAotCache {
+			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE_ENABLED", true)
 		}
 
 		// prepare the training run JVM opts
@@ -131,13 +131,19 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			return libcnb.Layer{}, err
 		}
 
-		trainingRunArgs = append(trainingRunArgs,
-			"-Dspring.context.exit=onRefresh",
-			"-XX:ArchiveClassesAtExit=application.jsa",
-			"-cp",
-		)
-		trainingRunArgs = append(trainingRunArgs, s.ClasspathString)
-		trainingRunArgs = append(trainingRunArgs, startClassValue)
+		jreVersion, err := JavaMajorVersionFromJRE(s.Executor)
+		if err != nil {
+			return layer, fmt.Errorf("error extracting finding out Java Version\n%w", err)
+		}
+
+		trainingRunArgs = append(trainingRunArgs, "-Dspring.context.exit=onRefresh")
+		if jreVersion >= 25 {
+			// we can use https://openjdk.org/jeps/514
+			trainingRunArgs = append(trainingRunArgs, "-XX:AOTCacheOutput=application.aot")
+		} else {
+			trainingRunArgs = append(trainingRunArgs, "-XX:ArchiveClassesAtExit=application.jsa")
+		}
+		trainingRunArgs = append(trainingRunArgs, "-cp", s.ClasspathString, startClassValue)
 
 		var trainingRunEnvVariables []string
 
@@ -146,7 +152,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", s.TrainingRunJavaToolOptions))
 		}
 
-		// perform the training run, application.dsa, the cache file, will be created
+		// perform the training run, application.dsa or .aot, the cache file, will be created
 		if err := s.Executor.Execute(effect.Execution{
 			Command: javaCommand,
 			Env:     trainingRunEnvVariables,
