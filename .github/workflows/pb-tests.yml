@@ -17,7 +17,7 @@ jobs:
         steps:
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.24"
+                go-version: "1.25"
             - name: Install create-package
               run: |
                 #!/usr/bin/env bash
@@ -25,9 +25,9 @@ jobs:
                 set -euo pipefail
 
                 go install -ldflags="-s -w" github.com/paketo-buildpacks/libpak/cmd/create-package@latest
-            - uses: buildpacks/github-actions/setup-pack@v5.8.9
+            - uses: buildpacks/github-actions/setup-pack@v5.9.7
               with:
-                pack-version: 0.36.4
+                pack-version: 0.39.1
             - name: Enable pack Experimental
               run: |
                 #!/usr/bin/env bash
@@ -184,7 +184,7 @@ jobs:
                 restore-keys: ${{ runner.os }}-go-
             - uses: actions/setup-go@v5
               with:
-                go-version: "1.24"
+                go-version: "1.25"
             - name: Install richgo
               run: |
                 #!/usr/bin/env bash
