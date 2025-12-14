@@ -1904,6 +1904,15 @@
     OSS = "2026-12-31"
 
 [[Projects]]
+  Name = "Spring gRPC"
+  Slug = "spring-grpc"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.0.x"
+    OSS = "2026-12-31"
+
+[[Projects]]
   Name = "Spring for Apache Hadoop"
   Slug = "spring-hadoop"
   Status = "END_OF_LIFE"
@@ -2548,6 +2557,10 @@
   [[Projects.Generations]]
     Name = "3.0.x"
     OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "4.0.x"
+    OSS = "2026-12-31"
 
 [[Projects]]
   Name = "Spring Web Services"
