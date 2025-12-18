@@ -67,6 +67,23 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		},
 	}
 
+	performanceResult := libcnb.DetectResult{
+		Pass: true,
+		Plans: []libcnb.BuildPlan{
+			{
+				Provides: []libcnb.BuildPlanProvide{
+					{Name: "spring-boot"},
+				},
+				Requires: []libcnb.BuildPlanRequire{
+					{Name: "jvm-application"},
+					{Name: "spring-boot"},
+					// Require a JRE at build time to perform CdsAotCache training run
+					{Name: "jre", Metadata: map[string]interface{}{"build": true}},
+				},
+			},
+		},
+	}
+
 	it("always passes for standard build", func() {
 		Expect(os.Unsetenv("BP_MAVEN_ACTIVE_PROFILES")).To(Succeed())
 		Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "META-INF"))).To(Succeed())
@@ -112,6 +129,24 @@ Spring-Boot-Native-Processed: true
 
 		Expect(os.Setenv("BP_MAVEN_ACTIVE_PROFILES", "!native")).To(Succeed())
 		Expect(detect.Detect(ctx)).To(Equal(normalResult))
+
+	})
+
+	it("using BP_JVM_CDS_ENABLED", func() {
+
+		Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "META-INF"))).To(Succeed())
+
+		Expect(os.Setenv("BP_JVM_CDS_ENABLED", "true")).To(Succeed())
+		Expect(detect.Detect(ctx)).To(Equal(performanceResult))
+
+	})
+
+	it("using BP_JVM_AOTCACHE_ENABLED", func() {
+
+		Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "META-INF"))).To(Succeed())
+
+		Expect(os.Setenv("BP_JVM_AOTCACHE_ENABLED", "true")).To(Succeed())
+		Expect(detect.Detect(ctx)).To(Equal(performanceResult))
 
 	})
 

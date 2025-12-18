@@ -673,12 +673,12 @@ Spring-Boot-Lib: BOOT-INF/lib
 			os.Unsetenv("BP_JVM_CDS_ENABLED")
 			os.Unsetenv("BP_SPRING_CLOUD_BINDINGS_DISABLED")
 			os.Unsetenv("BP_SPRING_AOT_ENABLED")
-			os.Unsetenv("CDS_TRAINING_JAVA_TOOL_OPTIONS")
+			os.Unsetenv("TRAINING_RUN_JAVA_TOOL_OPTIONS")
 		})
 
 		ctx.Buildpack.API = "0.6"
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps", func() {
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
 			Start-Class: test-class
@@ -694,7 +694,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps even when they're jar'ed", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps even when they're jar'ed", func() {
 
 			Copy("cds", "spring-app-3.3-no-dependencies.jar", "")
 
@@ -706,7 +706,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("does not contribute CDS layer & helper for Boot < 3.3 apps", func() {
+		it("does not contribute CdsAotCache layer & helper for Boot < 3.3 apps", func() {
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.2.1
 			Start-Class: test-class
@@ -721,7 +721,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[0].Name()).To(Equal("web-application-type"))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and CDS_TRAINING_JAVA_TOOL_OPTIONS not set", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and TRAINING_RUN_JAVA_TOOL_OPTIONS not set", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "true")
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -738,9 +738,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("fails the build because CDS_TRAINING_JAVA_TOOL_OPTIONS was provided with BP_SPRING_AOT_ENABLED", func() {
+		it("fails the build because TRAINING_RUN_JAVA_TOOL_OPTIONS was provided with BP_SPRING_AOT_ENABLED", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "true")
-			t.Setenv("CDS_TRAINING_JAVA_TOOL_OPTIONS", "user-cds-opt")
+			t.Setenv("TRAINING_RUN_JAVA_TOOL_OPTIONS", "user-cds-opt")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -756,9 +756,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(err.Error()).To(Equal("build failed because of invalid user configuration"))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps with CDS_TRAINING_JAVA_TOOL_OPTIONS but BP_SPRING_AOT_ENABLED is disabled", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps with TRAINING_RUN_JAVA_TOOL_OPTIONS but BP_SPRING_AOT_ENABLED is disabled", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "false")
-			t.Setenv("CDS_TRAINING_JAVA_TOOL_OPTIONS", "user-cds-opt")
+			t.Setenv("TRAINING_RUN_JAVA_TOOL_OPTIONS", "user-cds-opt")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -775,16 +775,16 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers).To(HaveLen(3))
 
 			springPerformanceLayer := result.Layers[0].(boot.SpringPerformance)
-			// specific CDS_TRAINING_JAVA_TOOL_OPTIONS was set, so we set it in the training run
+			// specific TRAINING_RUN_JAVA_TOOL_OPTIONS was set, so we set it in the training run
 			Expect(springPerformanceLayer.TrainingRunJavaToolOptions).To(Equal("user-cds-opt"))
 
 			Expect(result.Layers[2].Name()).To(Equal("helper"))
 			Expect(result.Layers[2].(libpak.HelperLayerContributor).Names).To(Equal([]string{"performance"}))
 		})
 
-		it("contributes CDS layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and JAVA_TOOL_OPTIONS set", func() {
+		it("contributes CdsAotCache layer & helper for Boot 3.3+ apps with BP_SPRING_AOT_ENABLED and JAVA_TOOL_OPTIONS set", func() {
 			t.Setenv("BP_SPRING_AOT_ENABLED", "true")
-			t.Setenv("CDS_TRAINING_JAVA_TOOL_OPTIONS", "default-opt")
+			t.Setenv("TRAINING_RUN_JAVA_TOOL_OPTIONS", "default-opt")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -799,7 +799,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(result.Layers).To(HaveLen(3))
 
 			springPerformanceLayer := result.Layers[0].(boot.SpringPerformance)
-			// no specific CDS_TRAINING_JAVA_TOOL_OPTIONS was set, but JAVA_TOOL_OPTIONS was, so we set it in the training run as well
+			// no specific TRAINING_RUN_JAVA_TOOL_OPTIONS was set, but JAVA_TOOL_OPTIONS was, so we set it in the training run as well
 			Expect(springPerformanceLayer.TrainingRunJavaToolOptions).To(Equal("default-opt"))
 
 			Expect(result.Layers[2].Name()).To(Equal("helper"))

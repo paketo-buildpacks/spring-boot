@@ -17,6 +17,7 @@
 package helper
 
 import (
+	"os"
 
 	"github.com/paketo-buildpacks/libpak/bard"
 	"github.com/paketo-buildpacks/libpak/sherpa"
@@ -29,19 +30,33 @@ type SpringPerformance struct {
 func (s SpringPerformance) Execute() (map[string]string, error) {
 	var values []string
 	aot := sherpa.ResolveBool("BPL_SPRING_AOT_ENABLED")
-	cds := sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") 
-	if !aot && !cds{
+	aotCache := sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") || sherpa.ResolveBool("BPL_JVM_AOTCACHE_ENABLED")
+	if !aot && !aotCache {
 		return nil, nil
 	}
-	
+
 	if aot {
 		s.Logger.Info("Spring AOT Enabled, contributing -Dspring.aot.enabled=true to JAVA_TOOL_OPTIONS")
 		values = append(values, "-Dspring.aot.enabled=true")
 	}
 
-	if cds {
-		s.Logger.Info("Spring CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_TOOL_OPTIONS")
-		values = append(values, "-XX:SharedArchiveFile=application.jsa")
+	if aotCache {
+
+		applicationJsa := "application.jsa"
+		applicationAot := "application.aot"
+
+		if _, errJsa := os.Stat(applicationJsa); errJsa == nil {
+			s.Logger.Info("Spring CDS Enabled, contributing -XX:SharedArchiveFile=application.jsa to JAVA_TOOL_OPTIONS")
+			values = append(values, "-XX:SharedArchiveFile=application.jsa")
+		} else {
+			if _, errAot := os.Stat(applicationAot); errAot == nil {
+				s.Logger.Info("Spring AOT Cache Enabled, contributing -XX:AOTCache=application.aot to JAVA_TOOL_OPTIONS")
+				values = append(values, "-XX:AOTCache=application.aot")
+			} else {
+				s.Logger.Info("Something went wrong, neither application.jsa nor application.aot found, CDS/AOT Cache optimization disabled")
+				s.Logger.Infof("Errors looking for  application.jsa and application.aot: %v - %v", errJsa, errAot)
+			}
+		}
 	}
 	opts := sherpa.AppendToEnvVar("JAVA_TOOL_OPTIONS", " ", values...)
 	return map[string]string{"JAVA_TOOL_OPTIONS": opts}, nil

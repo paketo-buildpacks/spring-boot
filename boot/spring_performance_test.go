@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"testing"
 
 	"github.com/buildpacks/libcnb"
@@ -39,10 +40,13 @@ func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx        libcnb.BuildContext
-		executor   *mocks.Executor
-		aotEnabled bool
-		cdsEnabled bool
+		ctx                 libcnb.BuildContext
+		executor            *mocks.Executor
+		aotEnabled          bool
+		performanceType     boot.SpringPerformanceType
+		javaVersion21Output = `openjdk version "21.0.5" 2024-10-15 LTS
+OpenJDK Runtime Environment Temurin-21.0.5+11 (build 21.0.5+11-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.5+11 (build 21.0.5+11-LTS, mixed mode, sharing)`
 	)
 
 	it.Before(func() {
@@ -63,13 +67,25 @@ func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 	it.After(func() {
 		Expect(os.RemoveAll(ctx.Layers.Path)).To(Succeed())
 		Expect(os.RemoveAll(ctx.Application.Path)).To(Succeed())
-		aotEnabled, cdsEnabled = false, false
+		aotEnabled = false
+		performanceType = boot.Without
 	})
 
-	it("contributes Spring Performance for Boot 3.3+, both CDS & AOT enabled", func() {
-		aotEnabled, cdsEnabled = true, true
+	it("contributes Spring Performance for Boot 3.3+, both CdsAotCache & AOT enabled", func() {
+		Expect(os.Setenv("JRE_HOME", "/that/does/not/exist")).To(Succeed())
+
+		aotEnabled = true
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).Return(nil)
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if (slices.Contains(execution.Args, "-version")) && execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -79,7 +95,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
 
-		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true, "")
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
 		s.Executor = executor
 
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -89,10 +105,10 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("true"))
-		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
+		Expect(layer.LaunchEnvironment["BPL_JVM_AOTCACHE_ENABLED.default"]).To(Equal("true"))
 
-		Expect(executor.Calls).To(HaveLen(2))
-		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(3))
+		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).To(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
@@ -102,7 +118,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 	})
 
 	it("contributes Spring Performance for Boot 3.3+, AOT only enabled", func() {
-		aotEnabled, cdsEnabled = true, false
+		aotEnabled = true
+		performanceType = boot.Without
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
@@ -114,7 +131,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
 
-		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true, "")
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
 		s.Executor = executor
 
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -131,8 +148,9 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	})
 
-	it("contributes Spring Performance for Boot 3.3+, CDS only enabled", func() {
-		aotEnabled, cdsEnabled = false, true
+	it("contributes Spring Performance for Boot 3.3+, extract layout only enabled", func() {
+		aotEnabled = false
+		performanceType = boot.ExtractLayout
 		dc := libpak.DependencyCache{CachePath: "testdata"}
 		executor.On("Execute", mock.Anything).Return(nil)
 
@@ -144,7 +162,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
 
-		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true, "")
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
 		s.Executor = executor
 
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -154,10 +172,56 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("false"))
-		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
-		Expect(executor.Calls).To(HaveLen(2))
+		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal(""))
+		Expect(executor.Calls).To(HaveLen(1))
 
-		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
+		e, ok := executor.Calls[0].Arguments[0].(effect.Execution)
+		Expect(ok).To(BeTrue())
+		Expect(e.Args).NotTo(ContainElement("-Dspring.aot.enabled=true"))
+		Expect(e.Args).NotTo(ContainElements("-Dspring.context.exit=onRefresh",
+			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
+		Expect(e.Args).To(ContainElement("-Djarmode=tools"))
+
+		Expect(layer.Build).To(BeTrue())
+
+	})
+
+	it("contributes Spring Performance for Boot 3.3+, CdsAotCache only enabled", func() {
+		aotEnabled = false
+		performanceType = boot.CdsAotCache
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.3.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+		s.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("false"))
+		Expect(layer.LaunchEnvironment["BPL_JVM_AOTCACHE_ENABLED.default"]).To(Equal("true"))
+		Expect(executor.Calls).To(HaveLen(3))
+
+		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).NotTo(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
@@ -169,10 +233,18 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	it("contributes user-provided JAVA_TOOL_OPTIONS to training run", func() {
 		Expect(os.Setenv("JAVA_TOOL_OPTIONS", "default-opt")).To(Succeed())
-
-		aotEnabled, cdsEnabled = false, true
+		aotEnabled = false
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).Return(nil)
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -182,7 +254,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
 
-		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true, "user-cds-opt")
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "user-cds-opt")
 		s.Executor = executor
 
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -191,21 +263,29 @@ Spring-Boot-Lib: BOOT-INF/lib
 		layer, err = s.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(executor.Calls).To(HaveLen(2))
-		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(3))
+		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 
 		Expect(e.Env).To(ContainElement("JAVA_TOOL_OPTIONS=user-cds-opt"))
 		Expect(layer.Build).To(BeTrue())
 
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
-		Expect(os.Unsetenv("CDS_TRAINING_JAVA_TOOL_OPTIONS")).To(Succeed())
 	})
 
-	it("contributes Spring Performance for Boot 3.3+, both CDS & AOT enabled - with SCB symlink", func() {
-		aotEnabled, cdsEnabled = true, true
+	it("contributes Spring Performance for Boot 3.3+, both CdsAotCache & AOT enabled - with SCB symlink", func() {
+		aotEnabled = true
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).Return(nil)
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 	Spring-Boot-Version: 3.3.1
@@ -221,7 +301,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
 
-		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true, "")
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
 		s.Executor = executor
 
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -231,10 +311,10 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(err).NotTo(HaveOccurred())
 
 		Expect(layer.LaunchEnvironment["BPL_SPRING_AOT_ENABLED.default"]).To(Equal("true"))
-		Expect(layer.LaunchEnvironment["BPL_JVM_CDS_ENABLED.default"]).To(Equal("true"))
+		Expect(layer.LaunchEnvironment["BPL_JVM_AOTCACHE_ENABLED.default"]).To(Equal("true"))
 
-		Expect(executor.Calls).To(HaveLen(2))
-		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(3))
+		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 		Expect(e.Args).To(ContainElement("-Dspring.aot.enabled=true"))
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
@@ -252,9 +332,18 @@ Spring-Boot-Lib: BOOT-INF/lib
 	it("fails with a non existing JRE_HOME path", func() {
 		Expect(os.Setenv("JRE_HOME", "/that/does/not/exist")).To(Succeed())
 
-		aotEnabled, cdsEnabled = true, true
+		aotEnabled = true
+		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).Return(nil)
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				execution := args.Get(0).(effect.Execution)
+				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
+					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
+					Expect(err).NotTo(HaveOccurred())
+				}
+			}).Return(nil)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -264,7 +353,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
 
-		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, cdsEnabled, "", true, "")
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
 		s.Executor = executor
 
 		layer, err := ctx.Layers.Layer("test-layer")
@@ -273,8 +362,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		layer, err = s.Contribute(layer)
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(executor.Calls).To(HaveLen(2))
-		e, ok := executor.Calls[1].Arguments[0].(effect.Execution)
+		Expect(executor.Calls).To(HaveLen(3))
+		e, ok := executor.Calls[2].Arguments[0].(effect.Execution)
 		Expect(ok).To(BeTrue())
 
 		Expect(e.Command).To(Equal("/that/does/not/exist/bin/java"))
