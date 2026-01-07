@@ -19,7 +19,6 @@ package boot_test
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,7 +40,7 @@ func testWebApplicationTypeResolver(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		path, err = ioutil.TempDir("", "native-image-application")
+		path, err = os.MkdirTemp("", "native-image-application")
 		Expect(err).NotTo(HaveOccurred())
 	})
 
@@ -54,7 +53,7 @@ func testWebApplicationTypeResolver(t *testing.T, context spec.G, it spec.S) {
 		var Touch = func(name string) {
 			file := filepath.Join(path, fmt.Sprintf("%s.class", strings.ReplaceAll(name, ".", "/")))
 			Expect(os.MkdirAll(filepath.Dir(file), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(file, []byte{}, 0644)).To(Succeed())
+			Expect(os.WriteFile(file, []byte{}, 0644)).To(Succeed())
 		}
 
 		it("no indicators", func() {
@@ -189,6 +188,13 @@ func testWebApplicationTypeResolver(t *testing.T, context spec.G, it spec.S) {
 			Expect(err).NotTo(HaveOccurred())
 
 			Expect(w.Resolve()).To(Equal(boot.Servlet))
+		})
+
+		it("did not go well", func() {
+			Copy("not-a-jar.jar")
+
+			_, err := boot.NewWebApplicationResolver(path, path)
+			Expect(err).To(HaveOccurred())
 		})
 	})
 }
