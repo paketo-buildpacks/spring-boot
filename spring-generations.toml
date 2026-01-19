@@ -206,6 +206,10 @@
     Name = "4.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring CLI"
   Slug = "spring-cli"
@@ -2435,6 +2439,11 @@
   [[Projects.Generations]]
     Name = "2.7.x"
     OSS = "2023-06-30"
+
+[[Projects]]
+  Name = "Spring Session MongoDB"
+  Slug = "spring-session-mongodb"
+  Status = "COMMUNITY"
 
 [[Projects]]
   Name = "Spring Shell"
