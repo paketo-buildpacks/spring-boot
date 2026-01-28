@@ -19,6 +19,7 @@ package boot
 import (
 	"fmt"
 	"io/fs"
+	"os/exec"
 
 	"github.com/paketo-buildpacks/libpak/crush"
 	"github.com/paketo-buildpacks/libpak/sherpa"
@@ -151,6 +152,8 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			s.Logger.Bodyf("Training run will use this value as JAVA_TOOL_OPTIONS: %s", s.TrainingRunJavaToolOptions)
 			trainingRunEnvVariables = append(trainingRunEnvVariables, fmt.Sprintf("JAVA_TOOL_OPTIONS=%s", s.TrainingRunJavaToolOptions))
 		}
+		s.Logger.Body("STARTING EXTRA LOG OUTPUT")
+		s.Logger.Bodyf("About to call javaCommand with args: %s and env variables: %s in this dir: %s", trainingRunArgs, trainingRunEnvVariables, s.AppPath)
 
 		// perform the training run, application.dsa or .aot, the cache file, will be created
 		if err := s.Executor.Execute(effect.Execution{
@@ -161,9 +164,21 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			Stdout:  s.Logger.InfoWriter(),
 			Stderr:  s.Logger.InfoWriter(),
 		}); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
+
+			s.Logger.Body("oh no! an error happened while executing the training run!")
+			fmt.Printf("ERROR!!!!\n%v", err)
+			s.Logger.Bodyf("%v", err)
+
+			s.Logger.Bodyf("let's see what's up in the folder where we tried to work, %s", s.AppPath)
+			cmd := exec.Command("ls", "-al")
+			output, _ := cmd.CombinedOutput()
+			s.Logger.Body(string(output))
+			s.Logger.Body("Letting the error slide!")
+
+			//return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
 		}
 
+		s.Logger.Body("PERFORMANCE WORK DONE; RETURNING layer TO build.go")
 		return layer, nil
 	})
 
