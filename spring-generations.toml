@@ -62,6 +62,10 @@
     Name = "4.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring for Android"
   Slug = "spring-android"
@@ -135,7 +139,7 @@
 
   [[Projects.Generations]]
     Name = "6.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Boot"
@@ -995,7 +999,7 @@
 
   [[Projects.Generations]]
     Name = "2022.0.x"
-    OSS = "2024-11-30"
+    OSS = "2024-06-30"
 
   [[Projects.Generations]]
     Name = "2024.0.x"
@@ -1905,7 +1909,7 @@
 
   [[Projects.Generations]]
     Name = "2.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring gRPC"
@@ -2047,6 +2051,10 @@
     Name = "7.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "7.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Integration Groovy DSL"
   Slug = "spring-integration-dsl-groovy"
@@ -2149,7 +2157,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Mobile"
@@ -2209,7 +2217,7 @@
 
   [[Projects.Generations]]
     Name = "2.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring REST Docs"
@@ -2230,7 +2238,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Roo"
@@ -2314,6 +2322,10 @@
   [[Projects.Generations]]
     Name = "7.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "7.1.x"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Security Kerberos"
@@ -2552,7 +2564,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Web Flow"
@@ -2569,7 +2581,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Web Services"
@@ -2598,7 +2610,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring XD"
