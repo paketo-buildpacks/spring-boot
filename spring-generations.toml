@@ -850,6 +850,10 @@
     Name = "4.5.x"
     OSS = "2026-06-30"
 
+  [[Projects.Generations]]
+    Name = "5.0.x"
+    OSS = "2026-12-31"
+
 [[Projects]]
   Name = "Spring Cloud OpenFeign"
   Slug = "spring-cloud-openfeign"
@@ -1199,6 +1203,14 @@
     Name = "3.4.x"
     OSS = "2026-06-30"
 
+  [[Projects.Generations]]
+    Name = "3.5.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "4.0.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Data"
   Slug = "spring-data"
@@ -1268,6 +1280,10 @@
     Name = "2025.1.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "2026.0.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Data for Apache Cassandra"
   Slug = "spring-data-cassandra"
@@ -1336,6 +1352,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Data Couchbase"
@@ -1423,6 +1443,10 @@
     Name = "4.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Data JDBC Extensions"
   Slug = "spring-data-jdbc-ext"
@@ -1497,6 +1521,10 @@
     Name = "4.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Data LDAP"
   Slug = "spring-data-ldap"
@@ -1565,6 +1593,10 @@
   [[Projects.Generations]]
     Name = "4.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Data MongoDB"
@@ -1635,6 +1667,10 @@
     Name = "5.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Data Neo4j"
   Slug = "spring-data-neo4j"
@@ -1692,6 +1728,10 @@
   [[Projects.Generations]]
     Name = "4.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Data Redis"
@@ -1762,6 +1802,10 @@
     Name = "4.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring Data REST"
   Slug = "spring-data-rest"
@@ -1830,6 +1874,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Data for Apache Solr"
@@ -2126,6 +2174,10 @@
     Name = "4.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
+
 [[Projects]]
   Name = "Spring LDAP"
   Slug = "spring-ldap"
@@ -2157,6 +2209,10 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
+    OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
     OSS = "2027-06-30"
 
 [[Projects]]
@@ -2414,6 +2470,10 @@
   [[Projects.Generations]]
     Name = "4.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-06-30"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
