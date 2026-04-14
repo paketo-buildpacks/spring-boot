@@ -50,7 +50,7 @@ func (s SpringPerformance) Execute() (map[string]string, error) {
 			values = append(values, "-XX:SharedArchiveFile=application.jsa")
 		} else {
 			if _, errAot := os.Stat(applicationAot); errAot == nil {
-				s.Logger.Info("Spring AOT Cache Enabled, contributing -XX:AOTCache=application.aot to JAVA_TOOL_OPTIONS")
+				s.Logger.Info("JVM AOT Cache Enabled, contributing -XX:AOTCache=application.aot to JAVA_TOOL_OPTIONS")
 				values = append(values, "-XX:AOTCache=application.aot")
 			} else {
 				s.Logger.Info("Something went wrong, neither application.jsa nor application.aot found, CDS/AOT Cache optimization disabled")

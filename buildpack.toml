@@ -88,13 +88,13 @@ api = "0.7"
   [[metadata.configurations]]
     build = true
     default = "false"
-    description = "whether to enable Spring AOT Cache & perform JVM training run"
+    description = "whether to enable JVM AOT Cache & perform JVM training run"
     name = "BP_JVM_AOTCACHE_ENABLED"
 
   [[metadata.configurations]]
     build = true
     default = "false"
-    description = "whether to enable Spring AOT Cache optimizations at runtime"
+    description = "whether to enable JVM AOT Cache optimizations at runtime"
     name = "BPL_JVM_AOTCACHE_ENABLED"
 
   [[metadata.dependencies]]
