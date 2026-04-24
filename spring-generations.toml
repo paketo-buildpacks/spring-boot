@@ -397,7 +397,7 @@
 [[Projects]]
   Name = "Spring Cloud CLI"
   Slug = "spring-cloud-cli"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "3.0.x"
@@ -630,7 +630,7 @@
 
   [[Projects.Generations]]
     Name = "2.11.x"
-    OSS = "2023-06-30"
+    OSS = "2024-09-30"
 
 [[Projects]]
   Name = "Spring Cloud Function"
