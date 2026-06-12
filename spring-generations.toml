@@ -19,7 +19,7 @@
 
   [[Projects.Generations]]
     Name = "2.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring AMQP"
@@ -68,7 +68,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring for Android"
@@ -143,7 +143,7 @@
 
   [[Projects.Generations]]
     Name = "6.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Boot"
@@ -216,7 +216,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring CLI"
@@ -610,7 +610,7 @@
 [[Projects]]
   Name = "Spring Cloud Data Flow"
   Slug = "spring-cloud-dataflow"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "2.7.x"
@@ -921,7 +921,7 @@
 [[Projects]]
   Name = "Spring Cloud Sleuth"
   Slug = "spring-cloud-sleuth"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "2.0.x"
@@ -1213,7 +1213,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data"
@@ -1286,7 +1286,7 @@
 
   [[Projects.Generations]]
     Name = "2026.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data for Apache Cassandra"
@@ -1359,7 +1359,7 @@
 
   [[Projects.Generations]]
     Name = "5.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data Couchbase"
@@ -1449,7 +1449,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data JDBC Extensions"
@@ -1527,7 +1527,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data LDAP"
@@ -1600,7 +1600,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data MongoDB"
@@ -1673,7 +1673,7 @@
 
   [[Projects.Generations]]
     Name = "5.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data Neo4j"
@@ -1735,7 +1735,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data Redis"
@@ -1808,7 +1808,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data REST"
@@ -1881,7 +1881,7 @@
 
   [[Projects.Generations]]
     Name = "5.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Data for Apache Solr"
@@ -1961,7 +1961,7 @@
 
   [[Projects.Generations]]
     Name = "2.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring gRPC"
@@ -1971,6 +1971,10 @@
   [[Projects.Generations]]
     Name = "1.0.x"
     OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.1.x"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring for Apache Hadoop"
@@ -2044,7 +2048,7 @@
 
   [[Projects.Generations]]
     Name = "3.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Integration"
@@ -2109,7 +2113,7 @@
 
   [[Projects.Generations]]
     Name = "7.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Integration Groovy DSL"
@@ -2184,7 +2188,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring LDAP"
@@ -2221,7 +2225,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Mobile"
@@ -2257,6 +2261,10 @@
     Name = "2.0.x"
     OSS = ""
 
+  [[Projects.Generations]]
+    Name = "2.1.x"
+    OSS = ""
+
 [[Projects]]
   Name = "Spring Plugin"
   Slug = "spring-plugin"
@@ -2281,7 +2289,7 @@
 
   [[Projects.Generations]]
     Name = "2.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring REST Docs"
@@ -2302,7 +2310,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Roo"
@@ -2389,7 +2397,7 @@
 
   [[Projects.Generations]]
     Name = "7.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Security Kerberos"
@@ -2481,7 +2489,7 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Session for Apache Geode"
@@ -2632,11 +2640,11 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
   [[Projects.Generations]]
     Name = "4.1.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Web Flow"
@@ -2653,7 +2661,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Web Services"
@@ -2682,7 +2690,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring XD"
