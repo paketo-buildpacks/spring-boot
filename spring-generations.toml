@@ -266,7 +266,7 @@
 
   [[Projects.Generations]]
     Name = "2025.1.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Alibaba"
@@ -276,7 +276,7 @@
 [[Projects]]
   Name = "Spring Cloud App Broker"
   Slug = "spring-cloud-app-broker"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "1.6.x"
@@ -355,7 +355,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Circuit Breaker"
@@ -392,7 +392,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud CLI"
@@ -460,7 +460,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Config"
@@ -505,7 +505,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Connectors"
@@ -555,12 +555,12 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Contract"
   Slug = "spring-cloud-contract"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "2.0.x"
@@ -600,7 +600,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "spring-cloud-data"
@@ -675,7 +675,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Gateway"
@@ -720,7 +720,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud GCP"
@@ -766,7 +766,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Netflix"
@@ -811,7 +811,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Open Service Broker"
@@ -901,7 +901,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Pipelines"
@@ -986,12 +986,12 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Stream Applications"
   Slug = "spring-cloud-stream-applications"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "2020.0.x"
@@ -1070,7 +1070,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Vault"
@@ -1115,7 +1115,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring Cloud Zookeeper"
@@ -1160,7 +1160,7 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring CredHub"
@@ -2599,7 +2599,7 @@
 [[Projects]]
   Name = "Spring Statemachine"
   Slug = "spring-statemachine"
-  Status = "ACTIVE"
+  Status = "END_OF_LIFE"
 
   [[Projects.Generations]]
     Name = "3.2.x"
