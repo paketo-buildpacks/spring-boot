@@ -178,6 +178,58 @@ func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 		})
 	})
 
+	context("$BPL_JVM_AOTCACHE set", func() {
+		it.Before(func() {
+			Expect(os.Setenv("BPL_SPRING_AOT_ENABLED", "false")).To(Succeed())
+			Expect(os.Setenv("BPL_JVM_AOTCACHE", "/path/to/pre-recorded.aot")).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BPL_SPRING_AOT_ENABLED")).To(Succeed())
+			Expect(os.Unsetenv("BPL_JVM_AOTCACHE")).To(Succeed())
+		})
+
+		it("includes -XX:AOTCache in JAVA_TOOL_OPTIONS", func() {
+			Expect(s.Execute()).To(Equal(map[string]string{
+				"JAVA_TOOL_OPTIONS": "-XX:AOTCache=/path/to/pre-recorded.aot",
+			}))
+		})
+	})
+
+	context("$BPL_JVM_AOTCACHE set alongside $BPL_JVM_AOTCACHE_ENABLED", func() {
+		var (
+			wd     string
+			tmpDir string
+		)
+
+		it.Before(func() {
+			Expect(os.Setenv("BPL_SPRING_AOT_ENABLED", "false")).To(Succeed())
+			Expect(os.Setenv("BPL_JVM_AOTCACHE_ENABLED", "true")).To(Succeed())
+			Expect(os.Setenv("BPL_JVM_AOTCACHE", "/path/to/pre-recorded.aot")).To(Succeed())
+			var err error
+			wd, err = os.Getwd()
+			Expect(err).NotTo(HaveOccurred())
+			tmpDir, err = os.MkdirTemp("", "spring-performance-helper")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(os.WriteFile(filepath.Join(tmpDir, "application.aot"), []byte{}, 0644)).To(Succeed())
+			Expect(os.Chdir(tmpDir)).To(Succeed())
+		})
+
+		it.After(func() {
+			Expect(os.Unsetenv("BPL_SPRING_AOT_ENABLED")).To(Succeed())
+			Expect(os.Unsetenv("BPL_JVM_AOTCACHE_ENABLED")).To(Succeed())
+			Expect(os.Unsetenv("BPL_JVM_AOTCACHE")).To(Succeed())
+			Expect(os.Chdir(wd)).To(Succeed())
+			Expect(os.RemoveAll(tmpDir)).To(Succeed())
+		})
+
+		it("uses BPL_JVM_AOTCACHE over auto-detection", func() {
+			Expect(s.Execute()).To(Equal(map[string]string{
+				"JAVA_TOOL_OPTIONS": "-XX:AOTCache=/path/to/pre-recorded.aot",
+			}))
+		})
+	})
+
 	context("$JAVA_TOOL_OPTIONS", func() {
 		var (
 			wd     string

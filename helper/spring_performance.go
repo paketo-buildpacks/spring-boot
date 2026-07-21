@@ -30,8 +30,9 @@ type SpringPerformance struct {
 func (s SpringPerformance) Execute() (map[string]string, error) {
 	var values []string
 	aot := sherpa.ResolveBool("BPL_SPRING_AOT_ENABLED")
-	aotCache := sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") || sherpa.ResolveBool("BPL_JVM_AOTCACHE_ENABLED")
-	if !aot && !aotCache {
+	aotCacheEnabled := sherpa.ResolveBool("BPL_JVM_CDS_ENABLED") || sherpa.ResolveBool("BPL_JVM_AOTCACHE_ENABLED")
+	aotCachePath := sherpa.GetEnvWithDefault("BPL_JVM_AOTCACHE", "")
+	if !aot && !aotCacheEnabled && aotCachePath == "" {
 		return nil, nil
 	}
 
@@ -40,8 +41,10 @@ func (s SpringPerformance) Execute() (map[string]string, error) {
 		values = append(values, "-Dspring.aot.enabled=true")
 	}
 
-	if aotCache {
-
+	if aotCachePath != "" {
+		s.Logger.Infof("JVM AOT Cache Enabled, contributing -XX:AOTCache=%s to JAVA_TOOL_OPTIONS", aotCachePath)
+		values = append(values, "-XX:AOTCache="+aotCachePath)
+	} else if aotCacheEnabled {
 		applicationJsa := "application.jsa"
 		applicationAot := "application.aot"
 
