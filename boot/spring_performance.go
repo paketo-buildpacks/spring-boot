@@ -78,6 +78,24 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE_ENABLED", true)
 		}
 
+		// Check for pre-recorded AOT cache
+		cacheFile := filepath.Join(s.AppPath, "aot-cache", "application.aot")
+		if _, err := os.Stat(cacheFile); err == nil {
+			// Pre-recorded cache exists — skip training and use it directly
+			layer.Launch = true
+			layerPath := filepath.Join(layer.Path, "application.aot")
+			cacheFileHandle, err := os.Open(cacheFile)
+			if err != nil {
+				return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
+			}
+			defer cacheFileHandle.Close()
+			if err := sherpa.CopyFile(cacheFileHandle, layerPath); err != nil {
+				return layer, fmt.Errorf("error writing AOT cache file to layer\n%w", err)
+			}
+			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE", layerPath)
+			return layer, nil
+		}
+
 		// prepare the training run JVM opts
 		var trainingRunArgs []string
 

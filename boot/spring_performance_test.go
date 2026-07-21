@@ -372,6 +372,90 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(os.Unsetenv("JRE_HOME")).To(Succeed())
 	})
 
+	context("when pre-recorded AOT cache exists", func() {
+		it.Before(func() {
+			cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
+			Expect(os.MkdirAll(cacheDir, 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot"), []byte("cache-data"), 0644)).To(Succeed())
+		})
+
+		it("skips training run and uses cache", func() {
+			aotEnabled = true
+			performanceType = boot.CdsAotCache
+			dc := libpak.DependencyCache{CachePath: "testdata"}
+			executor.On("Execute", mock.Anything).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+			props, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+			s.Executor = executor
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			layer, err = s.Contribute(layer)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Training should NOT have been run (no executor calls)
+			Expect(executor.Calls).To(BeEmpty())
+
+			// Cache file should be copied to the layer path
+			Expect(filepath.Join(layer.Path, "application.aot")).To(BeAnExistingFile())
+
+			// AOTCache should be set in launch environment
+			Expect(layer.LaunchEnvironment).To(HaveKey("BPL_JVM_AOTCACHE.default"))
+			Expect(layer.LaunchEnvironment["BPL_JVM_AOTCACHE.default"]).To(Equal(filepath.Join(layer.Path, "application.aot")))
+
+			// Layer should be marked as launch
+			Expect(layer.Launch).To(BeTrue())
+		})
+	})
+
+	context("when no pre-recorded AOT cache exists", func() {
+		it("runs training as normal", func() {
+			aotEnabled = true
+			performanceType = boot.CdsAotCache
+			dc := libpak.DependencyCache{CachePath: "testdata"}
+			executor.On("Execute", mock.Anything).
+				Return(nil).
+				Run(func(args mock.Arguments) {
+					execution := args.Get(0).(effect.Execution)
+					if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
+						_, err := io.WriteString(execution.Stderr, javaVersion21Output)
+						Expect(err).NotTo(HaveOccurred())
+					}
+				}).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+			props, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+			s.Executor = executor
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			layer, err = s.Contribute(layer)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Training SHOULD have been run
+			Expect(executor.Calls).NotTo(BeEmpty())
+			// AOTCacheInput should NOT be set
+			Expect(layer.LaunchEnvironment).NotTo(HaveKey("BPL_JVM_AOTCACHE_INPUT.default"))
+		})
+	})
+
 }
 
 func unzip(src, dest string) error {
