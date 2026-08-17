@@ -80,20 +80,28 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		// Check for pre-recorded AOT cache
 		cacheFile := filepath.Join(s.AppPath, "aot-cache", "application.aot")
-		if _, err := os.Stat(cacheFile); err == nil {
-			// Pre-recorded cache exists — skip training and use it directly
-			layer.Launch = true
-			layerPath := filepath.Join(layer.Path, "application.aot")
-			cacheFileHandle, err := os.Open(cacheFile)
-			if err != nil {
-				return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
+		if info, err := os.Stat(cacheFile); err == nil {
+			if info.Size() <= 0 {
+				// A zero-byte cache means nothing was recorded (the JVM can emit an empty
+				// application.aot when there is nothing to cache). Treat it as if no
+				// pre-recorded cache exists and fall through to the training run, which
+				// runs exactly once and is not a retry.
+				s.Logger.Bodyf("Ignoring empty pre-recorded AOT cache at %s", cacheFile)
+			} else {
+				// Pre-recorded cache exists — skip training and use it directly
+				layer.Launch = true
+				layerPath := filepath.Join(layer.Path, "application.aot")
+				cacheFileHandle, err := os.Open(cacheFile)
+				if err != nil {
+					return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
+				}
+				defer cacheFileHandle.Close()
+				if err := sherpa.CopyFile(cacheFileHandle, layerPath); err != nil {
+					return layer, fmt.Errorf("error writing AOT cache file to layer\n%w", err)
+				}
+				layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE", layerPath)
+				return layer, nil
 			}
-			defer cacheFileHandle.Close()
-			if err := sherpa.CopyFile(cacheFileHandle, layerPath); err != nil {
-				return layer, fmt.Errorf("error writing AOT cache file to layer\n%w", err)
-			}
-			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE", layerPath)
-			return layer, nil
 		}
 
 		// prepare the training run JVM opts
