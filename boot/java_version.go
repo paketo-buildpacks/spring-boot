@@ -14,6 +14,11 @@ import (
 
 var javaVersionPattern = regexp.MustCompile(`(?i)\bversion\s+"([^"]+)"`)
 
+var (
+	javaVersionPropertyPattern = regexp.MustCompile(`(?i)^\s*java\.version\s*=\s*(.+)`)
+	javaOsArchPropertyPattern  = regexp.MustCompile(`(?i)^\s*os\.arch\s*=\s*(.+)`)
+)
+
 func JavaMajorVersionFromJRE(executor effect.Executor) (int, error) {
 	javaCommand := JavaCommand()
 
@@ -78,4 +83,48 @@ func JavaMajorVersion(output string) (int, error) {
 	}
 
 	return major, nil
+}
+
+// JREProperties describes the version and architecture of a JVM, as reported by the JRE
+// itself. It is used to verify that a pre-recorded AOT cache was produced for a matching
+// JDK and platform before it is reused at runtime.
+type JREProperties struct {
+	JavaVersion string
+	OsArch      string
+}
+
+// JREPropertiesFromJRE returns the version and architecture of the installed JRE, parsed
+// from the output of `java -XshowSettings:properties -version`.
+func JREPropertiesFromJRE(executor effect.Executor) (JREProperties, error) {
+	javaCommand := JavaCommand()
+
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	if err := executor.Execute(effect.Execution{
+		Command: javaCommand,
+		Args:    []string{"-XshowSettings:properties", "-version"},
+		Stdout:  &stdout,
+		Stderr:  &stderr,
+	}); err != nil {
+		return JREProperties{}, fmt.Errorf("unable to execute %s -XshowSettings:properties -version: %w", javaCommand, err)
+	}
+
+	output := strings.TrimSpace(stdout.String() + stderr.String())
+
+	var props JREProperties
+	for _, line := range strings.Split(output, "\n") {
+		if m := javaVersionPropertyPattern.FindStringSubmatch(line); m != nil {
+			props.JavaVersion = strings.TrimSpace(m[1])
+		} else if m := javaOsArchPropertyPattern.FindStringSubmatch(line); m != nil {
+			props.OsArch = strings.TrimSpace(m[1])
+		}
+	}
+
+	if props.JavaVersion == "" {
+		return JREProperties{}, fmt.Errorf("unable to determine java.version from java -XshowSettings:properties output")
+	}
+	if props.OsArch == "" {
+		return JREProperties{}, fmt.Errorf("unable to determine os.arch from java -XshowSettings:properties output")
+	}
+	return props, nil
 }
