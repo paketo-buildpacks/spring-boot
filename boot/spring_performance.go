@@ -88,9 +88,37 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				// runs exactly once and is not a retry.
 				s.Logger.Bodyf("Ignoring empty pre-recorded AOT cache at %s", cacheFile)
 			} else {
-				// Pre-recorded cache exists — skip training and use it directly
+				// Pre-recorded cache exists — skip training and use it directly. Before
+				// accepting it, verify it was produced for the JRE baked into the image so it
+				// is not reused across a mismatched JDK or platform (AOT caches are JDK- and
+				// platform-specific).
 				layer.Launch = true
 				layerPath := filepath.Join(layer.Path, "application.aot")
+
+				meta, present, err := loadAotCacheMetadata(cacheFile)
+				if err != nil {
+					return layer, err
+				}
+				if !present {
+					// Existing workloads may record the cache without metadata. We cannot verify
+					// compatibility, so warn and proceed rather than break the build.
+					s.Logger.Bodyf("Pre-recorded AOT cache at %s has no metadata; skipping compatibility verification", cacheFile)
+				} else {
+					jre, err := JREPropertiesFromJRE(s.Executor)
+					if err != nil {
+						s.Logger.Bodyf("Could not verify AOT cache compatibility: %s", err)
+					} else {
+						compatible, reason, err := validateAotCacheMetadata(meta, present, jre, false)
+						if err != nil {
+							return layer, err
+						}
+						if !compatible {
+							return layer, fmt.Errorf("%s", reason)
+						}
+						s.Logger.Bodyf("Verified pre-recorded AOT cache at %s matches the image JRE (%s, %s)", cacheFile, jre.JavaVersion, jre.OsArch)
+					}
+				}
+
 				cacheFileHandle, err := os.Open(cacheFile)
 				if err != nil {
 					return layer, fmt.Errorf("error opening AOT cache file\n%w", err)

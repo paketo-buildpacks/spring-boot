@@ -47,6 +47,13 @@ func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 		javaVersion21Output = `openjdk version "21.0.5" 2024-10-15 LTS
 OpenJDK Runtime Environment Temurin-21.0.5+11 (build 21.0.5+11-LTS)
 OpenJDK 64-Bit Server VM Temurin-21.0.5+11 (build 21.0.5+11-LTS, mixed mode, sharing)`
+
+		// Output of `java -XshowSettings:properties -version` for a JDK 25 runtime on amd64.
+		javaSettingsOutput = `Property settings:
+    java.version = 25.0.1
+    java.vendor = Eclipse Adoptium
+    os.arch = amd64
+    os.name = linux`
 	)
 
 	it.Before(func() {
@@ -414,6 +421,139 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 			// Layer should be marked as launch
 			Expect(layer.Launch).To(BeTrue())
+		})
+	})
+
+	context("when pre-recorded AOT cache has matching metadata", func() {
+		it.Before(func() {
+			cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
+			Expect(os.MkdirAll(cacheDir, 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot"), []byte("cache-data"), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot.meta"), []byte(`{"javaVersion":"25.0.1","osArch":"amd64"}`), 0644)).To(Succeed())
+		})
+
+		it("verifies the cache and skips training run", func() {
+			aotEnabled = true
+			performanceType = boot.CdsAotCache
+			dc := libpak.DependencyCache{CachePath: "testdata"}
+			executor.On("Execute", mock.Anything).
+				Return(nil).
+				Run(func(args mock.Arguments) {
+					execution := args.Get(0).(effect.Execution)
+					if slices.Contains(execution.Args, "-XshowSettings:properties") && execution.Stderr != nil {
+						_, err := io.WriteString(execution.Stderr, javaSettingsOutput)
+						Expect(err).NotTo(HaveOccurred())
+					}
+				}).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+			props, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+			s.Executor = executor
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			layer, err = s.Contribute(layer)
+			Expect(err).NotTo(HaveOccurred())
+
+			// Only the JRE property probe should have run, not the training run
+			Expect(executor.Calls).To(HaveLen(1))
+
+			// Cache verified and used
+			Expect(filepath.Join(layer.Path, "application.aot")).To(BeAnExistingFile())
+			Expect(layer.LaunchEnvironment).To(HaveKey("BPL_JVM_AOTCACHE.default"))
+			Expect(layer.Launch).To(BeTrue())
+		})
+	})
+
+	context("when pre-recorded AOT cache has mismatched version metadata", func() {
+		it.Before(func() {
+			cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
+			Expect(os.MkdirAll(cacheDir, 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot"), []byte("cache-data"), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot.meta"), []byte(`{"javaVersion":"25.0.2","osArch":"amd64"}`), 0644)).To(Succeed())
+		})
+
+		it("fails the build on version mismatch", func() {
+			aotEnabled = true
+			performanceType = boot.CdsAotCache
+			dc := libpak.DependencyCache{CachePath: "testdata"}
+			executor.On("Execute", mock.Anything).
+				Return(nil).
+				Run(func(args mock.Arguments) {
+					execution := args.Get(0).(effect.Execution)
+					if slices.Contains(execution.Args, "-XshowSettings:properties") && execution.Stderr != nil {
+						_, err := io.WriteString(execution.Stderr, javaSettingsOutput)
+						Expect(err).NotTo(HaveOccurred())
+					}
+				}).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+			props, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+			s.Executor = executor
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			layer, err = s.Contribute(layer)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("recorded with Java 25.0.2 but the image JRE is Java 25.0.1"))
+		})
+	})
+
+	context("when pre-recorded AOT cache has mismatched arch metadata", func() {
+		it.Before(func() {
+			cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
+			Expect(os.MkdirAll(cacheDir, 0755)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot"), []byte("cache-data"), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot.meta"), []byte(`{"javaVersion":"25.0.1","osArch":"aarch64"}`), 0644)).To(Succeed())
+		})
+
+		it("fails the build on architecture mismatch", func() {
+			aotEnabled = true
+			performanceType = boot.CdsAotCache
+			dc := libpak.DependencyCache{CachePath: "testdata"}
+			executor.On("Execute", mock.Anything).
+				Return(nil).
+				Run(func(args mock.Arguments) {
+					execution := args.Get(0).(effect.Execution)
+					if slices.Contains(execution.Args, "-XshowSettings:properties") && execution.Stderr != nil {
+						_, err := io.WriteString(execution.Stderr, javaSettingsOutput)
+						Expect(err).NotTo(HaveOccurred())
+					}
+				}).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+			props, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+			s.Executor = executor
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			layer, err = s.Contribute(layer)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("recorded for architecture aarch64 but the image JRE architecture is amd64"))
 		})
 	})
 
