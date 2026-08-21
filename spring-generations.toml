@@ -1,8 +1,230 @@
 
 [[Projects]]
+  Name = "Micrometer"
+  Slug = "micrometer"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.0.x"
+    OSS = "2019-03-31"
+
+  [[Projects.Generations]]
+    Name = "1.1.x"
+    OSS = "2019-10-31"
+
+  [[Projects.Generations]]
+    Name = "1.3.x"
+    OSS = "2020-10-31"
+
+  [[Projects.Generations]]
+    Name = "1.5.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "1.6.x"
+    OSS = "2021-11-30"
+
+  [[Projects.Generations]]
+    Name = "1.7.x"
+    OSS = "2022-05-31"
+
+  [[Projects.Generations]]
+    Name = "1.8.x"
+    OSS = "2022-11-30"
+
+  [[Projects.Generations]]
+    Name = "1.9.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.10.x"
+    OSS = "2023-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.11.x"
+    OSS = "2024-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.12.x"
+    OSS = "2024-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.13.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.14.x"
+    OSS = "2025-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.15.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.16.x"
+    OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.17.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Micrometer Context Propagation"
+  Slug = "micrometer-context-propagation"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.1.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.2.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Micrometer Tracing"
+  Slug = "micrometer-tracing"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.0.x"
+    OSS = "2023-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.1.x"
+    OSS = "2024-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.2.x"
+    OSS = "2024-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.3.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.4.x"
+    OSS = "2025-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.5.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.6.x"
+    OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "1.7.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
   Name = "Spring IO Platform"
   Slug = "platform"
   Status = "END_OF_LIFE"
+
+[[Projects]]
+  Name = "Project Reactor"
+  Slug = "reactor"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "Bismuth.x"
+    OSS = "2019-03-31"
+
+  [[Projects.Generations]]
+    Name = "Californium.x"
+    OSS = "2019-10-31"
+
+  [[Projects.Generations]]
+    Name = "Dysprosium.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "2020.0.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "2022.0.x"
+    OSS = "2024-06-30"
+
+  [[Projects.Generations]]
+    Name = "2023.0.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "2024.0.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "2025.0.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Reactor Core"
+  Slug = "reactor-core"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "3.1.x"
+    OSS = "2019-03-31"
+
+  [[Projects.Generations]]
+    Name = "3.2.x"
+    OSS = "2019-10-31"
+
+  [[Projects.Generations]]
+    Name = "3.3.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "3.4.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.5.x"
+    OSS = "2024-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.6.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.7.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.8.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Reactor Netty"
+  Slug = "reactor-netty"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "0.8.x"
+    OSS = "2019-10-31"
+
+  [[Projects.Generations]]
+    Name = "0.9.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "1.0.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.1.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.2.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "1.3.x"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring AI"
@@ -69,6 +291,10 @@
   [[Projects.Generations]]
     Name = "4.1.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "4.2.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring for Android"
@@ -1362,61 +1588,44 @@
     OSS = "2027-07-31"
 
 [[Projects]]
-  Name = "Spring Data Couchbase"
-  Slug = "spring-data-couchbase"
-  Status = "COMMUNITY"
-
-[[Projects]]
-  Name = "Spring Data Elasticsearch"
-  Slug = "spring-data-elasticsearch"
-  Status = "COMMUNITY"
-
-[[Projects]]
-  Name = "Spring Data Envers"
-  Slug = "spring-data-envers"
-  Status = "COMMUNITY"
-
-[[Projects]]
-  Name = "Spring Data for VMware GemFire"
-  Slug = "spring-data-gemfire"
-  Status = "END_OF_LIFE"
-
-[[Projects]]
-  Name = "Spring Data for Apache Geode"
-  Slug = "spring-data-geode"
-  Status = "END_OF_LIFE"
-
-[[Projects]]
-  Name = "Spring Data JDBC"
-  Slug = "spring-data-jdbc"
+  Name = "Spring Data Commons"
+  Slug = "spring-data-commons"
   Status = "ACTIVE"
 
   [[Projects.Generations]]
-    Name = "1.0.x"
-    OSS = "2019-10-31"
-
-  [[Projects.Generations]]
-    Name = "1.1.x"
-    OSS = "2020-10-31"
+    Name = "1.13.x"
+    OSS = "2019-08-31"
 
   [[Projects.Generations]]
     Name = "2.0.x"
-    OSS = "2021-05-31"
+    OSS = "2019-03-31"
 
   [[Projects.Generations]]
     Name = "2.1.x"
-    OSS = "2021-11-30"
+    OSS = "2019-10-31"
 
   [[Projects.Generations]]
     Name = "2.2.x"
-    OSS = "2022-05-31"
+    OSS = "2020-10-31"
 
   [[Projects.Generations]]
     Name = "2.3.x"
-    OSS = "2022-11-30"
+    OSS = "2021-05-31"
 
   [[Projects.Generations]]
     Name = "2.4.x"
+    OSS = "2021-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.5.x"
+    OSS = "2022-05-31"
+
+  [[Projects.Generations]]
+    Name = "2.6.x"
+    OSS = "2022-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.7.x"
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
@@ -1452,6 +1661,40 @@
     OSS = "2027-07-31"
 
 [[Projects]]
+  Name = "Spring Data Couchbase"
+  Slug = "spring-data-couchbase"
+  Status = "COMMUNITY"
+
+[[Projects]]
+  Name = "Spring Data Elasticsearch"
+  Slug = "spring-data-elasticsearch"
+  Status = "COMMUNITY"
+
+[[Projects]]
+  Name = "Spring Data Envers"
+  Slug = "spring-data-envers"
+  Status = "COMMUNITY"
+
+[[Projects]]
+  Name = "Spring Data for VMware GemFire"
+  Slug = "spring-data-gemfire"
+  Status = "END_OF_LIFE"
+
+[[Projects]]
+  Name = "Spring Data for Apache Geode"
+  Slug = "spring-data-geode"
+  Status = "END_OF_LIFE"
+
+[[Projects]]
+  Name = "Spring Data JDBC"
+  Slug = "spring-data-jdbc"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.0.x"
+    OSS = "2019-10-31"
+
+[[Projects]]
   Name = "Spring Data JDBC Extensions"
   Slug = "spring-data-jdbc-ext"
   Status = "END_OF_LIFE"
@@ -1463,6 +1706,79 @@
 
   [[Projects.Generations]]
     Name = "1.11.x"
+    OSS = "2019-08-31"
+
+  [[Projects.Generations]]
+    Name = "2.0.x"
+    OSS = "2019-03-31"
+
+  [[Projects.Generations]]
+    Name = "2.1.x"
+    OSS = "2019-10-31"
+
+  [[Projects.Generations]]
+    Name = "2.2.x"
+    OSS = "2020-10-31"
+
+  [[Projects.Generations]]
+    Name = "2.3.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "2.4.x"
+    OSS = "2021-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.5.x"
+    OSS = "2022-05-31"
+
+  [[Projects.Generations]]
+    Name = "2.6.x"
+    OSS = "2022-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.7.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.0.x"
+    OSS = "2023-12-31"
+
+  [[Projects.Generations]]
+    Name = "3.1.x"
+    OSS = "2024-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.2.x"
+    OSS = "2024-12-31"
+
+  [[Projects.Generations]]
+    Name = "3.3.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.4.x"
+    OSS = "2025-12-31"
+
+  [[Projects.Generations]]
+    Name = "3.5.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "4.0.x"
+    OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Spring Data KeyValue"
+  Slug = "spring-data-keyvalue"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.2.x"
     OSS = "2019-08-31"
 
   [[Projects.Generations]]
@@ -1705,38 +2021,6 @@
     Name = "1.5.x"
     OSS = "2023-06-30"
 
-  [[Projects.Generations]]
-    Name = "3.0.x"
-    OSS = "2023-12-31"
-
-  [[Projects.Generations]]
-    Name = "3.1.x"
-    OSS = "2024-06-30"
-
-  [[Projects.Generations]]
-    Name = "3.2.x"
-    OSS = "2024-12-31"
-
-  [[Projects.Generations]]
-    Name = "3.3.x"
-    OSS = "2025-06-30"
-
-  [[Projects.Generations]]
-    Name = "3.4.x"
-    OSS = "2025-12-31"
-
-  [[Projects.Generations]]
-    Name = "3.5.x"
-    OSS = "2026-06-30"
-
-  [[Projects.Generations]]
-    Name = "4.0.x"
-    OSS = "2026-12-31"
-
-  [[Projects.Generations]]
-    Name = "4.1.x"
-    OSS = "2027-07-31"
-
 [[Projects]]
   Name = "Spring Data Redis"
   Slug = "spring-data-redis"
@@ -1776,6 +2060,67 @@
 
   [[Projects.Generations]]
     Name = "2.7.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.0.x"
+    OSS = "2023-12-31"
+
+  [[Projects.Generations]]
+    Name = "3.1.x"
+    OSS = "2024-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.2.x"
+    OSS = "2024-12-31"
+
+  [[Projects.Generations]]
+    Name = "3.3.x"
+    OSS = "2025-06-30"
+
+  [[Projects.Generations]]
+    Name = "3.4.x"
+    OSS = "2025-12-31"
+
+  [[Projects.Generations]]
+    Name = "3.5.x"
+    OSS = "2026-06-30"
+
+  [[Projects.Generations]]
+    Name = "4.0.x"
+    OSS = "2026-12-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
+    OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Spring Data Relational"
+  Slug = "spring-data-relational"
+  Status = "ACTIVE"
+
+  [[Projects.Generations]]
+    Name = "1.1.x"
+    OSS = "2020-10-31"
+
+  [[Projects.Generations]]
+    Name = "2.0.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "2.1.x"
+    OSS = "2021-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.2.x"
+    OSS = "2022-05-31"
+
+  [[Projects.Generations]]
+    Name = "2.3.x"
+    OSS = "2022-11-30"
+
+  [[Projects.Generations]]
+    Name = "2.4.x"
     OSS = "2023-06-30"
 
   [[Projects.Generations]]
@@ -1932,7 +2277,7 @@
 
   [[Projects.Generations]]
     Name = "7.0.x"
-    OSS = "2027-06-30"
+    OSS = "2027-07-31"
 
 [[Projects]]
   Name = "Spring for GraphQL"
@@ -2115,6 +2460,10 @@
     Name = "7.1.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "7.2.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Integration Groovy DSL"
   Slug = "spring-integration-dsl-groovy"
@@ -2189,6 +2538,10 @@
   [[Projects.Generations]]
     Name = "4.1.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "4.2.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring LDAP"
@@ -2311,6 +2664,23 @@
   [[Projects.Generations]]
     Name = "4.0.x"
     OSS = "2027-07-31"
+
+[[Projects]]
+  Name = "Spring Retry"
+  Slug = "spring-retry"
+  Status = "END_OF_LIFE"
+
+  [[Projects.Generations]]
+    Name = "1.2.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "1.3.x"
+    OSS = "2023-06-30"
+
+  [[Projects.Generations]]
+    Name = "2.0.x"
+    OSS = "2026-06-30"
 
 [[Projects]]
   Name = "Spring Roo"
@@ -2527,6 +2897,11 @@
   [[Projects.Generations]]
     Name = "2.7.x"
     OSS = "2023-06-30"
+
+[[Projects]]
+  Name = "Spring Session Hazelcast"
+  Slug = "spring-session-hazelcast"
+  Status = "COMMUNITY"
 
 [[Projects]]
   Name = "Spring Session MongoDB"
