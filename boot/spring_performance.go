@@ -121,9 +121,16 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		startClassValue, _ := s.Manifest.Get("Start-Class")
 
 		if err := fs.WalkDir(os.DirFS(s.AppPath), ".", func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if path == "." {
+				// skip walk root, it is not needed and can break some builds eg. kpack
+				return nil
+			}
 			if baseTime, err := time.Parse(time.DateTime, "1980-01-01 00:00:01"); err != nil {
 				return fmt.Errorf("error parsing date-time\n%w", err)
-			} else if err := os.Chtimes(path, baseTime, baseTime); err != nil {
+			} else if err := os.Chtimes(filepath.Join(s.AppPath, path), baseTime, baseTime); err != nil {
 				return fmt.Errorf("error resetting file times\n%w", err)
 			}
 			return nil
