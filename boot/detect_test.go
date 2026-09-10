@@ -36,6 +36,12 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 		detect boot.Detect
 	)
 
+	it.After(func() {
+		Expect(os.Unsetenv("BP_JVM_CDS_ENABLED")).To(Succeed())
+		Expect(os.Unsetenv("BP_JVM_AOTCACHE_ENABLED")).To(Succeed())
+		Expect(os.Unsetenv("BP_UNPACK_LAYOUT_ONLY")).To(Succeed())
+	})
+
 	nativeResult := libcnb.DetectResult{
 		Pass: true,
 		Plans: []libcnb.BuildPlan{
@@ -77,7 +83,8 @@ func testDetect(t *testing.T, context spec.G, it spec.S) {
 				Requires: []libcnb.BuildPlanRequire{
 					{Name: "jvm-application"},
 					{Name: "spring-boot"},
-					// Require a JRE at build time to perform CdsAotCache training run
+					// Require a JRE at build time to perform the CdsAotCache training run,
+					// and to run `-Djarmode=tools ... extract` for BP_UNPACK_LAYOUT_ONLY
 					{Name: "jre", Metadata: map[string]interface{}{"build": true}},
 				},
 			},
@@ -146,6 +153,17 @@ Spring-Boot-Native-Processed: true
 		Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "META-INF"))).To(Succeed())
 
 		Expect(os.Setenv("BP_JVM_AOTCACHE_ENABLED", "true")).To(Succeed())
+		Expect(detect.Detect(ctx)).To(Equal(performanceResult))
+
+	})
+
+	it("using BP_UNPACK_LAYOUT_ONLY", func() {
+
+		Expect(os.RemoveAll(filepath.Join(ctx.Application.Path, "META-INF"))).To(Succeed())
+
+		// the extract layout only mode runs `java -Djarmode=tools ... extract` at build
+		// time, so it needs a build time JRE just like the training run does
+		Expect(os.Setenv("BP_UNPACK_LAYOUT_ONLY", "true")).To(Succeed())
 		Expect(detect.Detect(ctx)).To(Equal(performanceResult))
 
 	})
