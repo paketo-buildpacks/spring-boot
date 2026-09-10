@@ -63,7 +63,7 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 		return libcnb.DetectResult{}, fmt.Errorf("unable to create configuration resolver\n%w", err)
 	}
 
-	if sherpa.ResolveBool("BP_JVM_CDS_ENABLED") || sherpa.ResolveBool("BP_JVM_AOTCACHE_ENABLED") {
+	if sherpa.ResolveBool("BP_JVM_CDS_ENABLED") || sherpa.ResolveBool("BP_JVM_AOTCACHE_ENABLED") || sherpa.ResolveBool("BP_UNPACK_LAYOUT_ONLY") {
 
 		result = libcnb.DetectResult{
 			Pass: true,
@@ -75,7 +75,8 @@ func (d Detect) Detect(context libcnb.DetectContext) (libcnb.DetectResult, error
 					Requires: []libcnb.BuildPlanRequire{
 						{Name: PlanEntryJVMApplication},
 						{Name: PlanEntrySpringBoot},
-						// Require a JRE at build time to perform CdsAotCache training run
+						// Require a JRE at build time to perform the CdsAotCache training run,
+						// and to run `-Djarmode=tools ... extract` for BP_UNPACK_LAYOUT_ONLY
 						{Name: PlanEntryJRE, Metadata: map[string]interface{}{"build": true}},
 					},
 				},
