@@ -78,6 +78,74 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE_ENABLED", true)
 		}
 
+		// Check for pre-recorded AOT cache
+		preRecordedCache := ""
+		cacheFile := filepath.Join(s.AppPath, "aot-cache", "application.aot")
+		if info, err := os.Stat(cacheFile); err == nil && s.PerformanceType == CdsAotCache {
+			if info.Size() <= 0 {
+				// A zero-byte cache means nothing was recorded (the JVM can emit an empty
+				// application.aot when there is nothing to cache). Treat it as if no
+				// pre-recorded cache exists and fall through to the training run, which
+				// runs exactly once and is not a retry.
+				s.Logger.Bodyf("Ignoring empty pre-recorded AOT cache at %s", cacheFile)
+			} else if jreVersion, err := JavaMajorVersionFromJRE(s.Executor); err != nil {
+				return layer, fmt.Errorf("error extracting finding out Java Version\n%w", err)
+			} else if jreVersion < 24 {
+				// -XX:AOTCache, which loads a cache, arrived in Java 24 with
+				// https://openjdk.org/jeps/483; older JREs get the CDS training run instead
+				s.Logger.Bodyf("Ignoring pre-recorded AOT cache at %s: loading one needs Java 24 or later, this image runs Java %d", cacheFile, jreVersion)
+			} else {
+				// Pre-recorded cache exists — skip training and use it directly. Before
+				// accepting it, verify it was produced for the JRE baked into the image so it
+				// is not reused across a mismatched JDK or platform (AOT caches are JDK- and
+				// platform-specific).
+				layer.Launch = true
+
+				meta, present, err := loadAotCacheMetadata(cacheFile)
+				if err != nil {
+					// the sidecar is written by whatever recorded the cache, so it is advisory:
+					// an unreadable one leaves the cache unverified rather than failing the build
+					s.Logger.Bodyf("Could not read AOT cache metadata: %s", err)
+					present = false
+				}
+				if !present {
+					// Existing workloads may record the cache without metadata. We cannot verify
+					// compatibility, so warn and proceed rather than break the build.
+					s.Logger.Bodyf("Pre-recorded AOT cache at %s has no metadata; skipping compatibility verification", cacheFile)
+				} else {
+					jre, err := JREPropertiesFromJRE(s.Executor)
+					if err != nil {
+						s.Logger.Bodyf("Could not verify AOT cache compatibility: %s", err)
+					} else {
+						compatible, reason := validateAotCacheMetadata(meta, jre)
+						if !compatible {
+							return layer, fmt.Errorf("%s", reason)
+						}
+						s.Logger.Bodyf("Verified pre-recorded AOT cache at %s matches the image JRE (%s, %s)", cacheFile, jre.JavaVersion, jre.OsArch)
+					}
+				}
+
+				cacheFileHandle, err := os.Open(cacheFile)
+				if err != nil {
+					return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
+				}
+				defer cacheFileHandle.Close()
+				stashDir, err := os.MkdirTemp("", "pre-recorded-aot-cache")
+				if err != nil {
+					return layer, fmt.Errorf("error creating temp directory for AOT cache file\n%w", err)
+				}
+				preRecordedCache = filepath.Join(stashDir, "application.aot")
+				if err := sherpa.CopyFile(cacheFileHandle, preRecordedCache); err != nil {
+					return layer, fmt.Errorf("error copying AOT cache file\n%w", err)
+				}
+				// aot-cache is build input rather than application content: dropping it keeps it
+				// out of runner.jar and stops it being shipped a second time in the app layer
+				if err := os.RemoveAll(filepath.Dir(cacheFile)); err != nil {
+					return layer, fmt.Errorf("error removing %s\n%w", filepath.Dir(cacheFile), err)
+				}
+			}
+		}
+
 		// prepare the training run JVM opts
 		var trainingRunArgs []string
 
@@ -129,6 +197,40 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			return nil
 		}); err != nil {
 			return libcnb.Layer{}, err
+		}
+
+		// Use the pre-recorded AOT cache, if there is one, instead of the training run. It has to
+		// happen here rather than earlier: the launch process type runs from the extracted layout,
+		// and an AOT cache records the timestamp of every classpath entry it was recorded against,
+		// so runner.jar has to look exactly as it did then.
+		if preRecordedCache != "" {
+			layerPath := filepath.Join(layer.Path, "application.aot")
+			f, err := os.Open(preRecordedCache)
+			if err != nil {
+				return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
+			}
+			defer f.Close()
+			if err := sherpa.CopyFile(f, layerPath); err != nil {
+				return layer, fmt.Errorf("error writing AOT cache file to layer\n%w", err)
+			}
+			// -XX:AOTCache on its own is lenient: the JVM only warns and carries on when it cannot
+			// map the cache. -XX:AOTMode=on makes it fail, so a cache that does not belong to this
+			// image is caught here instead of silently shipping as dead weight. The launch
+			// environment keeps the lenient flag, so a surprise at runtime costs the optimization
+			// rather than the application.
+			if err := s.Executor.Execute(effect.Execution{
+				Command: javaCommand,
+				Args:    []string{"-XX:AOTMode=on", fmt.Sprintf("-XX:AOTCache=%s", layerPath), "-cp", s.ClasspathString, "-version"},
+				Dir:     s.AppPath,
+				Stdout:  s.Logger.InfoWriter(),
+				Stderr:  s.Logger.InfoWriter(),
+			}); err != nil {
+				return layer, fmt.Errorf("the image JRE refused to load the pre-recorded AOT cache at %s\n"+
+					"a cache only loads on the JDK version and architecture that recorded it, and with the "+
+					"classpath it was recorded with, which here is %q\n%w", cacheFile, s.ClasspathString, err)
+			}
+			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE", layerPath)
+			return layer, nil
 		}
 
 		jreVersion, err := JavaMajorVersionFromJRE(s.Executor)
