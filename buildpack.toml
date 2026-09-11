@@ -92,6 +92,11 @@ api = "0.7"
     name = "BP_JVM_AOTCACHE_ENABLED"
 
   [[metadata.configurations]]
+    description = "path of a pre-recorded AOT cache to load at runtime; set by the buildpack when the application ships aot-cache/application.aot"
+    launch = true
+    name = "BPL_JVM_AOTCACHE"
+
+  [[metadata.configurations]]
     build = true
     default = "false"
     description = "whether to enable JVM AOT Cache optimizations at runtime"

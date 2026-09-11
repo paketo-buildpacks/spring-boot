@@ -12,6 +12,10 @@ import (
 type AotCacheMetadata struct {
 	JavaVersion string `json:"javaVersion"`
 	OsArch      string `json:"osArch"`
+
+	// the sidecar may name the fields after the Java system properties instead
+	JavaVersionProperty string `json:"java.version"`
+	OsArchProperty      string `json:"os.arch"`
 }
 
 // loadAotCacheMetadata reads the metadata sidecar for a pre-recorded AOT cache. The sidecar
@@ -31,29 +35,27 @@ func loadAotCacheMetadata(cacheFile string) (AotCacheMetadata, bool, error) {
 	if err := json.Unmarshal(data, &meta); err != nil {
 		return AotCacheMetadata{}, false, fmt.Errorf("error parsing AOT cache metadata at %s\n%w", metaFile, err)
 	}
-	return meta, true, nil
+	if meta.JavaVersion == "" {
+		meta.JavaVersion = meta.JavaVersionProperty
+	}
+	if meta.OsArch == "" {
+		meta.OsArch = meta.OsArchProperty
+	}
+	// a sidecar that declares neither field is not something we can check anything against
+	return meta, meta.JavaVersion != "" || meta.OsArch != "", nil
 }
 
 // validateAotCacheMetadata verifies that a pre-recorded AOT cache was produced for the given
-// JRE. When metadata is absent (ok false), it returns an error only if strict is true.
-// Otherwise it returns a boolean indicating whether the cache is compatible.
-func validateAotCacheMetadata(meta AotCacheMetadata, present bool, jre JREProperties, strict bool) (compatible bool, reason string, err error) {
-	if !present {
-		if strict {
-			return false, "", fmt.Errorf("AOT cache metadata is missing; the cache cannot be verified as compatible with the runtime JRE")
-		}
-		return true, "", nil
-	}
-
+// JRE. Only the fields the sidecar actually declared are compared. Callers only reach this
+// with metadata that loadAotCacheMetadata reported as usable.
+func validateAotCacheMetadata(meta AotCacheMetadata, jre JREProperties) (compatible bool, reason string) {
 	if meta.JavaVersion != "" && meta.JavaVersion != jre.JavaVersion {
 		return false,
-			fmt.Sprintf("pre-recorded AOT cache was recorded with Java %s but the image JRE is Java %s", meta.JavaVersion, jre.JavaVersion),
-			nil
+			fmt.Sprintf("pre-recorded AOT cache was recorded with Java %s but the image JRE is Java %s", meta.JavaVersion, jre.JavaVersion)
 	}
 	if meta.OsArch != "" && meta.OsArch != jre.OsArch {
 		return false,
-			fmt.Sprintf("pre-recorded AOT cache was recorded for architecture %s but the image JRE architecture is %s", meta.OsArch, jre.OsArch),
-			nil
+			fmt.Sprintf("pre-recorded AOT cache was recorded for architecture %s but the image JRE architecture is %s", meta.OsArch, jre.OsArch)
 	}
-	return true, "", nil
+	return true, ""
 }
