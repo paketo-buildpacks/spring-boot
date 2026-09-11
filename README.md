@@ -60,8 +60,48 @@ The buildpack will do the following:
 | `$BPL_JVM_CDS_ENABLED`                | Deprecated, use `BPL_JVM_AOTCACHE_ENABLED`  - Whether to load the CDS caching file (`-XX:SharedArchiveFile=application.jsa`) that was generated during the CDS training run. Defaults to the value of `BP_JVM_CDS_ENABLED`                                                                                     |
 | `$BP_JVM_AOTCACHE_ENABLED`            | Whether to perform the AOT Cache training run (that will generate the caching file `application.jsa`). Defaults to false.                                                                                                 |
 | `$BPL_JVM_AOTCACHE_ENABLED`           | Whether to load the CDS caching file (`-XX:SharedArchiveFile=application.jsa`) that was generated during the CDS training run. Defaults to the value of `BP_JVM_CDS_ENABLED`                                             |
+| `$BPL_JVM_AOTCACHE`                   | Path of a pre-recorded AOT cache to load (`-XX:AOTCache=<path>`). Set by the buildpack when the application ships `aot-cache/application.aot`. Takes precedence over `BPL_JVM_AOTCACHE_ENABLED`                                             |
 | `$CDS_TRAINING_JAVA_TOOL_OPTIONS`     | Deprecated, use `TRAINING_RUN_JAVA_TOOL_OPTIONS`  - Allow the user to override the default `JAVA_TOOL_OPTIONS`, only for the CDS training run. Useful to configure your app not to reach external services during training run for example.                                                                          |
 | `$TRAINING_RUN_JAVA_TOOL_OPTIONS`     | Allow the user to override the default `JAVA_TOOL_OPTIONS`, only for training run. Useful to configure your app not to reach external services during training run for example.                                                                                |
+## Using a pre-recorded AOT cache
+
+Instead of letting the buildpack record the AOT cache with a training run, an application can ship
+one it recorded itself, at `aot-cache/application.aot`. The buildpack then skips the training run,
+puts the cache in a launch layer and points `BPL_JVM_AOTCACHE` at it.
+
+An AOT cache only loads on the JDK version and the architecture that recorded it, **and only with
+the classpath and timestamps it was recorded against**, which here means `runner.jar` plus `lib/`
+in the extracted application directory. The buildpack asks the image JRE to load the cache before
+accepting it, so a cache that does not belong to the image fails the build instead of silently
+costing the optimization at runtime. An optional `aot-cache/application.aot.meta` sidecar gives a
+clearer message for a plain version or architecture mismatch:
+
+```json
+{ "java.version": "25.0.1", "os.arch": "amd64" }
+```
+
+Building from source, `BP_INCLUDE_FILES` carries the cache through the Maven or Gradle build:
+
+```shell
+pack build my-app \
+  --env BP_JVM_AOTCACHE_ENABLED=true \
+  --env BP_JVM_VERSION=25 \
+  --env BP_INCLUDE_FILES='aot-cache/application.aot:aot-cache/application.aot.meta'
+```
+
+Building from an already packaged archive, the cache has to be inside it, under `aot-cache/`:
+
+```shell
+pack build my-app --path target/my-app-0.0.1.jar \
+  --env BP_JVM_AOTCACHE_ENABLED=true \
+  --env BP_JVM_VERSION=25
+```
+
+An empty cache, or an image whose JRE is older than Java 24, is ignored and the training run
+happens as usual. Loading a cache needs Java 24 (`-XX:AOTCache`); it is recording one in a single
+step that needs Java 25 (`-XX:AOTCacheOutput`), which is why the training run only produces
+`application.aot` from Java 25 on.
+
 ## Bindings
 The buildpack optionally accepts the following bindings:
 
