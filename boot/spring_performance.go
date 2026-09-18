@@ -96,35 +96,12 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				// https://openjdk.org/jeps/483; older JREs get the CDS training run instead
 				s.Logger.Bodyf("Ignoring pre-recorded AOT cache at %s: loading one needs Java 24 or later, this image runs Java %d", cacheFile, jreVersion)
 			} else {
-				// Pre-recorded cache exists — skip training and use it directly. Before
-				// accepting it, verify it was produced for the JRE baked into the image so it
-				// is not reused across a mismatched JDK or platform (AOT caches are JDK- and
-				// platform-specific).
+				// Pre-recorded cache exists — skip training and use it directly. The JVM is
+				// asked to load the cache with -XX:AOTMode=on before the build accepts it, which
+				// is the authority on whether the cache belongs to this image (it only loads on
+				// the JDK version and architecture that recorded it, with the classpath it was
+				// recorded with).
 				layer.Launch = true
-
-				meta, present, err := loadAotCacheMetadata(cacheFile)
-				if err != nil {
-					// the sidecar is written by whatever recorded the cache, so it is advisory:
-					// an unreadable one leaves the cache unverified rather than failing the build
-					s.Logger.Bodyf("Could not read AOT cache metadata: %s", err)
-					present = false
-				}
-				if !present {
-					// Existing workloads may record the cache without metadata. We cannot verify
-					// compatibility, so warn and proceed rather than break the build.
-					s.Logger.Bodyf("Pre-recorded AOT cache at %s has no metadata; skipping compatibility verification", cacheFile)
-				} else {
-					jre, err := JREPropertiesFromJRE(s.Executor)
-					if err != nil {
-						s.Logger.Bodyf("Could not verify AOT cache compatibility: %s", err)
-					} else {
-						compatible, reason := validateAotCacheMetadata(meta, jre)
-						if !compatible {
-							return layer, fmt.Errorf("%s", reason)
-						}
-						s.Logger.Bodyf("Verified pre-recorded AOT cache at %s matches the image JRE (%s, %s)", cacheFile, jre.JavaVersion, jre.OsArch)
-					}
-				}
 
 				cacheFileHandle, err := os.Open(cacheFile)
 				if err != nil {
