@@ -71,14 +71,10 @@ puts the cache in a launch layer and points `BPL_JVM_AOTCACHE` at it.
 
 An AOT cache only loads on the JDK version and the architecture that recorded it, **and only with
 the classpath and timestamps it was recorded against**, which here means `runner.jar` plus `lib/`
-in the extracted application directory. The buildpack asks the image JRE to load the cache before
-accepting it, so a cache that does not belong to the image fails the build instead of silently
-costing the optimization at runtime. An optional `aot-cache/application.aot.meta` sidecar gives a
-clearer message for a plain version or architecture mismatch:
-
-```json
-{ "java.version": "25.0.1", "os.arch": "amd64" }
-```
+in the extracted application directory. The buildpack asks the image JRE to load the cache with
+`-XX:AOTMode=on` before accepting it, so a cache that does not belong to the image fails the build
+instead of silently costing the optimization at runtime. No separate metadata file is needed: the
+JVM itself is the authority on which caches it will load.
 
 Building from source, `BP_INCLUDE_FILES` carries the cache through the Maven or Gradle build:
 
@@ -86,7 +82,7 @@ Building from source, `BP_INCLUDE_FILES` carries the cache through the Maven or 
 pack build my-app \
   --env BP_JVM_AOTCACHE_ENABLED=true \
   --env BP_JVM_VERSION=25 \
-  --env BP_INCLUDE_FILES='aot-cache/application.aot:aot-cache/application.aot.meta'
+  --env BP_INCLUDE_FILES='aot-cache/application.aot'
 ```
 
 Building from an already packaged archive, the cache has to be inside it, under `aot-cache/`:
