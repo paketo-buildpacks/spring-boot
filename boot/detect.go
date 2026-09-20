@@ -124,7 +124,7 @@ func isSpringBootNativeProcessedDetected(manifest *properties.Properties, logger
 func isMavenNativeProfileDetected(cr *libpak.ConfigurationResolver, logger *bard.Logger) bool {
 	mavenActiveProfiles, _ := cr.Resolve(MavenConfigActiveProfiles)
 	mavenActiveProfilesAsSlice := strings.Split(mavenActiveProfiles, ",")
-	r, _ := regexp.Compile("^native$|^\\?native$")
+	r, _ := regexp.Compile(`^native$|^\?native$`)
 
 	for _, profile := range mavenActiveProfilesAsSlice {
 		if r.MatchString(profile) {

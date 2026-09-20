@@ -1,0 +1,120 @@
+name: Test Pull Request
+
+on:
+  pull_request:
+    branches:
+    - main
+
+permissions:
+  contents: read
+
+concurrency:
+  # only one instance of test suite per PR at one time
+  group: pr-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    outputs:
+      builders: ${{ steps.builders.outputs.builders }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      with:
+        go-version-file: go.mod
+
+    - name: Run Unit Tests
+      env:
+        GO_TEST_PARAMS: -count=5
+      run: ./scripts/unit.sh
+
+    - name: Get builders from integration.json
+      id: builders
+      run: |
+        source "${{ github.workspace }}/scripts/.util/builders.sh"
+
+        builders="$(util::builders::list "${{ github.workspace }}/integration.json")"
+        printf "Output: %s\n" "${builders}"
+        printf "builders=%s\n" "${builders}" >> "$GITHUB_OUTPUT"
+
+  integration:
+    name: Integration Tests with Builders
+    runs-on: ubuntu-24.04
+    needs: unit
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      matrix:
+        builder: ${{ fromJSON(needs.unit.outputs.builders) }}
+      fail-fast: false  # don't cancel all test jobs when one fails
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+
+    - name: Free Disk Space
+      if: vars.RECLAIM_DISK_SPACE == 'true'
+      uses: paketo-buildpacks/github-config/actions/pull-request/reclaim-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: true
+
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      with:
+        go-version-file: go.mod
+
+    # Causes errors with integration tests
+    - name: Disable containerd snapshotter
+      run: |
+        echo '{"features": {"containerd-snapshotter": false}}' | sudo tee /etc/docker/daemon.json
+        sudo systemctl restart docker
+
+    - name: Run Integration Tests
+      run: ./scripts/integration.sh --builder "${BUILDER}" --token "${GIT_TOKEN}"
+      env:
+        TMPDIR: "${{ runner.temp }}"
+        GIT_TOKEN: ${{ github.token }}
+        BUILDER: ${{ matrix.builder }}
+
+  roundup:
+    name: Integration Tests
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    needs: integration
+    steps:
+    - run: |
+        result="${{ needs.integration.result }}"
+        if [[ $result == "success" ]]; then
+          echo "Integration tests passed against all builders"
+          exit 0
+        else
+          echo "Integration tests failed on one or more builders"
+          exit 1
+        fi
+
+  upload:
+    name: Upload Workflow Event Payload
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    steps:
+    - name: Upload Artifact
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      with:
+        name: event-payload
+        path: ${{ github.event_path }}

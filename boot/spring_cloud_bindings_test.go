@@ -17,7 +17,6 @@
 package boot_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,10 +39,10 @@ func testSpringCloudBindings(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "spring-cloud-bindings-layers")
+		ctx.Layers.Path, err = os.MkdirTemp("", "spring-cloud-bindings-layers")
 		Expect(err).NotTo(HaveOccurred())
 
-		ctx.Application.Path, err = ioutil.TempDir("", "spring-cloud-bindings-app")
+		ctx.Application.Path, err = os.MkdirTemp("", "spring-cloud-bindings-app")
 		Expect(err).NotTo(HaveOccurred())
 	})
 

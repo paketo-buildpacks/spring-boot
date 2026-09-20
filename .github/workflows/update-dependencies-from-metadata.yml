@@ -1,0 +1,419 @@
+name: Update Dependencies From Metadata (Retrieve, Metadata, Compile, Test, Create PR)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '57 13 * * *'  # daily at 13:57 UTC
+
+permissions:
+  contents: read
+
+jobs:
+  retrieve:
+    name: Retrieve New Versions and Generate Metadata
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    outputs:
+      metadata-filepath: ${{ steps.retrieve.outputs.metadata-filepath }}
+      metadata-json: ${{ steps.retrieve.outputs.metadata-json }}
+      # from-source-metadata-filepath is the path to a file containing a subset
+      # of metadata-json entries for NON-compiled dependencies
+      from-source-metadata-filepath: ${{ steps.retrieve.outputs.from-source-metadata-filepath }}
+      # compilation-json is a subset of metadata-json entries which are missing
+      # a `checksum` and `uri`
+      compilation-json: ${{ steps.retrieve.outputs.compilation-json }}
+      id: ${{ steps.retrieve.outputs.id }}
+      length: ${{ steps.retrieve.outputs.length }}
+      compilation-length: ${{ steps.retrieve.outputs.compilation-length }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        with:
+          # hashFiles returns empty string if file does not exist
+          go-version-file: ${{ hashFiles('dependency/retrieval/go.mod') != '' && 'dependency/retrieval/go.mod' || 'go.mod' }}
+
+      - name: Run Retrieve
+        id: retrieve
+        working-directory: dependency
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          shopt -s inherit_errexit
+
+          OUTPUT="/tmp/metadata.json"
+
+          make retrieve \
+            buildpackTomlPath="${{ github.workspace }}/buildpack.toml" \
+            output="${OUTPUT}"
+
+          id=$(jq -r .[0].id < "${OUTPUT}")
+          content=$(jq -r < "${OUTPUT}")
+
+          length=$(echo $content | jq -r '. | length')
+
+          compilation=$(echo $content | jq -r 'map(select(.checksum == null and .uri == null))'?)
+          complength=$(echo $compilation | jq -r '. | length')
+          echo $content | jq -r 'map(select(.checksum != null and .uri != null))'? > "/tmp/from-source-metadata.json"
+          echo "from-source-metadata-filepath=/tmp/from-source-metadata.json" >> "$GITHUB_OUTPUT"
+
+
+          delimiter="$(uuidgen)"
+          echo "metadata-filepath=${OUTPUT}" >> "$GITHUB_OUTPUT"
+          printf "metadata-json<<%s\n%s\n%s\n" "${delimiter}" "${content}" "${delimiter}" >> "$GITHUB_OUTPUT" # see https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+          echo "length=$length" >> "$GITHUB_OUTPUT"
+          printf "compilation-json<<%s\n%s\n%s\n" "${delimiter}" "${compilation}" "${delimiter}" >> "$GITHUB_OUTPUT" # see https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
+          echo "compilation-length=$complength" >> "$GITHUB_OUTPUT"
+
+      - name: Upload `${{ steps.retrieve.outputs.metadata-filepath }}`
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: metadata.json
+          path: ${{ steps.retrieve.outputs.metadata-filepath }}
+
+      - name: Upload `${{ steps.retrieve.outputs.from-source-metadata-filepath }}`
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: from-source-metadata.json
+          path: ${{ steps.retrieve.outputs.from-source-metadata-filepath }}
+
+  # Check if there is buildpack-provided compilation code and testing code
+  # Optional compilation code expected at: <buildpack>/dependency/actions/compile/
+  # Optional testing code expected at: <buildpack>/dependency/test/
+  get-compile-and-test:
+    name: Get Compilation and Testing Code
+    outputs:
+      should-compile: ${{ steps.compile-check.outputs.should-compile }}
+      should-test: ${{ steps.test-check.outputs.should-test }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Has Compilation Action?
+        id: compile-check
+        run: |
+          if test -d "dependency/actions/compile"; then
+            echo "Compilation action provided"
+            echo "should-compile=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Has Testing Action?
+        id: test-check
+        run: |
+          if test -d "dependency/test"; then
+            echo "Testing file provided"
+            echo "should-test=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  test:
+    name: Test Non-Compiled Dependency
+    needs:
+      - retrieve
+      - get-compile-and-test
+    strategy:
+      matrix:
+        includes: ${{ fromJSON(needs.retrieve.outputs.metadata-json) }}
+    # Run job step if BOTH:
+    #   (1) needs.get-compile-and-test.outputs.should-test = TRUE -> if there is a dependency/test directory in the buildpack
+    #   (2) needs.get-compile-and-test.outputs.should-compile = FALSE -> if there is NOT a dependency/actions/compile directory in the buildpack
+    #   AND:
+    #   (3) there is at least one new version to test
+    if: ${{ needs.retrieve.outputs.length > 0 && needs.get-compile-and-test.outputs.should-test == 'true' && needs.get-compile-and-test.outputs.should-compile == 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Make Temporary Artifact Directory
+        id: make-outputdir
+        run: echo "outputdir=$(mktemp -d)" >> "$GITHUB_OUTPUT"
+
+      # Download the tarball for testing if:
+      #   (1) dependency testing code is present in the buildpack directory
+      #   (2) URI in metadata.json is available
+      - name: Download upstream tarball (if not compiled)
+        if: ${{ matrix.includes.uri != ''  && needs.get-compile-and-test.outputs.should-test == 'true' }}
+        env:
+          URI: ${{ matrix.includes.uri }}
+          OUTPUT_DIR: ${{ steps.make-outputdir.outputs.outputdir }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          shopt -s inherit_errexit
+
+          curl "${URI}" \
+            --fail-with-body \
+            --show-error \
+            --silent \
+            --location \
+            --output "${OUTPUT_DIR}/dependency.tgz"
+
+      # Test the dependency tarball if:
+      #   (1) dependency testing code is present in the buildpack directory
+      - name: Test Upstream Dependency
+        working-directory: dependency
+        if: ${{ needs.get-compile-and-test.outputs.should-test == 'true' }}
+        env:
+          VERSION: ${{ matrix.includes.version }}
+          TARBALL_PATH: ${{ steps.make-outputdir.outputs.outputdir }}/*.tgz
+        run: |
+          make test \
+            version="${VERSION}" \
+            tarballPath="${TARBALL_PATH}"
+  compile:
+    name: Compile and Test Dependency
+    needs:
+      - retrieve
+      - get-compile-and-test
+    permissions:
+      contents: read
+      actions: write
+    strategy:
+      matrix:
+        includes: ${{ fromJSON(needs.retrieve.outputs.compilation-json) }}
+    # Run job step if:
+    #   (1) needs.get-compile-and-test.outputs.should-compile -> if there is a dependency/actions/compile directory in the buildpack
+    #   (2) OR needs.get-compile-and-test.outputs.should-test -> if there is a dependency/test directory in the buildpack
+    #   AND:
+    #   (3) there is at least one version to compile/test
+    if: ${{ needs.retrieve.outputs.compilation-length > 0 && (needs.get-compile-and-test.outputs.should-compile == 'true' || needs.get-compile-and-test.outputs.should-test == 'true') }}
+    uses: $/.github/workflows/compile-dependency.yml
+    with:
+      version: "${{ matrix.includes.version }}"
+      target: "${{ matrix.includes.target }}"
+      os: "${{ matrix.includes.os }}"
+      arch: "${{ matrix.includes.arch }}"
+      shouldCompile: ${{ matrix.includes.checksum == '' && matrix.includes.uri == '' }}
+      shouldTest: ${{ matrix.includes.checksum == '' && matrix.includes.uri == '' && needs.get-compile-and-test.outputs.should-test == 'true' }}
+      uploadArtifactName: "${{ needs.retrieve.outputs.id }}-${{ matrix.includes.version }}-${{ matrix.includes.os != '' && matrix.includes.os || 'linux' }}-${{ matrix.includes.arch != '' && matrix.includes.arch || 'amd64' }}-${{ matrix.includes.target }}"
+
+  # Add in the checksum and URI fields to the metadata if the dependency was compiled
+  update-metadata:
+    name: Update Metadata (if compiled)
+    needs:
+      - retrieve
+      - get-compile-and-test
+      - compile
+    permissions:
+      contents: read
+      actions: write
+    strategy:
+      matrix:
+        includes: ${{ fromJSON(needs.retrieve.outputs.compilation-json) }}
+    if: ${{ needs.retrieve.outputs.compilation-length > 0 && needs.get-compile-and-test.outputs.should-compile == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Download artifact files
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: "${{ needs.retrieve.outputs.id }}-${{ matrix.includes.version }}-${{ matrix.includes.os != '' && matrix.includes.os || 'linux' }}-${{ matrix.includes.arch != '' && matrix.includes.arch || 'amd64' }}-${{ matrix.includes.target }}"
+
+      - name: Get artifact file name
+        id: get-file-names
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          shopt -s inherit_errexit
+
+          echo "artifact-file=$(basename ./*.tgz)" >> "$GITHUB_OUTPUT"
+          echo "checksum-file=$(basename ./*.tgz.checksum)" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_S3_DEPENDENCIES_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_S3_DEPENDENCIES_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Upload to S3
+        id: upload
+        uses: paketo-buildpacks/github-config/actions/dependency/upload-to-s3@main
+        with:
+          bucket-name: "paketo-buildpacks"
+          dependency-name: ${{ needs.retrieve.outputs.id }}
+          artifact-path: ${{ steps.get-file-names.outputs.artifact-file }}
+
+      - name: Get Checksum
+        id: get-checksum
+        env:
+          CHECKSUM_FILE: ${{ steps.get-file-names.outputs.checksum-file }}
+        run: echo "checksum=$(cat "${CHECKSUM_FILE}")" >> "$GITHUB_OUTPUT"
+
+      - name: Download metadata.json
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: metadata.json
+
+      # Create target/version specific metadata files
+      # Due to limitations with the upload action, we can no longer modify/upload the same metadata file
+      - name: Write dependency-specific metadata to new file
+        id: dependency-metadata
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          shopt -s inherit_errexit
+
+          metadata_file_name="${{ matrix.includes.target }}-${{ matrix.includes.version }}-${{ matrix.includes.os != '' && matrix.includes.os || 'linux' }}-${{ matrix.includes.arch != '' && matrix.includes.arch || 'amd64' }}-metadata-file.json"
+          if [[ -z "${{ matrix.includes.os }}" && -z "${{ matrix.includes.arch }}" ]]; then
+            cat metadata.json | jq -r ['.[] | select( .version == "${{ matrix.includes.version }}" and .target == "${{ matrix.includes.target }}")'] > $metadata_file_name
+          else
+            echo "multi-arch buildpack with os and arch specified"
+            cat metadata.json | jq -r ['.[] | select( .version == "${{ matrix.includes.version }}" and .target == "${{ matrix.includes.target }}" and .os == "${{ matrix.includes.os }}" and .arch == "${{ matrix.includes.arch }}")'] > $metadata_file_name
+          fi
+          echo "file=$(echo $metadata_file_name)" >> "$GITHUB_OUTPUT"
+
+      - name: Update `checksum` and `uri` in metadata for ${{ matrix.includes.target }} ${{ matrix.includes.version }}
+        if: ${{ matrix.includes.checksum == '' && matrix.includes.uri == '' }}
+        uses: paketo-buildpacks/github-config/actions/dependency/update-metadata-json@main
+        with:
+          version: ${{ matrix.includes.version }}
+          target: ${{ matrix.includes.target }}
+          checksum: ${{ steps.get-checksum.outputs.checksum }}
+          uri: ${{ steps.upload.outputs.dependency-uri }}
+          file: ${{ steps.dependency-metadata.outputs.file }}
+          os: ${{ matrix.includes.os }}
+          arch: ${{ matrix.includes.arch }}
+
+      - name: Upload modified metadata
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: ${{ steps.dependency-metadata.outputs.file }}
+          path: ${{ steps.dependency-metadata.outputs.file }}
+
+  assemble:
+    name: Update buildpack.toml
+    needs:
+      - retrieve
+      - test
+      - compile
+      - update-metadata
+    permissions:
+      contents: read
+      actions: read
+    # Update buildpack.toml only if ALL of the following conditions are met:
+    #   (1) Retrieval step has succeeded and has found at least 1 new version
+    #   (2) Testing step has succeeded OR been skipped
+    #   (3) Compilation/Testing step has succeeded OR been skipped
+    #   (4) Update metadata step has succeeded OR been skipped
+    if: always() && needs.retrieve.result == 'success' && needs.retrieve.outputs.length > 0 && (needs.test.result == 'success' || needs.test.result == 'skipped') && (needs.compile.result == 'success' || needs.compile.result == 'skipped') && (needs.update-metadata.result == 'success' || needs.update-metadata.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        # zizmor: ignore[artipacked] -- persistent credentials required for push-branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+
+      - name: Checkout Branch
+        uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
+        with:
+          branch: automation/dependencies/update-from-metadata
+
+      - name: Make Temporary Artifact Directory
+        id: make-outputdir
+        run: echo "outputdir=$(mktemp -d)" >> "$GITHUB_OUTPUT"
+
+
+      # Metadata file for the non-compiled dependencies, if there are any
+      - name: Download metadata.json file
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata-files"
+          pattern: "from-source-metadata.json"
+          merge-multiple: true
+
+      # If we compiled the dependency, and updated the metadata:
+      # Download each metadata file, and combine them into one
+      - name: Download individual metadata-file.json file(s)
+        if: ${{ needs.update-metadata.result == 'success' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata-files"
+          pattern: "*metadata-file.json"
+          merge-multiple: true
+      - name: Display Metadata Files
+        env:
+          OUTPUT_DIR: ${{ steps.make-outputdir.outputs.outputdir }}
+        run: ls "${OUTPUT_DIR}/metadata-files"
+      - name: Combine Metadata Files
+        env:
+          OUTPUT_DIR: ${{ steps.make-outputdir.outputs.outputdir }}
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          shopt -s inherit_errexit
+
+          jq -s 'add' "${OUTPUT_DIR}"/metadata-files/* > "${OUTPUT_DIR}/metadata.json"
+
+      - name: Update dependencies from metadata.json
+        id: update
+        uses: paketo-buildpacks/github-config/actions/dependency/update-from-metadata@main
+        with:
+          buildpack_toml_path: "${{ github.workspace }}/buildpack.toml"
+          metadata_file_path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata.json"
+
+      - name: Show git diff
+        run: |
+          git diff
+
+      - name: Commit
+        id: commit
+        uses: paketo-buildpacks/github-config/actions/pull-request/create-commit@main
+        with:
+          message: "Updating buildpack.toml with new versions ${{ steps.update.outputs.new-versions }}"
+          pathspec: "."
+          keyid: ${{ secrets.PAKETO_BOT_GPG_SIGNING_KEY_ID }}
+          key: ${{ secrets.PAKETO_BOT_GPG_SIGNING_KEY }}
+
+      - name: Push Branch 'automation/dependencies/update-from-metadata'
+        if: ${{ steps.commit.outputs.commit_sha != '' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
+        with:
+          branch: automation/dependencies/update-from-metadata
+
+      - name: Open Pull Request
+        if: ${{ steps.commit.outputs.commit_sha != '' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/open@main
+        with:
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+          title: "Updates buildpack.toml with ${{ steps.update.outputs.new-versions }}"
+          branch: automation/dependencies/update-from-metadata
+
+  failure:
+    name: Alert on Failure
+    runs-on: ubuntu-24.04
+    needs: [ retrieve, get-compile-and-test, test, compile, update-metadata, assemble ]
+    if: ${{ always() && needs.retrieve.result == 'failure' || needs.get-compile-and-test.result == 'failure' || needs.test.result == 'failure' || needs.compile.result == 'failure' || needs.update-metadata.result == 'failure' || needs.assemble.result == 'failure' }}
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: File Failure Alert Issue
+        uses: paketo-buildpacks/github-config/actions/issue/file@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repo: ${{ github.repository }}
+          label: "failure:update-dependencies"
+          comment_if_exists: true
+          issue_title: "Failure: Update Dependencies workflow"
+          issue_body: |
+            Update Dependencies From Metadata workflow [failed](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}).
+          comment_body: |
+             Another failure occurred: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}

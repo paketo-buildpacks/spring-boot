@@ -101,7 +101,7 @@ func (n NativeImageClasspath) classpathEntries() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("unable to open %s\n%w", file, err)
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 
 	var libs []string
 	if err := yaml.NewDecoder(in).Decode(&libs); err != nil {

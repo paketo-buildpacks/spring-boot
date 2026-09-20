@@ -28,8 +28,8 @@ api = "0.7"
     uri = "https://github.com/paketo-buildpacks/spring-boot/blob/main/LICENSE"
 
 [metadata]
-  include-files = ["LICENSE", "NOTICE", "README.md", "linux/amd64/bin/build", "linux/amd64/bin/detect", "linux/amd64/bin/main", "linux/amd64/bin/helper", "linux/arm64/bin/build", "linux/arm64/bin/detect", "linux/arm64/bin/main", "linux/arm64/bin/helper", "buildpack.toml", "spring-generations.toml"]
-  pre-package = "scripts/build.sh"
+  include-files = ["LICENSE", "NOTICE", "README.md", "linux/amd64/bin/build", "linux/amd64/bin/detect", "linux/amd64/bin/run", "linux/amd64/bin/helper", "linux/arm64/bin/build", "linux/arm64/bin/detect", "linux/arm64/bin/run", "linux/arm64/bin/helper", "buildpack.toml", "spring-generations.toml"]
+  pre-package = "scripts/build.sh --target linux/amd64 --target linux/arm64"
 
   [[metadata.configurations]]
     build = true
@@ -128,6 +128,16 @@ api = "0.7"
     [[metadata.dependencies.licenses]]
       type = "Apache-2.0"
       uri = "https://github.com/spring-cloud/spring-cloud-bindings/blob/main/LICENSE"
+
+  [[metadata.dependency-constraints]]
+    constraint = "1.*.*"
+    id = "spring-cloud-bindings"
+    patches = 2
+
+  [[metadata.dependency-constraints]]
+    constraint = "2.*.*"
+    id = "spring-cloud-bindings"
+    patches = 2
 
 [[stacks]]
   id = "io.buildpacks.stacks.bionic"

@@ -17,7 +17,6 @@
 package boot_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -40,11 +39,11 @@ func testWebApplicationType(t *testing.T, context spec.G, it spec.S) {
 	it.Before(func() {
 		var err error
 
-		ctx.Layers.Path, err = ioutil.TempDir("", "web-application-type")
+		ctx.Layers.Path, err = os.MkdirTemp("", "web-application-type")
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Layers.Path, "app-file-1"), []byte("some contents"), 0644)).To(Succeed())
-		Expect(ioutil.WriteFile(filepath.Join(ctx.Layers.Path, "app-file-2"), []byte("some more contents"), 0400)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(ctx.Layers.Path, "app-file-1"), []byte("some contents"), 0644)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(ctx.Layers.Path, "app-file-2"), []byte("some more contents"), 0400)).To(Succeed())
 
 		wr := boot.WebApplicationTypeResolver{Classes: map[string]interface{}{}}
 

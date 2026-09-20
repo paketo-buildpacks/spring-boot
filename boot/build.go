@@ -233,7 +233,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 		bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
 		bindingsLayer.Logger = b.Logger
 		result.Layers = append(result.Layers, bindingsLayer)
-		result.BOM.Entries = append(result.BOM.Entries, be)
+		result.BOM.Entries = append(result.BOM.Entries, be) //nolint:staticcheck // hold off on the BOM migration for now
 
 		additionalLibs = append(additionalLibs, filepath.Base(dep.URI))
 	}
@@ -282,7 +282,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 	}
 
-	result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{
+	result.BOM.Entries = append(result.BOM.Entries, libcnb.BOMEntry{ //nolint:staticcheck // hold off on the BOM migration for now
 		Name:     "dependencies",
 		Metadata: map[string]interface{}{"layer": "application", "dependencies": d},
 		Launch:   true,
@@ -540,7 +540,7 @@ func (b *Build) createSlices(path string, index string, result libcnb.BuildResul
 	if err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to open %s\n%w", file, err)
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 	var layers []map[string][]string
 	if err := yaml.NewDecoder(in).Decode(&layers); err != nil {
 		return libcnb.BuildResult{}, fmt.Errorf("unable to decode %s\n%w", file, err)
@@ -560,10 +560,10 @@ func (b *Build) createSlices(path string, index string, result libcnb.BuildResul
 }
 
 func (b *Build) contributeHelpers(context libcnb.BuildContext, result libcnb.BuildResult, helpers []string) libcnb.BuildResult {
-	h, bom := libpak.NewHelperLayer(context.Buildpack, helpers...)
+	h, bom := libpak.NewHelperLayer(context.Buildpack, helpers...) //nolint:staticcheck // hold off on the BOM migration for now
 	h.Logger = b.Logger
 	result.Layers = append(result.Layers, h)
-	result.BOM.Entries = append(result.BOM.Entries, bom)
+	result.BOM.Entries = append(result.BOM.Entries, bom) //nolint:staticcheck // hold off on the BOM migration for now
 	return result
 }
 
@@ -655,10 +655,10 @@ func (b *Build) findSpringBootExecutableJAR(appPath string) (string, *properties
 	if err != nil {
 		return "", nil, err
 	}
-	defer jar.Close()
-	crush.Extract(jar, tempExplodedJar, 0)
-	os.RemoveAll(appPath)
-	sherpa.CopyDir(tempExplodedJar, appPath)
+	defer func() { _ = jar.Close() }()
+	_ = crush.Extract(jar, tempExplodedJar, 0)
+	_ = os.RemoveAll(appPath)
+	_ = sherpa.CopyDir(tempExplodedJar, appPath)
 	jarPath = appPath
 
 	return jarPath, props, nil

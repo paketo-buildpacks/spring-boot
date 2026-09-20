@@ -1,0 +1,89 @@
+name: Update shared github-config
+
+on:
+  schedule:
+  - cron: '27 13 * * *'  # daily at 13:27 UTC
+  workflow_dispatch: {}
+
+concurrency: github_config_update
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Create PR to update shared files
+    runs-on: ubuntu-24.04
+    steps:
+
+    - name: Checkout
+      # zizmor: ignore[artipacked] -- persistent credentials required for push-branch
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+
+    - name: Checkout github-config
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+        repository: paketo-buildpacks/github-config
+        path: github-config
+
+    - name: Checkout Branch
+      uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
+      with:
+        branch: automation/github-config/update
+
+    - name: Run the sync action
+      uses: paketo-buildpacks/github-config/actions/sync@main
+      with:
+        workspace: /github/workspace
+        config: /github/workspace/github-config/implementation
+
+    - name: Cleanup
+      run: rm -rf github-config
+
+    - name: Commit
+      id: commit
+      uses: paketo-buildpacks/github-config/actions/pull-request/create-commit@main
+      with:
+        message: "Updating github-config"
+        pathspec: "."
+        keyid: ${{ secrets.PAKETO_BOT_GPG_SIGNING_KEY_ID }}
+        key: ${{ secrets.PAKETO_BOT_GPG_SIGNING_KEY }}
+
+    - name: Push Branch
+      if: ${{ steps.commit.outputs.commit_sha != '' }}
+      uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
+      with:
+        branch: automation/github-config/update
+
+    - name: Open Pull Request
+      if: ${{ steps.commit.outputs.commit_sha != '' }}
+      uses: paketo-buildpacks/github-config/actions/pull-request/open@main
+      with:
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        title: "Updates github-config"
+        branch: automation/github-config/update
+
+  failure:
+    name: Alert on Failure
+    runs-on: ubuntu-24.04
+    needs: [build]
+    if: ${{ always() && needs.build.result == 'failure' }}
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - name: File Failure Alert Issue
+      uses: paketo-buildpacks/github-config/actions/issue/file@main
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repo: ${{ github.repository }}
+        label: "failure:update-github-config"
+        comment_if_exists: true
+        issue_title: "Failure: Update GitHub config workflow"
+        issue_body: |
+          Update GitHub config workflow [failed](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}).
+        comment_body: |
+           Another failure occurred: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}

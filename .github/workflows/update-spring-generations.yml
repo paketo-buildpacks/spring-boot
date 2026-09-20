@@ -35,7 +35,7 @@ jobs:
                 branch: update/buildpack/spring-generations
                 commit-message: Bump Spring Generations
                 delete-branch: true
-                labels: semver:patch, type:dependency-upgrade
+                labels: semver:patch
                 signoff: true
                 title: Bump Spring Generations
                 token: ${{ secrets.JAVA_GITHUB_TOKEN }}

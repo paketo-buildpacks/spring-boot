@@ -33,6 +33,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+//nolint:staticcheck // hold off on the BOM migration for now
 func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
@@ -45,11 +46,11 @@ func testBuild(t *testing.T, context spec.G, it spec.S) {
 	var Copy = func(srcPath string, name string, dstPath string) {
 		in, err := os.Open(filepath.Join("testdata", srcPath, name))
 		Expect(err).NotTo(HaveOccurred())
-		defer in.Close()
+		defer func() { _ = in.Close() }()
 
 		out, err := os.OpenFile(filepath.Join(ctx.Application.Path, dstPath, name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 		Expect(err).NotTo(HaveOccurred())
-		defer out.Close()
+		defer func() { _ = out.Close() }()
 
 		_, err = io.Copy(out, in)
 		Expect(err).NotTo(HaveOccurred())
@@ -543,7 +544,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 	context("when the Spring Boot lib folder already contains a spring-cloud-bindings jar", func() {
 
 		it("contributes to the result for API 0.7+", func() {
-			os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
+			_ = os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
 			Copy("spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar", "BOOT-INF/lib")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
@@ -575,7 +576,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it("contributes to the result for API <= 0.6", func() {
-			os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
+			_ = os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)
 			Copy("spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar", "BOOT-INF/lib")
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
@@ -670,10 +671,10 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 
 		it.After(func() {
-			os.Unsetenv("BP_JVM_CDS_ENABLED")
-			os.Unsetenv("BP_SPRING_CLOUD_BINDINGS_DISABLED")
-			os.Unsetenv("BP_SPRING_AOT_ENABLED")
-			os.Unsetenv("TRAINING_RUN_JAVA_TOOL_OPTIONS")
+			_ = os.Unsetenv("BP_JVM_CDS_ENABLED")
+			_ = os.Unsetenv("BP_SPRING_CLOUD_BINDINGS_DISABLED")
+			_ = os.Unsetenv("BP_SPRING_AOT_ENABLED")
+			_ = os.Unsetenv("TRAINING_RUN_JAVA_TOOL_OPTIONS")
 		})
 
 		ctx.Buildpack.API = "0.6"
@@ -812,7 +813,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		it.Before(func() {
 			t.Setenv("BP_SPRING_CLOUD_BINDINGS_DISABLED", "true")
-			os.Remove(filepath.Join(ctx.Application.Path, "META-INF"))
+			_ = os.Remove(filepath.Join(ctx.Application.Path, "META-INF"))
 		})
 
 		it("finds and extracts a jar that exists", func() {
