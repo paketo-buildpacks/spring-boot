@@ -34,8 +34,8 @@ type SpringCloudBindings struct {
 	SpringBootLib    string
 }
 
-func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDependency, cache libpak.DependencyCache) (SpringCloudBindings, libcnb.BOMEntry) {
-	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{
+func NewSpringCloudBindings(springBootLib string, dependency libpak.BuildpackDependency, cache libpak.DependencyCache) (SpringCloudBindings, libcnb.BOMEntry) { //nolint:staticcheck // hold off on the BOM migration for now
+	contributor, entry := libpak.NewDependencyLayer(dependency, cache, libcnb.LayerTypes{ //nolint:staticcheck // hold off on the BOM migration for now
 		Launch: true,
 		Cache:  true,
 	})

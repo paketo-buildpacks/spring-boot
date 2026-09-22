@@ -80,7 +80,7 @@ func NewConfigurationMetadataFromPath(path string) (ConfigurationMetadata, error
 	} else if err != nil {
 		return ConfigurationMetadata{}, fmt.Errorf("unable to open %s\n%w", file, err)
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 
 	var c ConfigurationMetadata
 	if err := json.NewDecoder(in).Decode(&c); err != nil {
@@ -97,7 +97,7 @@ func NewConfigurationMetadataFromJAR(jar string) (ConfigurationMetadata, error) 
 	} else if err != nil {
 		return ConfigurationMetadata{}, fmt.Errorf("unable to open %s\n%w", jar, err)
 	}
-	defer zIn.Close()
+	defer func() { _ = zIn.Close() }()
 
 	var c ConfigurationMetadata
 	for _, f := range zIn.File {
@@ -109,7 +109,7 @@ func NewConfigurationMetadataFromJAR(jar string) (ConfigurationMetadata, error) 
 		if err != nil {
 			return ConfigurationMetadata{}, fmt.Errorf("unable to open %s\n%w", f.Name, err)
 		}
-		defer in.Close()
+		defer func() { _ = in.Close() }()
 
 		if err := json.NewDecoder(in).Decode(&c); err != nil {
 			return ConfigurationMetadata{}, fmt.Errorf("unable to decode %s\n%w", f.Name, err)

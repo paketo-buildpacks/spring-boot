@@ -1,0 +1,278 @@
+name: Create or Update Draft Release
+
+on:
+  push:
+    branches:
+    - main
+  repository_dispatch:
+    types: [ version-bump ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version of the release to cut (e.g. 1.2.3)'
+        required: false
+
+concurrency: release
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+    outputs:
+      builders: ${{ steps.builders.outputs.builders }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      with:
+        go-version-file: go.mod
+    - name: Run Unit Tests
+      run: ./scripts/unit.sh
+    - name: Get builders from integration.json
+      id: builders
+      run: |
+        source "${{ github.workspace }}/scripts/.util/builders.sh"
+        builders="$(util::builders::list "${{ github.workspace }}/integration.json")"
+        printf "Output: %s\n" "${builders}"
+        printf "builders=%s\n" "${builders}" >> "$GITHUB_OUTPUT"
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-24.04
+    needs: unit
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      matrix:
+        builder: ${{ fromJSON(needs.unit.outputs.builders) }}
+      fail-fast: false  # don't cancel all test jobs when one fails
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      with:
+        go-version-file: go.mod
+    - name: Free Disk Space
+      if: vars.RECLAIM_DISK_SPACE == 'true'
+      uses: paketo-buildpacks/github-config/actions/pull-request/reclaim-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: false
+        docker-images: true
+        swap-storage: true
+
+    # Causes errors with integration tests
+    - name: Disable containerd snapshotter
+      run: |
+        echo '{"features": {"containerd-snapshotter": false}}' | sudo tee /etc/docker/daemon.json
+        sudo systemctl restart docker
+
+    - name: Run Integration Tests
+      run: ./scripts/integration.sh --builder "${BUILDER}" --token "${GIT_TOKEN}"
+      env:
+        BUILDER: ${{ matrix.builder }}
+        TMPDIR: "${{ runner.temp }}"
+        GIT_TOKEN: ${{ github.token }}
+
+  release:
+    name: Release
+    runs-on: ubuntu-24.04
+    needs: integration
+    permissions:
+      contents: write
+    services:
+      registry:
+        image: registry:3
+        ports:
+          - 5000:5000
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+        fetch-tags: true
+
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      with:
+        go-version-file: go.mod
+
+    - name: Reset Draft Release
+      id: reset
+      uses: paketo-buildpacks/github-config/actions/release/reset-draft@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ github.token }}
+
+    - name: Calculate Semver Tag
+      if: github.event.inputs.version == ''
+      id: semver
+      uses: paketo-buildpacks/github-config/actions/tag/calculate-semver@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ github.token }}
+        ref-name: ${{ github.ref_name }}
+
+    - name: Set Release Tag
+      id: tag
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+        SEMVER_TAG: ${{ steps.semver.outputs.tag }}
+      run: |
+        tag="${INPUT_VERSION}"
+        if [ -z "${tag}" ]; then
+          tag="${SEMVER_TAG}"
+        fi
+        echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+    - name: Package
+      env:
+        TAG: ${{ steps.tag.outputs.tag }}
+      run: ./scripts/package.sh --version "${TAG}"
+
+    - name: Get buildpack type
+      id: get_buildpack_type
+      run: |
+
+        if [ -f "extension.toml" ]; then
+          echo "buildpack_type=extension" >> "$GITHUB_OUTPUT"
+        else
+          echo "buildpack_type=buildpack" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Get buildpack path
+      id: get_buildpack_path
+      run: |
+
+        if [ -f "build/buildpackage.cnb" ]; then
+          echo "path=build/buildpackage.cnb" >> "$GITHUB_OUTPUT"
+        else
+          echo "path=build/buildpackage-linux-amd64.cnb" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Create Release Notes
+      id: create-release-notes
+      uses: paketo-buildpacks/github-config/actions/release/notes@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        buildpack_type: ${{ steps.get_buildpack_type.outputs.buildpack_type }}
+        buildpackage_path: ${{ steps.get_buildpack_path.outputs.path }}
+
+    - name: Get Image Digest
+      id: image_digest
+      env:
+        BUILDPACK_TYPE: ${{ steps.get_buildpack_type.outputs.buildpack_type }}
+      run: |
+        image_name="localhost:5000/buildpack:latest"
+
+        ./scripts/publish.sh \
+          --buildpack-type "${BUILDPACK_TYPE}" \
+          --image-ref $image_name
+
+        echo "digest=$(sudo skopeo inspect "docker://${image_name}" --tls-verify=false | jq -r .Digest)" >> "$GITHUB_OUTPUT"
+
+    - name: Set Correct Image Digest on the Release notes
+      env:
+        RELEASE_BODY: ${{ steps.create-release-notes.outputs.release_body }}
+        IMAGE_DIGEST: ${{ steps.image_digest.outputs.digest }}
+      run: |
+        printf '%s' "${RELEASE_BODY}" \
+          | sed -E \
+            "s/\*\*Digest:\*\* \`sha256:[a-f0-9]{64}\`/\*\*Digest:\*\* \`${IMAGE_DIGEST}\`/" \
+            > ./release_notes
+
+        printf '%s' "${IMAGE_DIGEST}" > ./index-digest.sha256
+
+    - name: Create release assets
+      id: create_release_assets
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        TAG: ${{ steps.tag.outputs.tag }}
+      run: |
+        release_assets=$(jq -n --arg repo_name "${REPO_NAME}" --arg tag "${TAG}" '
+        [
+          {
+            "path": "build/buildpack.tgz",
+            "name": ($repo_name + "-" + $tag + ".tgz"),
+            "content_type": "application/gzip"
+          },
+          {
+            "path": "./index-digest.sha256",
+            "name": ($repo_name + "-" + $tag + "-" + "index-digest.sha256"),
+            "content_type": "text/plain"
+          }
+        ]')
+
+        for filepath in build/*.cnb; do
+          filename=$(basename "$filepath")
+          asset_name=""
+          if [[ "$filename" == "buildpackage-linux-amd64.cnb" ]]; then
+            asset_name="${REPO_NAME}-${TAG}.cnb"
+          elif [[ "$filename" == "buildpackage.cnb" ]]; then
+            asset_name="${REPO_NAME}-${TAG}.cnb"
+          else
+            formatted_filename="${filename#buildpackage-}"
+            asset_name="${REPO_NAME}-${TAG}-${formatted_filename}"
+          fi
+
+          release_assets=$(echo "$release_assets" | jq --arg asset_name "${asset_name}" --arg filepath "$filepath" '
+          . + [
+            {
+              "path": $filepath,
+              "name": $asset_name,
+              "content_type": "application/gzip"
+            }
+          ]')
+        done
+
+        release_assets=$(jq -c <<< "$release_assets" )
+        printf "release_assets=%s\n" "${release_assets}" >> "$GITHUB_OUTPUT"
+
+    - name: Create Release
+      uses: paketo-buildpacks/github-config/actions/release/create@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        tag_name: v${{ steps.tag.outputs.tag }}
+        target_commitish: ${{ github.sha }}
+        name: v${{ steps.tag.outputs.tag }}
+        body_filepath: "./release_notes"
+        draft: true
+        assets: ${{ steps.create_release_assets.outputs.release_assets }}
+
+  failure:
+    name: Alert on Failure
+    runs-on: ubuntu-24.04
+    needs: [ unit, integration, release ]
+    if: ${{ always() && needs.unit.result == 'failure' || needs.integration.result == 'failure' || needs.release.result == 'failure' }}
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - name: File Failure Alert Issue
+      uses: paketo-buildpacks/github-config/actions/issue/file@main
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        repo: ${{ github.repository }}
+        label: "failure:release"
+        comment_if_exists: true
+        issue_title: "Failure: Create Draft Release workflow"
+        issue_body: |
+          Create Draft Release workflow [failed](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}).
+        comment_body: |
+           Another failure occurred: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}

@@ -1,0 +1,47 @@
+name: Publish Draft Releases
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: '0 5 * * WED'  # Weekly on Wednesday at 5:00 AM UTC
+
+concurrency:
+  group: publish-release
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Publish Draft Release With Highest Semantic Version
+        id: drafts
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        uses: paketo-buildpacks/github-config/actions/release/publish-drafts@main
+        with:
+          repo: ${{ github.repository }}
+
+  failure:
+    name: Alert on Failure
+    runs-on: ubuntu-24.04
+    needs: [ publish ]
+    if: ${{ always() && needs.publish.result == 'failure' }}
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: File Failure Alert Issue
+        uses: paketo-buildpacks/github-config/actions/issue/file@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repo: ${{ github.repository }}
+          label: "failure:release"
+          comment_if_exists: true
+          issue_title: "Failure: Publish draft releases"
+          issue_body: |
+            Publish All Draft Releases workflow [failed](https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}).
+          comment_body: |
+             Another failure occurred: https://github.com/${{github.repository}}/actions/runs/${{github.run_id}}

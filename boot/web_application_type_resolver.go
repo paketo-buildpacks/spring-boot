@@ -102,7 +102,7 @@ func NewWebApplicationResolver(classes string, lib string) (WebApplicationTypeRe
 				results <- result{err: fmt.Errorf("unable to open %s\n%w", jar, err)}
 				return
 			}
-			defer in.Close()
+			defer func() { _ = in.Close() }()
 
 			var classes []string
 			for _, f := range in.File {

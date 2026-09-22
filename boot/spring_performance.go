@@ -72,9 +72,10 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
 
-		if s.PerformanceType == Without {
+		switch s.PerformanceType {
+		case Without:
 			return layer, nil
-		} else if s.PerformanceType == CdsAotCache {
+		case CdsAotCache:
 			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE_ENABLED", true)
 		}
 
@@ -105,7 +106,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			}
 
 			jarPath = tempJarPath
-			os.RemoveAll(s.AppPath)
+			_ = os.RemoveAll(s.AppPath)
 		}
 
 		javaCommand := JavaCommand()

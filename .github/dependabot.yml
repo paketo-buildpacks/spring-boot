@@ -1,11 +1,33 @@
+---
 version: 2
 updates:
-    - package-ecosystem: gomod
-      directory: /
-      schedule:
-        interval: daily
-      ignore:
-        - dependency-name: github.com/onsi/gomega
-      labels:
-        - semver:patch
-        - type:dependency-upgrade
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: daily
+  allow:
+  # Allow both direct and indirect updates for all packages
+  - dependency-type: "all"
+  # group all minor and patch dependency updates together
+  groups:
+    go-modules:
+      patterns:
+      - "*"
+      update-types:
+      - "minor"
+      - "patch"
+- package-ecosystem: gomod
+  directory: "/dependency/retrieval"
+  schedule:
+    interval: daily
+  allow:
+  # Allow both direct and indirect updates for all packages
+  - dependency-type: "all"
+  # group all minor and patch dependency updates together
+  groups:
+    go-modules:
+      patterns:
+      - "*"
+      update-types:
+      - "minor"
+      - "patch"

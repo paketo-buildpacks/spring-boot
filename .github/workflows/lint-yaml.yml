@@ -1,0 +1,36 @@
+name: Lint Workflows
+
+on:
+  pull_request:
+    paths:
+    - '.github/**.yml'
+    - '.github/**.yaml'
+
+permissions:
+  contents: read
+
+jobs:
+  lintYaml:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+
+    - name: Checkout github-config
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        persist-credentials: false
+        repository: paketo-buildpacks/github-config
+        path: github-config
+
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+      with:
+        python-version: 3.14
+
+    - name: Install yamllint
+      run: pip install yamllint
+
+    - name: Lint YAML files
+      run: yamllint ./.github -c github-config/.github/.yamllint

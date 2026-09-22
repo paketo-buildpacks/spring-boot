@@ -1,41 +1,43 @@
 # Custom Workflow - not managed by pipeline-builder
 name: Update Spring Generations
-"on":
-    schedule:
-        - cron: 0 2 * * 1-5
-    workflow_dispatch: {}
+
+on:
+  schedule:
+  - cron: 0 2 * * 1-5
+  workflow_dispatch: {}
+
 jobs:
-    update:
-        name: Update Buildpack Dependency
-        runs-on:
-            - ubuntu-latest
-        steps:
-            - uses: actions/checkout@v3
-            - id: generations
-              uses: docker://ghcr.io/paketo-buildpacks/actions/spring-generations:main
-              with:
-                uri: https://api.spring.io
-            - id: buildpack
-              name: Update Buildpack Dependency
-              run: |
-                #!/usr/bin/env bash
+  update:
+    name: Update Buildpack Dependency
+    runs-on:
+    - ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - id: generations
+      uses: docker://ghcr.io/paketo-buildpacks/actions/spring-generations:main
+      with:
+        uri: https://api.spring.io
+    - id: buildpack
+      name: Update Buildpack Dependency
+      run: |
+        #!/usr/bin/env bash
 
-                set -euo pipefail
+        set -euo pipefail
 
-                echo "${CONTENT}" > spring-generations.toml
+        echo "${CONTENT}" > spring-generations.toml
 
-                git add spring-generations.toml
-                git checkout -- .
-              env:
-                CONTENT: ${{ steps.generations.outputs.content }}
-            - uses: peter-evans/create-pull-request@v4
-              with:
-                author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
-                body: Bumps Spring Generations
-                branch: update/buildpack/spring-generations
-                commit-message: Bump Spring Generations
-                delete-branch: true
-                labels: semver:patch, type:dependency-upgrade
-                signoff: true
-                title: Bump Spring Generations
-                token: ${{ secrets.JAVA_GITHUB_TOKEN }}
+        git add spring-generations.toml
+        git checkout -- .
+      env:
+        CONTENT: ${{ steps.generations.outputs.content }}
+    - uses: peter-evans/create-pull-request@v4
+      with:
+        author: ${{ secrets.JAVA_GITHUB_USERNAME }} <${{ secrets.JAVA_GITHUB_USERNAME }}@users.noreply.github.com>
+        body: Bumps Spring Generations
+        branch: update/buildpack/spring-generations
+        commit-message: Bump Spring Generations
+        delete-branch: true
+        labels: semver:patch
+        signoff: true
+        title: Bump Spring Generations
+        token: ${{ secrets.JAVA_GITHUB_TOKEN }}

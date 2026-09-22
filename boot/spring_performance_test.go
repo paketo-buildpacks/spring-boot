@@ -296,7 +296,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		cwd, _ := os.Getwd()
 		old := filepath.Join(cwd, "testdata", "spring-cloud-bindings", "spring-cloud-bindings-1.2.3.jar")
 		now := filepath.Join(ctx.Application.Path, "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar")
-		os.Symlink(old, now)
+		_ = os.Symlink(old, now)
 
 		props, err := libjvm.NewManifest(ctx.Application.Path)
 		Expect(err).NotTo(HaveOccurred())
@@ -320,7 +320,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
 			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
 
-		unzip(filepath.Join(layer.Path, "runner.jar"), filepath.Join(layer.Path, "extract"))
+		_ = unzip(filepath.Join(layer.Path, "runner.jar"), filepath.Join(layer.Path, "extract"))
 		fileInfo, err := os.Lstat(filepath.Join(layer.Path, "extract", "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar"))
 		Expect(err).NotTo(HaveOccurred())
 		// SCB jar is included in the jar, but not as a link, as a real file.
@@ -383,7 +383,7 @@ func unzip(src, dest string) error {
 	}
 	defer CloseOrPanic(r)()
 
-	os.MkdirAll(dest, 0755)
+	_ = os.MkdirAll(dest, 0755)
 
 	// Closure to address file descriptors issue with all the deferred .Close() methods
 	extractAndWriteFile := func(f *zip.File) error {
@@ -400,9 +400,9 @@ func unzip(src, dest string) error {
 		defer CloseOrPanic(rc)()
 
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, f.Mode())
+			_ = os.MkdirAll(path, f.Mode())
 		} else {
-			os.MkdirAll(filepath.Dir(path), f.Mode())
+			_ = os.MkdirAll(filepath.Dir(path), f.Mode())
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
 				return err

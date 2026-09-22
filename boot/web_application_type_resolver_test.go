@@ -128,11 +128,11 @@ func testWebApplicationTypeResolver(t *testing.T, context spec.G, it spec.S) {
 		var Copy = func(name string) {
 			in, err := os.Open(filepath.Join("testdata", "web-application-type", name))
 			Expect(err).NotTo(HaveOccurred())
-			defer in.Close()
+			defer func() { _ = in.Close() }()
 
 			out, err := os.OpenFile(filepath.Join(path, name), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 			Expect(err).NotTo(HaveOccurred())
-			defer out.Close()
+			defer func() { _ = out.Close() }()
 
 			_, err = io.Copy(out, in)
 			Expect(err).NotTo(HaveOccurred())

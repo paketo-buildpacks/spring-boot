@@ -17,7 +17,6 @@
 package boot_test
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -44,10 +43,10 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 
 	it.Before(func() {
 		var err error
-		appDir, err = ioutil.TempDir("", "native-image-application")
+		appDir, err = os.MkdirTemp("", "native-image-application")
 		Expect(err).NotTo(HaveOccurred())
 
-		layerDir, err = ioutil.TempDir("", "classpath-layer")
+		layerDir, err = os.MkdirTemp("", "classpath-layer")
 		Expect(err).NotTo(HaveOccurred())
 		layers := &libcnb.Layers{Path: layerDir}
 		layer, err = layers.Layer("test-layer")
@@ -75,7 +74,7 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 
 	context("classpath.idx contains a list of jar", func() {
 		it.Before(func() {
-			Expect(ioutil.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
+			Expect(os.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
 - "some.jar"
 - "other.jar"
 `), 0644)).To(Succeed())
@@ -97,7 +96,7 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 
 	context("classpath.idx contains a list of relative paths to jars", func() {
 		it.Before(func() {
-			Expect(ioutil.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
+			Expect(os.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
 - "some/path/some.jar"
 - "some/path/other.jar"
 `), 0644)).To(Succeed())
@@ -118,12 +117,12 @@ func testNativeImage(t *testing.T, context spec.G, it spec.S) {
 	})
 	context("Boot @argfile is found", func() {
 		it.Before(func() {
-			Expect(ioutil.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
+			Expect(os.WriteFile(filepath.Join(appDir, "BOOT-INF", "classpath.idx"), []byte(`
 - "some.jar"
 - "other.jar"
 `), 0644)).To(Succeed())
 			Expect(os.MkdirAll(filepath.Join(appDir, "META-INF", "native-image"), 0755)).To(Succeed())
-			Expect(ioutil.WriteFile(filepath.Join(appDir, "META-INF", "native-image", "argfile"), []byte("file-data"), 0644)).To(Succeed())
+			Expect(os.WriteFile(filepath.Join(appDir, "META-INF", "native-image", "argfile"), []byte("file-data"), 0644)).To(Succeed())
 		})
 
 		it.After(func() {
