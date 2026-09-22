@@ -518,10 +518,6 @@
     Name = "2025.1.x"
     OSS = "2027-07-31"
 
-  [[Projects.Generations]]
-    Name = "2026.0.x"
-    OSS = "2027-12-31"
-
 [[Projects]]
   Name = "Spring Cloud Alibaba"
   Slug = "spring-cloud-alibaba"
