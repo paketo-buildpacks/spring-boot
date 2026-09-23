@@ -1,23 +1,27 @@
 name: Synchronize Labels
-"on":
+on:
     push:
         branches:
             - main
         paths:
             - .github/labels.yml
     workflow_dispatch: {}
+concurrency:
+    group: synchronize-labels
+    cancel-in-progress: false
 permissions:
     contents: read
-    issues: write
 jobs:
     synchronize:
         name: Synchronize Labels
-        runs-on:
-            - ubuntu-24.04
+        runs-on: ubuntu-24.04
+        permissions:
+            contents: read
+            issues: write # create, update, and delete labels
         steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
-            - uses: micnncim/action-label-syncer@3abd5ab72fda571e69fffd97bd4e0033dd5f495c # v1
+            - uses: micnncim/action-label-syncer@3abd5ab72fda571e69fffd97bd4e0033dd5f495c # v1.3.0
               env:
                   GITHUB_TOKEN: ${{ github.token }}

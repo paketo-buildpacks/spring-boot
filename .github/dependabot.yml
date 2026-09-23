@@ -16,6 +16,8 @@ updates:
       update-types:
       - "minor"
       - "patch"
+  cooldown:
+    default-days: 7
 - package-ecosystem: gomod
   directory: "/dependency/retrieval"
   schedule:
@@ -31,3 +33,5 @@ updates:
       update-types:
       - "minor"
       - "patch"
+  cooldown:
+    default-days: 7

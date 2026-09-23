@@ -21,12 +21,12 @@ jobs:
       builders: ${{ steps.builders.outputs.builders }}
     steps:
     - name: Checkout
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
     - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: go.mod
 
@@ -38,9 +38,9 @@ jobs:
     - name: Get builders from integration.json
       id: builders
       run: |
-        source "${{ github.workspace }}/scripts/.util/builders.sh"
+        source "${GITHUB_WORKSPACE}/scripts/.util/builders.sh"
 
-        builders="$(util::builders::list "${{ github.workspace }}/integration.json")"
+        builders="$(util::builders::list "${GITHUB_WORKSPACE}/integration.json")"
         printf "Output: %s\n" "${builders}"
         printf "builders=%s\n" "${builders}" >> "$GITHUB_OUTPUT"
 
@@ -50,14 +50,14 @@ jobs:
     needs: unit
     permissions:
       contents: read
-      packages: read
+      packages: read # pull builder images for integration tests
     strategy:
       matrix:
         builder: ${{ fromJSON(needs.unit.outputs.builders) }}
       fail-fast: false  # don't cancel all test jobs when one fails
     steps:
     - name: Checkout
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
@@ -74,7 +74,7 @@ jobs:
         swap-storage: true
 
     - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: go.mod
 
@@ -97,8 +97,10 @@ jobs:
     runs-on: ubuntu-24.04
     needs: integration
     steps:
-    - run: |
-        result="${{ needs.integration.result }}"
+    - env:
+        RESULT: ${{ needs.integration.result }}
+      run: |
+        result="${RESULT}"
         if [[ $result == "success" ]]; then
           echo "Integration tests passed against all builders"
           exit 0
@@ -111,10 +113,10 @@ jobs:
     name: Upload Workflow Event Payload
     runs-on: ubuntu-24.04
     permissions:
-      actions: write
+      actions: write # upload the workflow event payload artifact
     steps:
     - name: Upload Artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       with:
         name: event-payload
         path: ${{ github.event_path }}

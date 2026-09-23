@@ -36,17 +36,20 @@ on:
         type: string
 
 permissions:
-  actions: write
   contents: read
 
 jobs:
   compile:
+    name: Compile dependency
     # Speed up compilation by using runners that match os and arch when they are set, otherwise fall back to emulation.
     runs-on: ${{ (inputs.os == 'linux' && inputs.arch == 'arm64') && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
+    permissions:
+      actions: write # upload the compiled dependency artifact
+      contents: read
 
     steps:
     - name: Check out code
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
 
@@ -58,10 +61,10 @@ jobs:
         echo '{"experimental": "enabled"}' | sudo tee ~/.docker/config.json
 
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@1f40c72289eff860ee54a304f1438e3cff362e0a # v4
+      uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4
+      uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
     - name: Setup before compilation
       id: compile-setup
@@ -112,7 +115,7 @@ jobs:
           arch="${ARCH}"
 
     - name: Upload compiled artifact
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: ${{ inputs.shouldCompile == true || inputs.shouldCompile == 'true' }}
       with:
         name: '${{ inputs.uploadArtifactName }}'

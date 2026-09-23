@@ -12,7 +12,9 @@ on:
         description: 'Version of the release to cut (e.g. 1.2.3)'
         required: false
 
-concurrency: release
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -25,11 +27,11 @@ jobs:
       builders: ${{ steps.builders.outputs.builders }}
     steps:
     - name: Checkout
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: go.mod
     - name: Run Unit Tests
@@ -37,8 +39,8 @@ jobs:
     - name: Get builders from integration.json
       id: builders
       run: |
-        source "${{ github.workspace }}/scripts/.util/builders.sh"
-        builders="$(util::builders::list "${{ github.workspace }}/integration.json")"
+        source "${GITHUB_WORKSPACE}/scripts/.util/builders.sh"
+        builders="$(util::builders::list "${GITHUB_WORKSPACE}/integration.json")"
         printf "Output: %s\n" "${builders}"
         printf "builders=%s\n" "${builders}" >> "$GITHUB_OUTPUT"
 
@@ -48,18 +50,18 @@ jobs:
     needs: unit
     permissions:
       contents: read
-      packages: read
+      packages: read # pull builder images for integration tests
     strategy:
       matrix:
         builder: ${{ fromJSON(needs.unit.outputs.builders) }}
       fail-fast: false  # don't cancel all test jobs when one fails
     steps:
     - name: Checkout
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: go.mod
     - name: Free Disk Space
@@ -92,22 +94,22 @@ jobs:
     runs-on: ubuntu-24.04
     needs: integration
     permissions:
-      contents: write
+      contents: write # create and update the draft release
     services:
       registry:
-        image: registry:3
+        image: registry:3@sha256:fd374bae807c225661adfe2c0c1f9970a0b8fab1761fd7dfb91e0fd9a8748f9b
         ports:
           - 5000:5000
 
     steps:
     - name: Checkout
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
         fetch-tags: true
 
     - name: Setup Go
-      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
       with:
         go-version-file: go.mod
 

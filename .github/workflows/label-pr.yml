@@ -10,18 +10,23 @@ on:
     - labeled
     - unlabeled
 
-concurrency: pr_labels_${{ github.event.number }}
+concurrency:
+  group: pr_labels_${{ github.event.number }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
   autolabel:
     name: Ensure Minimal Semver Labels
     runs-on: ubuntu-24.04
     permissions:
-      issues: read
-      pull-requests: read
+      issues: read # read the issue's current labels
+      pull-requests: read # read the pull request's metadata
     steps:
     - name: Check Minimal Semver Labels
-      uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5
+      uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5.6.0
       with:
         count: 1
         labels: semver:major, semver:minor, semver:patch
