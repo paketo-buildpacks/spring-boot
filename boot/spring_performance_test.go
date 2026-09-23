@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"slices"
 	"testing"
+	"time"
 
 	"github.com/buildpacks/libcnb"
 	. "github.com/onsi/gomega"
@@ -37,21 +38,56 @@ import (
 	"github.com/paketo-buildpacks/spring-boot/v5/boot"
 )
 
+const javaVersion21Output = `openjdk version "21.0.5" 2024-10-15 LTS
+OpenJDK Runtime Environment Temurin-21.0.5+11 (build 21.0.5+11-LTS)
+OpenJDK 64-Bit Server VM Temurin-21.0.5+11 (build 21.0.5+11-LTS, mixed mode, sharing)`
+
+const javaVersion25Output = `openjdk version "25.0.1" 2025-10-21
+OpenJDK Runtime Environment Temurin-25.0.1+9 (build 25.0.1+9)
+OpenJDK 64-Bit Server VM Temurin-25.0.1+9 (build 25.0.1+9, mixed mode, sharing)`
+
+func createAppDir(path string) error {
+	if err := os.MkdirAll(filepath.Join(path, "META-INF"), 0755); err != nil {
+		return err
+	}
+	return os.MkdirAll(filepath.Join(path, "BOOT-INF", "lib"), 0755)
+}
+
+// mockExecuteWith answers the version probes the buildpack makes against the image JRE, and
+// recreates the application directory whenever the jarmode extraction is told to write to it.
+// That second part matters: the real extraction puts the exploded layout back after the
+// directory has been re-zipped and removed, and everything after it - the timestamp walk, the
+// training run, a pre-recorded cache - expects the directory to exist.
+func mockExecuteWith(versionOutput string) func(mock.Arguments) {
+	return func(args mock.Arguments) {
+		execution := args.Get(0).(effect.Execution)
+
+		if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
+			if _, err := io.WriteString(execution.Stderr, versionOutput); err != nil {
+				panic(err)
+			}
+		}
+
+		if i := slices.Index(execution.Args, "--destination"); i >= 0 && i+1 < len(execution.Args) {
+			if err := createAppDir(execution.Args[i+1]); err != nil {
+				panic(err)
+			}
+		}
+	}
+}
+
+func mockExecute(args mock.Arguments) {
+	mockExecuteWith(javaVersion21Output)(args)
+}
+
 func testSpringPerformance(t *testing.T, context spec.G, it spec.S) {
 	var (
 		Expect = NewWithT(t).Expect
 
-		ctx                 libcnb.BuildContext
-		executor            *mocks.Executor
-		aotEnabled          bool
-		performanceType     boot.SpringPerformanceType
-		javaVersion21Output = `openjdk version "21.0.5" 2024-10-15 LTS
-OpenJDK Runtime Environment Temurin-21.0.5+11 (build 21.0.5+11-LTS)
-OpenJDK 64-Bit Server VM Temurin-21.0.5+11 (build 21.0.5+11-LTS, mixed mode, sharing)`
-
-		javaVersion25Output = `openjdk version "25.0.1" 2025-10-21
-OpenJDK Runtime Environment Temurin-25.0.1+9 (build 25.0.1+9)
-OpenJDK 64-Bit Server VM Temurin-25.0.1+9 (build 25.0.1+9, mixed mode, sharing)`
+		ctx             libcnb.BuildContext
+		executor        *mocks.Executor
+		aotEnabled      bool
+		performanceType boot.SpringPerformanceType
 	)
 
 	allArgs := func() []string {
@@ -71,8 +107,7 @@ OpenJDK 64-Bit Server VM Temurin-25.0.1+9 (build 25.0.1+9, mixed mode, sharing)`
 		ctx.Application.Path, err = os.MkdirTemp("", "spring-performance-app-dir")
 		Expect(err).NotTo(HaveOccurred())
 
-		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "META-INF"), 0755)).To(Succeed())
-		Expect(os.MkdirAll(filepath.Join(ctx.Application.Path, "BOOT-INF/lib"), 0755)).To(Succeed())
+		Expect(createAppDir(ctx.Application.Path)).To(Succeed())
 
 		executor = &mocks.Executor{}
 	})
@@ -90,15 +125,7 @@ OpenJDK 64-Bit Server VM Temurin-25.0.1+9 (build 25.0.1+9, mixed mode, sharing)`
 		aotEnabled = true
 		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).
-			Return(nil).
-			Run(func(args mock.Arguments) {
-				execution := args.Get(0).(effect.Execution)
-				if (slices.Contains(execution.Args, "-version")) && execution.Stderr != nil {
-					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-					Expect(err).NotTo(HaveOccurred())
-				}
-			}).Return(nil)
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -203,15 +230,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		aotEnabled = false
 		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).
-			Return(nil).
-			Run(func(args mock.Arguments) {
-				execution := args.Get(0).(effect.Execution)
-				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-					Expect(err).NotTo(HaveOccurred())
-				}
-			}).Return(nil)
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -244,20 +263,50 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 	})
 
+	it("normalizes file times under the application directory but not the directory itself", func() {
+		aotEnabled = false
+		performanceType = boot.CdsAotCache
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.3.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+		s.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		var normalizedModTime = time.Date(1980, time.January, 1, 0, 0, 1, 0, time.UTC)
+
+		for _, path := range []string{"META-INF", "BOOT-INF", filepath.Join("BOOT-INF", "lib")} {
+			fi, err := os.Stat(filepath.Join(ctx.Application.Path, path))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(fi.ModTime().UTC()).To(Equal(normalizedModTime), path)
+		}
+
+		// the application directory itself is left alone: on some platforms it is
+		// a mount point that the build user does not own and cannot touch
+		fi, err := os.Stat(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(fi.ModTime().UTC()).NotTo(Equal(normalizedModTime))
+	})
+
 	it("contributes user-provided JAVA_TOOL_OPTIONS to training run", func() {
 		Expect(os.Setenv("JAVA_TOOL_OPTIONS", "default-opt")).To(Succeed())
 		aotEnabled = false
 		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).
-			Return(nil).
-			Run(func(args mock.Arguments) {
-				execution := args.Get(0).(effect.Execution)
-				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-					Expect(err).NotTo(HaveOccurred())
-				}
-			}).Return(nil)
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -290,15 +339,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		aotEnabled = true
 		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).
-			Return(nil).
-			Run(func(args mock.Arguments) {
-				execution := args.Get(0).(effect.Execution)
-				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-					Expect(err).NotTo(HaveOccurred())
-				}
-			}).Return(nil)
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 	Spring-Boot-Version: 3.3.1
@@ -348,15 +389,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 		aotEnabled = true
 		performanceType = boot.CdsAotCache
 		dc := libpak.DependencyCache{CachePath: "testdata"}
-		executor.On("Execute", mock.Anything).
-			Return(nil).
-			Run(func(args mock.Arguments) {
-				execution := args.Get(0).(effect.Execution)
-				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-					_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-					Expect(err).NotTo(HaveOccurred())
-				}
-			}).Return(nil)
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
 
 		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
@@ -398,13 +431,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			dc := libpak.DependencyCache{CachePath: "testdata"}
 			executor.On("Execute", mock.Anything).
 				Return(nil).
-				Run(func(args mock.Arguments) {
-					execution := args.Get(0).(effect.Execution)
-					if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-						_, err := io.WriteString(execution.Stderr, javaVersion25Output)
-						Expect(err).NotTo(HaveOccurred())
-					}
-				}).Return(nil)
+				Run(mockExecuteWith(javaVersion25Output)).Return(nil)
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -462,13 +489,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			dc := libpak.DependencyCache{CachePath: "testdata"}
 			executor.On("Execute", mock.Anything).
 				Return(nil).
-				Run(func(args mock.Arguments) {
-					execution := args.Get(0).(effect.Execution)
-					if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-						_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-						Expect(err).NotTo(HaveOccurred())
-					}
-				}).Return(nil)
+				Run(mockExecuteWith(javaVersion21Output)).Return(nil)
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -502,13 +523,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			dc := libpak.DependencyCache{CachePath: "testdata"}
 			executor.On("Execute", mock.Anything).
 				Return(nil).
-				Run(func(args mock.Arguments) {
-					execution := args.Get(0).(effect.Execution)
-					if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-						_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-						Expect(err).NotTo(HaveOccurred())
-					}
-				}).Return(nil)
+				Run(mockExecuteWith(javaVersion21Output)).Return(nil)
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 			Spring-Boot-Version: 3.3.1
@@ -549,10 +564,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 				if slices.Contains(execution.Args, "-XX:AOTMode=on") {
 					return fmt.Errorf("exit status 1")
 				}
-				if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-					_, err := io.WriteString(execution.Stderr, javaVersion25Output)
-					Expect(err).NotTo(HaveOccurred())
-				}
+				mockExecuteWith(javaVersion25Output)(mock.Arguments{execution})
 				return nil
 			})
 
@@ -589,13 +601,7 @@ Spring-Boot-Lib: BOOT-INF/lib
 			dc := libpak.DependencyCache{CachePath: "testdata"}
 			executor.On("Execute", mock.Anything).
 				Return(nil).
-				Run(func(args mock.Arguments) {
-					execution := args.Get(0).(effect.Execution)
-					if slices.Contains(execution.Args, "-version") && execution.Stderr != nil {
-						_, err := io.WriteString(execution.Stderr, javaVersion21Output)
-						Expect(err).NotTo(HaveOccurred())
-					}
-				}).Return(nil)
+				Run(mockExecuteWith(javaVersion21Output)).Return(nil)
 
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 Spring-Boot-Version: 3.3.1
