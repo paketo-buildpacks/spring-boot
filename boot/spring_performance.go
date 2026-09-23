@@ -102,12 +102,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				// the JDK version and architecture that recorded it, with the classpath it was
 				// recorded with).
 				layer.Launch = true
+				s.Logger.Bodyf("Found pre-recorded AOT cache at %s, skipping the training run", cacheFile)
 
 				cacheFileHandle, err := os.Open(cacheFile)
 				if err != nil {
 					return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
 				}
-				defer cacheFileHandle.Close()
+				defer func() { _ = cacheFileHandle.Close() }()
 				stashDir, err := os.MkdirTemp("", "pre-recorded-aot-cache")
 				if err != nil {
 					return layer, fmt.Errorf("error creating temp directory for AOT cache file\n%w", err)
@@ -187,7 +188,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			if err != nil {
 				return layer, fmt.Errorf("error opening AOT cache file\n%w", err)
 			}
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 			if err := sherpa.CopyFile(f, layerPath); err != nil {
 				return layer, fmt.Errorf("error writing AOT cache file to layer\n%w", err)
 			}
