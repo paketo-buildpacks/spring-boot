@@ -5,7 +5,9 @@ on:
     - cron: '48 4 * * MON'  # every monday at 4:48 UTC
   workflow_dispatch:
 
-concurrency: update-go
+concurrency:
+  group: update-go
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -17,7 +19,7 @@ jobs:
     steps:
       - name: Check out code
         # zizmor: ignore[artipacked] -- persistent credentials required for push-branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
       - name: Checkout PR Branch
@@ -26,7 +28,7 @@ jobs:
           branch: automation/go-mod-update/update-main
       - name: Setup Go
         id: setup-go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         # Fetching the latest stable Go version
         with:
           go-version: stable
@@ -87,7 +89,7 @@ jobs:
     if: ${{ always() && needs.update-go.result == 'failure' }}
     permissions:
       contents: read
-      issues: write
+      issues: write # file a failure alert issue
     steps:
       - name: File Failure Alert Issue
         uses: paketo-buildpacks/github-config/actions/issue/file@main

@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '57 13 * * *'  # daily at 13:57 UTC
 
+concurrency:
+  group: update-dependencies-from-metadata
+  cancel-in-progress: false
+
 permissions:
   contents: read
 
@@ -14,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      actions: write
+      actions: write # upload the generated metadata artifacts
     outputs:
       metadata-filepath: ${{ steps.retrieve.outputs.metadata-filepath }}
       metadata-json: ${{ steps.retrieve.outputs.metadata-json }}
@@ -29,12 +33,12 @@ jobs:
       compilation-length: ${{ steps.retrieve.outputs.compilation-length }}
     steps:
       - name: Check out code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Setup Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           # hashFiles returns empty string if file does not exist
           go-version-file: ${{ hashFiles('dependency/retrieval/go.mod') != '' && 'dependency/retrieval/go.mod' || 'go.mod' }}
@@ -50,7 +54,7 @@ jobs:
           OUTPUT="/tmp/metadata.json"
 
           make retrieve \
-            buildpackTomlPath="${{ github.workspace }}/buildpack.toml" \
+            buildpackTomlPath="${GITHUB_WORKSPACE}/buildpack.toml" \
             output="${OUTPUT}"
 
           id=$(jq -r .[0].id < "${OUTPUT}")
@@ -73,13 +77,13 @@ jobs:
           echo "compilation-length=$complength" >> "$GITHUB_OUTPUT"
 
       - name: Upload `${{ steps.retrieve.outputs.metadata-filepath }}`
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: metadata.json
           path: ${{ steps.retrieve.outputs.metadata-filepath }}
 
       - name: Upload `${{ steps.retrieve.outputs.from-source-metadata-filepath }}`
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: from-source-metadata.json
           path: ${{ steps.retrieve.outputs.from-source-metadata-filepath }}
@@ -95,7 +99,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -132,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -179,7 +183,7 @@ jobs:
       - get-compile-and-test
     permissions:
       contents: read
-      actions: write
+      actions: write # upload the compiled dependency artifacts
     strategy:
       matrix:
         includes: ${{ fromJSON(needs.retrieve.outputs.compilation-json) }}
@@ -208,7 +212,7 @@ jobs:
       - compile
     permissions:
       contents: read
-      actions: write
+      actions: write # upload the updated metadata artifacts
     strategy:
       matrix:
         includes: ${{ fromJSON(needs.retrieve.outputs.compilation-json) }}
@@ -216,12 +220,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Download artifact files
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: "${{ needs.retrieve.outputs.id }}-${{ matrix.includes.version }}-${{ matrix.includes.os != '' && matrix.includes.os || 'linux' }}-${{ matrix.includes.arch != '' && matrix.includes.arch || 'amd64' }}-${{ matrix.includes.target }}"
 
@@ -236,7 +240,7 @@ jobs:
           echo "checksum-file=$(basename ./*.tgz.checksum)" >> "$GITHUB_OUTPUT"
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_DEPENDENCIES_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_S3_DEPENDENCIES_SECRET_ACCESS_KEY }}
@@ -257,7 +261,7 @@ jobs:
         run: echo "checksum=$(cat "${CHECKSUM_FILE}")" >> "$GITHUB_OUTPUT"
 
       - name: Download metadata.json
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: metadata.json
 
@@ -265,17 +269,22 @@ jobs:
       # Due to limitations with the upload action, we can no longer modify/upload the same metadata file
       - name: Write dependency-specific metadata to new file
         id: dependency-metadata
+        env:
+          TARGET: ${{ matrix.includes.target }}
+          VERSION: ${{ matrix.includes.version }}
+          OS: ${{ matrix.includes.os }}
+          ARCH: ${{ matrix.includes.arch }}
         run: |
           #!/usr/bin/env bash
           set -euo pipefail
           shopt -s inherit_errexit
 
-          metadata_file_name="${{ matrix.includes.target }}-${{ matrix.includes.version }}-${{ matrix.includes.os != '' && matrix.includes.os || 'linux' }}-${{ matrix.includes.arch != '' && matrix.includes.arch || 'amd64' }}-metadata-file.json"
-          if [[ -z "${{ matrix.includes.os }}" && -z "${{ matrix.includes.arch }}" ]]; then
-            cat metadata.json | jq -r ['.[] | select( .version == "${{ matrix.includes.version }}" and .target == "${{ matrix.includes.target }}")'] > $metadata_file_name
+          metadata_file_name="${TARGET}-${VERSION}-${OS:-linux}-${ARCH:-amd64}-metadata-file.json"
+          if [[ -z "${OS}" && -z "${ARCH}" ]]; then
+            cat metadata.json | jq -r --arg version "${VERSION}" --arg target "${TARGET}" '[.[] | select( .version == $version and .target == $target )]' > $metadata_file_name
           else
             echo "multi-arch buildpack with os and arch specified"
-            cat metadata.json | jq -r ['.[] | select( .version == "${{ matrix.includes.version }}" and .target == "${{ matrix.includes.target }}" and .os == "${{ matrix.includes.os }}" and .arch == "${{ matrix.includes.arch }}")'] > $metadata_file_name
+            cat metadata.json | jq -r --arg version "${VERSION}" --arg target "${TARGET}" --arg os "${OS}" --arg arch "${ARCH}" '[.[] | select( .version == $version and .target == $target and .os == $os and .arch == $arch )]' > $metadata_file_name
           fi
           echo "file=$(echo $metadata_file_name)" >> "$GITHUB_OUTPUT"
 
@@ -292,7 +301,7 @@ jobs:
           arch: ${{ matrix.includes.arch }}
 
       - name: Upload modified metadata
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ steps.dependency-metadata.outputs.file }}
           path: ${{ steps.dependency-metadata.outputs.file }}
@@ -306,7 +315,7 @@ jobs:
       - update-metadata
     permissions:
       contents: read
-      actions: read
+      actions: read # download the metadata artifacts
     # Update buildpack.toml only if ALL of the following conditions are met:
     #   (1) Retrieval step has succeeded and has found at least 1 new version
     #   (2) Testing step has succeeded OR been skipped
@@ -317,7 +326,7 @@ jobs:
     steps:
       - name: Check out code
         # zizmor: ignore[artipacked] -- persistent credentials required for push-branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
 
@@ -333,7 +342,7 @@ jobs:
 
       # Metadata file for the non-compiled dependencies, if there are any
       - name: Download metadata.json file
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata-files"
           pattern: "from-source-metadata.json"
@@ -343,7 +352,7 @@ jobs:
       # Download each metadata file, and combine them into one
       - name: Download individual metadata-file.json file(s)
         if: ${{ needs.update-metadata.result == 'success' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata-files"
           pattern: "*metadata-file.json"
