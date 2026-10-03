@@ -59,6 +59,7 @@ The buildpack will do the following:
 | `$BP_JVM_CDS_ENABLED`                 | Deprecated, use `BP_JVM_AOTCACHE_ENABLED`  - Whether to perform the CDS training run (that will generate the caching file `application.jsa`). Defaults to false.                                                                                                                                              |
 | `$BPL_JVM_CDS_ENABLED`                | Deprecated, use `BPL_JVM_AOTCACHE_ENABLED`  - Whether to load the CDS caching file (`-XX:SharedArchiveFile=application.jsa`) that was generated during the CDS training run. Defaults to the value of `BP_JVM_CDS_ENABLED`                                                                                     |
 | `$BP_JVM_AOTCACHE_ENABLED`            | Whether to perform the AOT Cache training run (that will generate the caching file `application.jsa`). Defaults to false.                                                                                                 |
+| `$BP_JVM_AOTCACHE_PATH`               | Path of a pre-recorded AOT cache. Defaults to `aot-cache/application.aot`; the build fails if it is set but no cache is found there.                                                                                                 |
 | `$BPL_JVM_AOTCACHE_ENABLED`           | Whether to load the CDS caching file (`-XX:SharedArchiveFile=application.jsa`) that was generated during the CDS training run. Defaults to the value of `BP_JVM_CDS_ENABLED`                                             |
 | `$BPL_JVM_AOTCACHE`                   | Path of a pre-recorded AOT cache to load (`-XX:AOTCache=<path>`). Set by the buildpack when the application ships `aot-cache/application.aot`. Takes precedence over `BPL_JVM_AOTCACHE_ENABLED`                                             |
 | `$CDS_TRAINING_JAVA_TOOL_OPTIONS`     | Deprecated, use `TRAINING_RUN_JAVA_TOOL_OPTIONS`  - Allow the user to override the default `JAVA_TOOL_OPTIONS`, only for the CDS training run. Useful to configure your app not to reach external services during training run for example.                                                                          |
@@ -66,8 +67,10 @@ The buildpack will do the following:
 ## Using a pre-recorded AOT cache
 
 Instead of letting the buildpack record the AOT cache with a training run, an application can ship
-one it recorded itself, at `aot-cache/application.aot`. The buildpack then skips the training run,
-puts the cache in a launch layer and points `BPL_JVM_AOTCACHE` at it.
+one it recorded itself, at `aot-cache/application.aot` (or wherever `BP_JVM_AOTCACHE_PATH` points;
+a relative value is taken from the application directory, an absolute value is used as-is). The
+buildpack then skips the training run, puts the cache in a launch layer and points
+`BPL_JVM_AOTCACHE` at it.
 
 An AOT cache only loads on the JDK version and the architecture that recorded it, **and only with
 the classpath and timestamps it was recorded against**, which here means `runner.jar` plus `lib/`

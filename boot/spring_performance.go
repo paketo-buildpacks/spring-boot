@@ -34,6 +34,9 @@ import (
 	"github.com/paketo-buildpacks/libpak/effect"
 )
 
+// DefaultAotCachePath is where a pre-recorded AOT cache is looked for by default.
+const DefaultAotCachePath = "aot-cache/application.aot"
+
 type SpringPerformance struct {
 	Dependency                 libpak.BuildpackDependency
 	LayerContributor           libpak.LayerContributor
@@ -72,6 +75,12 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
 
+		// BP_JVM_AOTCACHE_PATH overrides the default lookup location.
+		aotCachePath, aotCachePathSet := os.LookupEnv("BP_JVM_AOTCACHE_PATH")
+		if !aotCachePathSet {
+			aotCachePath = DefaultAotCachePath
+		}
+
 		switch s.PerformanceType {
 		case Without:
 			return layer, nil
@@ -81,7 +90,17 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		// Check for pre-recorded AOT cache
 		preRecordedCache := ""
-		cacheFile := filepath.Join(s.AppPath, "aot-cache", "application.aot")
+		cacheFile := aotCachePath
+		if !filepath.IsAbs(cacheFile) {
+			cacheFile = filepath.Join(s.AppPath, cacheFile)
+		}
+		// An explicitly configured path that does not resolve to a cache file is a
+		// misconfiguration, not a reason to silently skip the optimization.
+		if s.PerformanceType == CdsAotCache && aotCachePathSet {
+			if info, err := os.Stat(cacheFile); err != nil || info.IsDir() {
+				return layer, fmt.Errorf("no pre-recorded AOT cache at %s (from BP_JVM_AOTCACHE_PATH)", cacheFile)
+			}
+		}
 		if info, err := os.Stat(cacheFile); err == nil && s.PerformanceType == CdsAotCache {
 			if info.Size() <= 0 {
 				// A zero-byte cache means nothing was recorded (the JVM can emit an empty
@@ -118,9 +137,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 					return layer, fmt.Errorf("error copying AOT cache file\n%w", err)
 				}
 				// aot-cache is build input rather than application content: dropping it keeps it
-				// out of runner.jar and stops it being shipped a second time in the app layer
-				if err := os.RemoveAll(filepath.Dir(cacheFile)); err != nil {
-					return layer, fmt.Errorf("error removing %s\n%w", filepath.Dir(cacheFile), err)
+				// out of runner.jar and stops it being shipped a second time in the app layer.
+				// Only a directory strictly inside the application content is dropped.
+				dir := filepath.Dir(cacheFile)
+				if rel, err := filepath.Rel(s.AppPath, dir); err == nil && rel != "." && filepath.IsLocal(rel) {
+					if err := os.RemoveAll(dir); err != nil {
+						return layer, fmt.Errorf("error removing %s\n%w", dir, err)
+					}
 				}
 			}
 		}
