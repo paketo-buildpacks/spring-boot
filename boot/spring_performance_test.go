@@ -476,6 +476,73 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 	})
 
+	it("looks for the pre-recorded AOT cache at BP_JVM_AOTCACHE_PATH", func() {
+		Expect(os.Setenv("BP_JVM_AOTCACHE_PATH", "custom/my-cache.aot")).To(Succeed())
+		defer func() { _ = os.Unsetenv("BP_JVM_AOTCACHE_PATH") }()
+
+		cacheDir := filepath.Join(ctx.Application.Path, "custom")
+		Expect(os.MkdirAll(cacheDir, 0755)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(cacheDir, "my-cache.aot"), []byte("cache-data"), 0644)).To(Succeed())
+
+		aotEnabled = true
+		performanceType = boot.CdsAotCache
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(mockExecuteWith(javaVersion25Output)).Return(nil)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Spring-Boot-Version: 3.3.1
+		Spring-Boot-Classes: BOOT-INF/classes
+		Spring-Boot-Lib: BOOT-INF/lib
+		`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+		s.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		// the cache was found at the configured path and used instead of the training run
+		Expect(allArgs()).To(ContainElements("-XX:AOTMode=on", "-XX:AOTCache="+filepath.Join(layer.Path, "application.aot")))
+		Expect(allArgs()).NotTo(ContainElement("-XX:AOTCacheOutput=application.aot"))
+		Expect(filepath.Join(layer.Path, "application.aot")).To(BeAnExistingFile())
+	})
+
+	it("fails the build when BP_JVM_AOTCACHE_PATH is set but there is no cache there", func() {
+		Expect(os.Setenv("BP_JVM_AOTCACHE_PATH", "does/not/exist.aot")).To(Succeed())
+		defer func() { _ = os.Unsetenv("BP_JVM_AOTCACHE_PATH") }()
+
+		aotEnabled = true
+		performanceType = boot.CdsAotCache
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).
+			Return(nil).
+			Run(mockExecuteWith(javaVersion25Output)).Return(nil)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+		Spring-Boot-Version: 3.3.1
+		Spring-Boot-Classes: BOOT-INF/classes
+		Spring-Boot-Lib: BOOT-INF/lib
+		`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+		s.Executor = executor
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = s.Contribute(layer)
+		Expect(err).To(HaveOccurred())
+	})
+
 	context("when pre-recorded AOT cache is empty", func() {
 		it.Before(func() {
 			cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
