@@ -25,6 +25,7 @@ import (
 
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/buildpacks/libcnb"
@@ -49,6 +50,10 @@ type SpringPerformance struct {
 	ClasspathString            string
 	ReZip                      bool
 	TrainingRunJavaToolOptions string
+	// AotCachePath is where a pre-recorded AOT cache is looked for.
+	AotCachePath string
+	// AotCachePathExplicit records that the user named the path themselves.
+	AotCachePathExplicit bool
 }
 
 func NewSpringPerformance(cache libpak.DependencyCache, appPath string, manifest *properties.Properties, aotEnabled bool, performanceType SpringPerformanceType, classpathString string, reZip bool, trainingRunJavaToolOptions string) SpringPerformance {
@@ -75,10 +80,11 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 		layer.LaunchEnvironment.Default("BPL_SPRING_AOT_ENABLED", s.AotEnabled)
 
-		// BP_JVM_AOTCACHE_PATH overrides the default lookup location.
-		aotCachePath, aotCachePathSet := os.LookupEnv("BP_JVM_AOTCACHE_PATH")
-		if !aotCachePathSet {
-			aotCachePath = DefaultAotCachePath
+		// A blank path behaves exactly like an unset one: the default location, and a
+		// missing cache there is a fallback rather than a failure.
+		aotCachePath, aotCachePathExplicit := s.AotCachePath, s.AotCachePathExplicit
+		if strings.TrimSpace(aotCachePath) == "" {
+			aotCachePath, aotCachePathExplicit = DefaultAotCachePath, false
 		}
 
 		switch s.PerformanceType {
@@ -94,14 +100,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		if !filepath.IsAbs(cacheFile) {
 			cacheFile = filepath.Join(s.AppPath, cacheFile)
 		}
-		// An explicitly configured path that does not resolve to a cache file is a
+		info, statErr := os.Stat(cacheFile)
+		// A path the user named themselves that does not resolve to a cache file is a
 		// misconfiguration, not a reason to silently skip the optimization.
-		if s.PerformanceType == CdsAotCache && aotCachePathSet {
-			if info, err := os.Stat(cacheFile); err != nil || info.IsDir() {
-				return layer, fmt.Errorf("no pre-recorded AOT cache at %s (from BP_JVM_AOTCACHE_PATH)", cacheFile)
-			}
+		if s.PerformanceType == CdsAotCache && aotCachePathExplicit && (statErr != nil || info.IsDir()) {
+			return layer, fmt.Errorf("no pre-recorded AOT cache at %s (from BP_JVM_AOTCACHE_PATH)", cacheFile)
 		}
-		if info, err := os.Stat(cacheFile); err == nil && s.PerformanceType == CdsAotCache {
+		if statErr == nil && !info.IsDir() && s.PerformanceType == CdsAotCache {
 			if info.Size() <= 0 {
 				// A zero-byte cache means nothing was recorded (the JVM can emit an empty
 				// application.aot when there is nothing to cache). Treat it as if no
@@ -136,13 +141,17 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				if err := sherpa.CopyFile(cacheFileHandle, preRecordedCache); err != nil {
 					return layer, fmt.Errorf("error copying AOT cache file\n%w", err)
 				}
-				// aot-cache is build input rather than application content: dropping it keeps it
-				// out of runner.jar and stops it being shipped a second time in the app layer.
-				// Only a directory strictly inside the application content is dropped.
-				dir := filepath.Dir(cacheFile)
-				if rel, err := filepath.Rel(s.AppPath, dir); err == nil && rel != "." && filepath.IsLocal(rel) {
-					if err := os.RemoveAll(dir); err != nil {
-						return layer, fmt.Errorf("error removing %s\n%w", dir, err)
+				// The cache is build input rather than application content: dropping it keeps
+				// it out of runner.jar and stops it being shipped a second time in the app
+				// layer. Only the cache file itself is removed, and only when it sits inside
+				// the application directory.
+				if rel, err := filepath.Rel(s.AppPath, cacheFile); err == nil && filepath.IsLocal(rel) {
+					if err := os.Remove(cacheFile); err != nil {
+						return layer, fmt.Errorf("error removing %s\n%w", cacheFile, err)
+					}
+					// tidy up the directory it came from, only if the cache is the last thing in it
+					if dir := filepath.Dir(cacheFile); dir != s.AppPath {
+						_ = os.Remove(dir)
 					}
 				}
 			}

@@ -98,7 +98,7 @@ api = "0.7"
     name = "BP_JVM_AOTCACHE_PATH"
 
   [[metadata.configurations]]
-    description = "path of a pre-recorded AOT cache to load at runtime; set by the buildpack when the application ships aot-cache/application.aot"
+    description = "path of a pre-recorded AOT cache to load at runtime; set by the buildpack when the application ships a pre-recorded cache (see BP_JVM_AOTCACHE_PATH)"
     launch = true
     name = "BPL_JVM_AOTCACHE"
 
