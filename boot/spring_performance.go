@@ -262,11 +262,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		}
 
 		trainingRunArgs = append(trainingRunArgs, "-Dspring.context.exit=onRefresh")
+		trainingRunCacheName := "application.jsa"
 		if jreVersion >= 25 {
 			// we can use https://openjdk.org/jeps/514
-			trainingRunArgs = append(trainingRunArgs, "-XX:AOTCacheOutput=application.aot")
+			trainingRunCacheName = "application.aot"
+			trainingRunArgs = append(trainingRunArgs, fmt.Sprintf("-XX:AOTCacheOutput=%s", trainingRunCacheName))
 		} else {
-			trainingRunArgs = append(trainingRunArgs, "-XX:ArchiveClassesAtExit=application.jsa")
+			trainingRunArgs = append(trainingRunArgs, fmt.Sprintf("-XX:ArchiveClassesAtExit=%s", trainingRunCacheName))
 		}
 		trainingRunArgs = append(trainingRunArgs, "-cp", s.ClasspathString, startClassValue)
 
@@ -286,7 +288,29 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			Stdout:  s.Logger.InfoWriter(),
 			Stderr:  s.Logger.InfoWriter(),
 		}); err != nil {
-			return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
+			// An application can exit non-zero from its own shutdown path after the JVM has
+			// written the cache, so judge the run on what it produced rather than the exit code.
+			trainingRunCache := filepath.Join(s.AppPath, trainingRunCacheName)
+			info, statErr := os.Stat(trainingRunCache)
+			if statErr != nil || info.IsDir() || info.Size() <= 0 {
+				return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
+			}
+			// -XX:AOTMode=on fails when the cache does not belong to this image, the same
+			// check a pre-recorded cache goes through.
+			if jreVersion >= 25 {
+				if verifyErr := s.Executor.Execute(effect.Execution{
+					Command: javaCommand,
+					Args:    []string{"-XX:AOTMode=on", fmt.Sprintf("-XX:AOTCache=%s", trainingRunCache), "-cp", s.ClasspathString, "-version"},
+					Dir:     s.AppPath,
+					Stdout:  s.Logger.DebugWriter(),
+					Stderr:  s.Logger.DebugWriter(),
+				}); verifyErr != nil {
+					return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
+				}
+			}
+			s.Logger.Bodyf("Training run exited with an error, but produced a usable %s (%d bytes); "+
+				"keeping it and continuing. The exit status came from the application, after the cache "+
+				"was written: %s", trainingRunCacheName, info.Size(), err)
 		}
 
 		return layer, nil
