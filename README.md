@@ -101,6 +101,13 @@ happens as usual. Loading a cache needs Java 24 (`-XX:AOTCache`); it is recordin
 step that needs Java 25 (`-XX:AOTCacheOutput`), which is why the training run only produces
 `application.aot` from Java 25 on.
 
+Some applications exit with a non-zero status from their own shutdown path — a shutdown hook, a
+library's `atexit` handler, a non-daemon thread — after the JVM has already finished writing the
+cache. That status belongs to the application rather than to the cache, so the training run is
+judged on what it produced: if the cache exists, is not empty, and the image JRE loads it
+(`-XX:AOTMode=on`), the build keeps it and logs the failure instead of stopping. A run that
+produced no usable cache still fails the build.
+
 ## Bindings
 The buildpack optionally accepts the following bindings:
 
