@@ -418,6 +418,87 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(os.Unsetenv("JRE_HOME")).To(Succeed())
 	})
 
+	context("when the training run exits non-zero", func() {
+		// the training run fails, optionally writing a cache first; everything else succeeds
+		// unless verifyErr says otherwise
+		setupTrainingRun := func(writeCache func(appPath string), verifyErr error) boot.SpringPerformance {
+			executor.On("Execute", mock.MatchedBy(func(e effect.Execution) bool {
+				return slices.Contains(e.Args, "-XX:AOTCacheOutput=application.aot")
+			})).Run(func(args mock.Arguments) {
+				if writeCache != nil {
+					writeCache(ctx.Application.Path)
+				}
+			}).Return(fmt.Errorf("exit status 1"))
+
+			executor.On("Execute", mock.MatchedBy(func(e effect.Execution) bool {
+				return slices.Contains(e.Args, "-XX:AOTMode=on")
+			})).Return(verifyErr)
+
+			executor.On("Execute", mock.Anything).
+				Run(mockExecuteWith(javaVersion25Output)).Return(nil)
+
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+			Spring-Boot-Version: 3.3.1
+			Spring-Boot-Classes: BOOT-INF/classes
+			Spring-Boot-Lib: BOOT-INF/lib
+			`), 0644)).To(Succeed())
+			props, err := libjvm.NewManifest(ctx.Application.Path)
+			Expect(err).NotTo(HaveOccurred())
+
+			s := boot.NewSpringPerformance(libpak.DependencyCache{CachePath: "testdata"},
+				ctx.Application.Path, props, true, boot.CdsAotCache, "", true, "")
+			s.Executor = executor
+			return s
+		}
+
+		it("keeps a cache the run finished writing before it failed", func() {
+			s := setupTrainingRun(func(appPath string) {
+				Expect(os.WriteFile(filepath.Join(appPath, "application.aot"), []byte("a-real-cache"), 0644)).To(Succeed())
+			}, nil)
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = s.Contribute(layer)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(allArgs()).To(ContainElement("-XX:AOTMode=on"))
+		})
+
+		it("fails when the run wrote no cache at all", func() {
+			s := setupTrainingRun(nil, nil)
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = s.Contribute(layer)
+			Expect(err).To(MatchError(ContainSubstring("error running build")))
+		})
+
+		it("fails when the cache the run wrote is empty", func() {
+			s := setupTrainingRun(func(appPath string) {
+				Expect(os.WriteFile(filepath.Join(appPath, "application.aot"), nil, 0644)).To(Succeed())
+			}, nil)
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = s.Contribute(layer)
+			Expect(err).To(MatchError(ContainSubstring("error running build")))
+		})
+
+		it("fails when the cache the run wrote does not load", func() {
+			s := setupTrainingRun(func(appPath string) {
+				Expect(os.WriteFile(filepath.Join(appPath, "application.aot"), []byte("not-a-cache"), 0644)).To(Succeed())
+			}, fmt.Errorf("cache refused"))
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = s.Contribute(layer)
+			Expect(err).To(MatchError(ContainSubstring("error running build")))
+		})
+	})
+
 	context("when pre-recorded AOT cache exists", func() {
 		it.Before(func() {
 			cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
