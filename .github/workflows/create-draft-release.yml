@@ -97,7 +97,7 @@ jobs:
       contents: write # create and update the draft release
     services:
       registry:
-        image: registry:3@sha256:fd374bae807c225661adfe2c0c1f9970a0b8fab1761fd7dfb91e0fd9a8748f9b
+        image: registry:3@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8
         ports:
           - 5000:5000
 
