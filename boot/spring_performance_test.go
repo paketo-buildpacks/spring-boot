@@ -335,6 +335,108 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(os.Unsetenv("JAVA_TOOL_OPTIONS")).To(Succeed())
 	})
 
+	it("contributes the build JAVA_TOOL_OPTIONS to launch so a recorded AOT cache loads", func() {
+		aotEnabled = false
+		performanceType = boot.CdsAotCache
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.3.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+		s.Executor = executor
+		s.JavaToolOptions = "--enable-native-access=ALL-UNNAMED"
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		// The build flags reach launch, so the cache recorded with them loads at runtime.
+		Expect(layer.LaunchEnvironment).To(HaveKey("JAVA_TOOL_OPTIONS.append"))
+		Expect(layer.LaunchEnvironment["JAVA_TOOL_OPTIONS.append"]).To(Equal("--enable-native-access=ALL-UNNAMED"))
+	})
+
+	it("validates a pre-recorded cache with the build JAVA_TOOL_OPTIONS", func() {
+		cacheDir := filepath.Join(ctx.Application.Path, "aot-cache")
+		Expect(os.MkdirAll(cacheDir, 0755)).To(Succeed())
+		Expect(os.WriteFile(filepath.Join(cacheDir, "application.aot"), []byte("cache-data"), 0644)).To(Succeed())
+
+		aotEnabled = false
+		performanceType = boot.CdsAotCache
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecuteWith(javaVersion25Output))
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.3.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "runner.jar", true, "")
+		s.Executor = executor
+		s.JavaToolOptions = "--enable-native-access=ALL-UNNAMED"
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		// The strict load that accepts the cache inherits the build environment (the
+		// executor only overrides Env when it is set), so it already runs with the flags.
+		var validation effect.Execution
+		for _, call := range executor.Calls {
+			execution := call.Arguments[0].(effect.Execution)
+			if slices.Contains(execution.Args, "-XX:AOTMode=on") {
+				validation = execution
+			}
+		}
+		Expect(validation.Args).To(ContainElement("-XX:AOTMode=on"))
+		Expect(validation.Env).To(BeEmpty())
+
+		// And the launch environment carries the flags too, so the cache loads at runtime.
+		Expect(layer.LaunchEnvironment["JAVA_TOOL_OPTIONS.append"]).To(Equal("--enable-native-access=ALL-UNNAMED"))
+	})
+
+	it("does not carry the build JAVA_TOOL_OPTIONS to launch when no AOT cache is in play", func() {
+		aotEnabled = false
+		performanceType = boot.ExtractLayout
+		dc := libpak.DependencyCache{CachePath: "testdata"}
+		executor.On("Execute", mock.Anything).Return(nil).Run(mockExecute)
+
+		Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+Spring-Boot-Version: 3.3.1
+Spring-Boot-Classes: BOOT-INF/classes
+Spring-Boot-Lib: BOOT-INF/lib
+`), 0644)).To(Succeed())
+		props, err := libjvm.NewManifest(ctx.Application.Path)
+		Expect(err).NotTo(HaveOccurred())
+
+		s := boot.NewSpringPerformance(dc, ctx.Application.Path, props, aotEnabled, performanceType, "", true, "")
+		s.Executor = executor
+		s.JavaToolOptions = "--enable-native-access=ALL-UNNAMED"
+
+		layer, err := ctx.Layers.Layer("test-layer")
+		Expect(err).NotTo(HaveOccurred())
+
+		layer, err = s.Contribute(layer)
+		Expect(err).NotTo(HaveOccurred())
+
+		// ExtractLayout is not an AOT cache mode, so the previous behaviour is preserved: the
+		// build options are not contributed to launch.
+		Expect(layer.LaunchEnvironment).NotTo(HaveKey("JAVA_TOOL_OPTIONS.append"))
+	})
+
 	it("contributes Spring Performance for Boot 3.3+, both CdsAotCache & AOT enabled - with SCB symlink", func() {
 		aotEnabled = true
 		performanceType = boot.CdsAotCache

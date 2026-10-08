@@ -278,6 +278,7 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 		cdsLayer := NewSpringPerformance(dc, context.Application.Path, manifest, aotEnabled, performanceType, classpathString, reZipExplodedJar, cdsTrainingJavaToolOptions)
 		cdsLayer.Logger = b.Logger
+		cdsLayer.JavaToolOptions = sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", "")
 		cdsLayer.AotCachePath, cdsLayer.AotCachePathExplicit = cr.Resolve("BP_JVM_AOTCACHE_PATH")
 		result.Layers = append(result.Layers, cdsLayer)
 
