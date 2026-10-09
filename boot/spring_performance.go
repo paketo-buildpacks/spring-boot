@@ -175,14 +175,9 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			if err := crush.CreateJar(s.AppPath+"/", tempJarPath); err != nil {
 				return layer, fmt.Errorf("error recreating jar\n%w", err)
 			}
-			f, err := os.Open(tempJarPath)
-			if err != nil {
-				return layer, fmt.Errorf("error opening jar\n%w", err)
-			}
-			if err = sherpa.CopyFile(f, filepath.Join(layer.Path, "runner.jar")); err != nil {
-				return layer, fmt.Errorf("error copying jar\n%w", err)
-			}
 
+			// tempJarPath is only the input to the layout extraction below; the launch process
+			// runs from the extracted layout in AppPath, so it is not copied into the layer.
 			jarPath = tempJarPath
 			// The extracted layout replaces the application directory below. This error is
 			// deliberately ignored: where the build user owns the contents but not the

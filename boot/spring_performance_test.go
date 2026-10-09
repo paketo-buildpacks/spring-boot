@@ -154,6 +154,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
 			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
 		Expect(layer.Build).To(BeTrue())
+		// The launch layer must not ship a second copy of the app (issue #505).
+		Expect(filepath.Join(layer.Path, "runner.jar")).NotTo(BeAnExistingFile())
 
 	})
 
@@ -374,12 +376,24 @@ Spring-Boot-Lib: BOOT-INF/lib
 		Expect(e.Args).To(ContainElements("-Dspring.context.exit=onRefresh",
 			"-XX:ArchiveClassesAtExit=application.jsa", "-cp"))
 
-		_ = unzip(filepath.Join(layer.Path, "runner.jar"), filepath.Join(layer.Path, "extract"))
+		// The re-zipped archive is not copied into the layer (issue #505); it lives only as
+		// the temporary input to the extraction, so read it from the jarmode call.
+		jarPath := ""
+		for _, call := range executor.Calls {
+			args := call.Arguments[0].(effect.Execution).Args
+			if i := slices.Index(args, "-Djarmode=tools"); i >= 0 && i+2 < len(args) {
+				jarPath = args[i+2]
+			}
+		}
+		Expect(jarPath).NotTo(BeEmpty())
+		_ = unzip(jarPath, filepath.Join(layer.Path, "extract"))
 		fileInfo, err := os.Lstat(filepath.Join(layer.Path, "extract", "BOOT-INF", "lib", "spring-cloud-bindings-1.2.3.jar"))
 		Expect(err).NotTo(HaveOccurred())
 		// SCB jar is included in the jar, but not as a link, as a real file.
 		Expect(fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink).To(BeFalse())
 		Expect(layer.Build).To(BeTrue())
+		// The launch layer must not ship a second copy of the app (issue #505).
+		Expect(filepath.Join(layer.Path, "runner.jar")).NotTo(BeAnExistingFile())
 
 	})
 
@@ -456,7 +470,8 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(allArgs()).NotTo(ContainElement("-XX:AOTCacheOutput=application.aot"))
 			Expect(allArgs()).NotTo(ContainElement("-XX:ArchiveClassesAtExit=application.jsa"))
 			Expect(allArgs()).To(ContainElement("-Djarmode=tools"))
-			Expect(filepath.Join(layer.Path, "runner.jar")).To(BeAnExistingFile())
+			// The launch layer must not ship a second copy of the app (issue #505).
+			Expect(filepath.Join(layer.Path, "runner.jar")).NotTo(BeAnExistingFile())
 
 			// and the image JRE was asked to load it, strictly, before it was accepted
 			Expect(allArgs()).To(ContainElements("-XX:AOTMode=on", "-XX:AOTCache="+filepath.Join(layer.Path, "application.aot")))
