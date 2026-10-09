@@ -50,6 +50,11 @@ type SpringPerformance struct {
 	ClasspathString            string
 	ReZip                      bool
 	TrainingRunJavaToolOptions string
+	// JavaToolOptions are the JVM options the build runs with (the build-time
+	// JAVA_TOOL_OPTIONS). An AOT cache only loads with the options it was recorded with, so
+	// when the buildpack is recording or loading one, it validates the cache and contributes
+	// these options to the launch environment too, keeping recording and loading in step.
+	JavaToolOptions string
 	// AotCachePath is where a pre-recorded AOT cache is looked for.
 	AotCachePath string
 	// AotCachePathExplicit records that the user named the path themselves.
@@ -92,6 +97,13 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			return layer, nil
 		case CdsAotCache:
 			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE_ENABLED", true)
+			// An AOT cache only loads with the JVM options it was recorded with. The build-time
+			// JAVA_TOOL_OPTIONS is what recording used (and what the cache's loader must use),
+			// so echo it to launch. Scoped to when an AOT cache is in play, so builds without
+			// one keep the previous behaviour of not carrying build options into runtime.
+			if s.JavaToolOptions != "" {
+				layer.LaunchEnvironment.Append("JAVA_TOOL_OPTIONS", " ", s.JavaToolOptions)
+			}
 		}
 
 		// Check for pre-recorded AOT cache
