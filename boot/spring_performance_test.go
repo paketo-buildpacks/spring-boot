@@ -904,6 +904,94 @@ Spring-Boot-Lib: BOOT-INF/lib
 		})
 	})
 
+	context("CacheFlavorFor", func() {
+		it("records an AOT cache from Java 25 on, a CDS archive before", func() {
+			for _, tt := range []struct {
+				jreVersion int
+				name       string
+				recordArg  string
+				verifiable bool
+			}{
+				{8, "application.jsa", "-XX:ArchiveClassesAtExit=application.jsa", false},
+				{11, "application.jsa", "-XX:ArchiveClassesAtExit=application.jsa", false},
+				{17, "application.jsa", "-XX:ArchiveClassesAtExit=application.jsa", false},
+				{21, "application.jsa", "-XX:ArchiveClassesAtExit=application.jsa", false},
+				{25, "application.aot", "-XX:AOTCacheOutput=application.aot", true},
+				{27, "application.aot", "-XX:AOTCacheOutput=application.aot", true},
+			} {
+				flavor := boot.CacheFlavorFor(tt.jreVersion)
+				Expect(flavor.Name).To(Equal(tt.name), "java %d", tt.jreVersion)
+				Expect(flavor.RecordArg()).To(Equal(tt.recordArg), "java %d", tt.jreVersion)
+				Expect(flavor.Verifiable).To(Equal(tt.verifiable), "java %d", tt.jreVersion)
+			}
+		})
+	})
+
+	context("CanLoadAotCache", func() {
+		it("needs Java 24, where -XX:AOTCache arrived", func() {
+			for _, jreVersion := range []int{8, 11, 17, 21} {
+				Expect(boot.CanLoadAotCache(jreVersion)).To(BeFalse(), "java %d", jreVersion)
+			}
+			for _, jreVersion := range []int{25, 27} {
+				Expect(boot.CanLoadAotCache(jreVersion)).To(BeTrue(), "java %d", jreVersion)
+			}
+		})
+	})
+
+	context("CacheFileSize", func() {
+		it("returns the size of a cache the training run wrote", func() {
+			path := filepath.Join(ctx.Application.Path, "application.aot")
+			Expect(os.WriteFile(path, []byte("cache-data"), 0644)).To(Succeed())
+
+			Expect(boot.CacheFileSize(path)).To(Equal(int64(len("cache-data"))))
+		})
+
+		it("errors when the training run wrote nothing", func() {
+			_, err := boot.CacheFileSize(filepath.Join(ctx.Application.Path, "application.aot"))
+			Expect(err).To(HaveOccurred())
+		})
+
+		it("errors on an empty cache", func() {
+			path := filepath.Join(ctx.Application.Path, "application.aot")
+			Expect(os.WriteFile(path, nil, 0644)).To(Succeed())
+
+			_, err := boot.CacheFileSize(path)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("is empty"))
+		})
+	})
+
+	context("LoadAotCache", func() {
+		it("loads the cache the way the container will", func() {
+			var execution effect.Execution
+			executor.On("Execute", mock.Anything).Return(nil).Run(func(args mock.Arguments) {
+				execution = args.Get(0).(effect.Execution)
+			})
+
+			s := boot.SpringPerformance{
+				Executor:        executor,
+				AppPath:         ctx.Application.Path,
+				ClasspathString: "runner.jar:lib/spring-cloud-bindings-2.0.4.jar",
+			}
+			Expect(s.LoadAotCache("java", "/layers/perf/application.aot", io.Discard)).To(Succeed())
+
+			Expect(execution.Command).To(Equal("java"))
+			Expect(execution.Args).To(Equal([]string{
+				"-XX:AOTMode=on", "-XX:AOTCache=/layers/perf/application.aot",
+				"-cp", "runner.jar:lib/spring-cloud-bindings-2.0.4.jar", "-version",
+			}))
+			Expect(execution.Dir).To(Equal(ctx.Application.Path))
+		})
+
+		it("propagates a JVM that refuses the cache", func() {
+			executor.On("Execute", mock.Anything).Return(fmt.Errorf("exit status 1"))
+
+			s := boot.SpringPerformance{Executor: executor, AppPath: ctx.Application.Path}
+			err := s.LoadAotCache("java", "/layers/perf/application.aot", io.Discard)
+			Expect(err).To(MatchError(ContainSubstring("exit status 1")))
+		})
+	})
+
 }
 
 func unzip(src, dest string) error {

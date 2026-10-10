@@ -18,6 +18,7 @@ package boot
 
 import (
 	"fmt"
+	"io"
 	"io/fs"
 
 	"github.com/paketo-buildpacks/libpak/crush"
@@ -37,6 +38,30 @@ import (
 
 // DefaultAotCachePath is where a pre-recorded AOT cache is looked for by default.
 const DefaultAotCachePath = "aot-cache/application.aot"
+
+type CacheFlavor struct {
+	Name       string
+	flag       string
+	Verifiable bool
+}
+
+func CacheFlavorFor(jreVersion int) CacheFlavor {
+	if jreVersion >= 25 {
+		return CacheFlavor{Name: "application.aot", flag: "-XX:AOTCacheOutput", Verifiable: true}
+	}
+	return CacheFlavor{Name: "application.jsa", flag: "-XX:ArchiveClassesAtExit"}
+}
+
+// RecordArg is the flag that makes the training run write the cache.
+func (c CacheFlavor) RecordArg() string {
+	return fmt.Sprintf("%s=%s", c.flag, c.Name)
+}
+
+// CanLoadAotCache reports whether a JRE can load a cache recorded elsewhere.
+// -XX:AOTCache arrived in Java 24 with https://openjdk.org/jeps/483.
+func CanLoadAotCache(jreVersion int) bool {
+	return jreVersion >= 24
+}
 
 type SpringPerformance struct {
 	Dependency                 libpak.BuildpackDependency
@@ -92,6 +117,8 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			return layer, nil
 		case CdsAotCache:
 			layer.LaunchEnvironment.Default("BPL_JVM_AOTCACHE_ENABLED", true)
+		// added to please compiler and missing switch statement
+		case ExtractLayout:
 		}
 
 		// Check for pre-recorded AOT cache
@@ -115,9 +142,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				s.Logger.Bodyf("Ignoring empty pre-recorded AOT cache at %s", cacheFile)
 			} else if jreVersion, err := JavaMajorVersionFromJRE(s.Executor); err != nil {
 				return layer, fmt.Errorf("error extracting finding out Java Version\n%w", err)
-			} else if jreVersion < 24 {
-				// -XX:AOTCache, which loads a cache, arrived in Java 24 with
-				// https://openjdk.org/jeps/483; older JREs get the CDS training run instead
+			} else if !CanLoadAotCache(jreVersion) {
 				s.Logger.Bodyf("Ignoring pre-recorded AOT cache at %s: loading one needs Java 24 or later, this image runs Java %d", cacheFile, jreVersion)
 			} else {
 				// Pre-recorded cache exists — skip training and use it directly. The JVM is
@@ -236,18 +261,7 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 			if err := sherpa.CopyFile(f, layerPath); err != nil {
 				return layer, fmt.Errorf("error writing AOT cache file to layer\n%w", err)
 			}
-			// -XX:AOTCache on its own is lenient: the JVM only warns and carries on when it cannot
-			// map the cache. -XX:AOTMode=on makes it fail, so a cache that does not belong to this
-			// image is caught here instead of silently shipping as dead weight. The launch
-			// environment keeps the lenient flag, so a surprise at runtime costs the optimization
-			// rather than the application.
-			if err := s.Executor.Execute(effect.Execution{
-				Command: javaCommand,
-				Args:    []string{"-XX:AOTMode=on", fmt.Sprintf("-XX:AOTCache=%s", layerPath), "-cp", s.ClasspathString, "-version"},
-				Dir:     s.AppPath,
-				Stdout:  s.Logger.InfoWriter(),
-				Stderr:  s.Logger.InfoWriter(),
-			}); err != nil {
+			if err := s.LoadAotCache(javaCommand, layerPath, s.Logger.InfoWriter()); err != nil {
 				return layer, fmt.Errorf("the image JRE refused to load the pre-recorded AOT cache at %s\n"+
 					"a cache only loads on the JDK version and architecture that recorded it, and with the "+
 					"classpath it was recorded with, which here is %q\n%w", cacheFile, s.ClasspathString, err)
@@ -262,14 +276,8 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		}
 
 		trainingRunArgs = append(trainingRunArgs, "-Dspring.context.exit=onRefresh")
-		trainingRunCacheName := "application.jsa"
-		if jreVersion >= 25 {
-			// we can use https://openjdk.org/jeps/514
-			trainingRunCacheName = "application.aot"
-			trainingRunArgs = append(trainingRunArgs, fmt.Sprintf("-XX:AOTCacheOutput=%s", trainingRunCacheName))
-		} else {
-			trainingRunArgs = append(trainingRunArgs, fmt.Sprintf("-XX:ArchiveClassesAtExit=%s", trainingRunCacheName))
-		}
+		flavor := CacheFlavorFor(jreVersion)
+		trainingRunArgs = append(trainingRunArgs, flavor.RecordArg())
 		trainingRunArgs = append(trainingRunArgs, "-cp", s.ClasspathString, startClassValue)
 
 		var trainingRunEnvVariables []string
@@ -290,27 +298,19 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 		}); err != nil {
 			// An application can exit non-zero from its own shutdown path after the JVM has
 			// written the cache, so judge the run on what it produced rather than the exit code.
-			trainingRunCache := filepath.Join(s.AppPath, trainingRunCacheName)
-			info, statErr := os.Stat(trainingRunCache)
-			if statErr != nil || info.IsDir() || info.Size() <= 0 {
+			trainingRunCache := filepath.Join(s.AppPath, flavor.Name)
+			size, cacheErr := CacheFileSize(trainingRunCache)
+			if cacheErr != nil {
 				return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
 			}
-			// -XX:AOTMode=on fails when the cache does not belong to this image, the same
-			// check a pre-recorded cache goes through.
-			if jreVersion >= 25 {
-				if verifyErr := s.Executor.Execute(effect.Execution{
-					Command: javaCommand,
-					Args:    []string{"-XX:AOTMode=on", fmt.Sprintf("-XX:AOTCache=%s", trainingRunCache), "-cp", s.ClasspathString, "-version"},
-					Dir:     s.AppPath,
-					Stdout:  s.Logger.DebugWriter(),
-					Stderr:  s.Logger.DebugWriter(),
-				}); verifyErr != nil {
+			if flavor.Verifiable {
+				if verifyErr := s.LoadAotCache(javaCommand, trainingRunCache, s.Logger.DebugWriter()); verifyErr != nil {
 					return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
 				}
 			}
 			s.Logger.Bodyf("Training run exited with an error, but produced a usable %s (%d bytes); "+
 				"keeping it and continuing. The exit status came from the application, after the cache "+
-				"was written: %s", trainingRunCacheName, info.Size(), err)
+				"was written: %s", flavor.Name, size, err)
 		}
 
 		return layer, nil
@@ -324,6 +324,33 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 
 func (s SpringPerformance) Name() string {
 	return s.LayerContributor.Name
+}
+
+func CacheFileSize(path string) (int64, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return 0, err
+	}
+	defer func() { _ = f.Close() }()
+
+	info, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	if info.Size() == 0 {
+		return 0, fmt.Errorf("%s is empty", path)
+	}
+	return info.Size(), nil
+}
+
+func (s SpringPerformance) LoadAotCache(javaCommand string, cachePath string, out io.Writer) error {
+	return s.Executor.Execute(effect.Execution{
+		Command: javaCommand,
+		Args:    []string{"-XX:AOTMode=on", fmt.Sprintf("-XX:AOTCache=%s", cachePath), "-cp", s.ClasspathString, "-version"},
+		Dir:     s.AppPath,
+		Stdout:  out,
+		Stderr:  out,
+	})
 }
 
 func (s SpringPerformance) springBootJarLayoutExtract(javaCommand string, jarPath string) error {
