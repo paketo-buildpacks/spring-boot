@@ -1108,6 +1108,14 @@
     Name = "5.0.x"
     OSS = "2026-12-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.2.x"
+    OSS = "2027-07-31"
+
 [[Projects]]
   Name = "Spring Cloud OpenFeign"
   Slug = "spring-cloud-openfeign"
@@ -1463,6 +1471,10 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
     OSS = "2027-07-31"
 
 [[Projects]]
@@ -2365,6 +2377,10 @@
 
   [[Projects.Generations]]
     Name = "2.0.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "2.1.x"
     OSS = "2027-12-31"
 
 [[Projects]]
@@ -2641,6 +2657,10 @@
 
   [[Projects.Generations]]
     Name = "4.1.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "4.2.x"
     OSS = "2027-12-31"
 
 [[Projects]]
@@ -2932,6 +2952,10 @@
     Name = "4.1.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "4.2.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Session for Apache Geode"
   Slug = "spring-session-data-geode"
@@ -3136,6 +3160,10 @@
 
   [[Projects.Generations]]
     Name = "5.0.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
     OSS = "2027-12-31"
 
 [[Projects]]
