@@ -9,8 +9,8 @@ github.com/ForestEckhardt/freezer v0.1.1/go.mod h1:fQApI/B3u/Pu6DD4rxmzBJQUBDc9E
 github.com/Masterminds/semver/v3 v3.5.0 h1:kQceYJfbupGfZOKZQg0kou0DgAKhzDg2NZPAwZ/2OOE=
 github.com/Masterminds/semver/v3 v3.5.0/go.mod h1:4V+yj/TJE1HU9XfppCwVMZq3I84lprf4nC11bSS5beM=
 github.com/Microsoft/go-winio v0.5.2/go.mod h1:WpS1mjBmmwHBEWmogvA2mj8546UReBk4v8QkMxJ6pZY=
-github.com/Microsoft/go-winio v0.6.3-0.20251027160822-ad3df93bed29 h1:0kQAzHq8vLs7Pptv+7TxjdETLf/nIqJpIB4oC6Ba4vY=
-github.com/Microsoft/go-winio v0.6.3-0.20251027160822-ad3df93bed29/go.mod h1:ZWa7ssZJT30CCDGJ7fk/2SBTq9BIQrrVjrcss0UW2s0=
+github.com/Microsoft/go-winio v0.6.3 h1:M/52tsoyTfwaxajLnXZm7PqkbMGRH8iSWP+8fcg9MQ4=
+github.com/Microsoft/go-winio v0.6.3/go.mod h1:ma0QpxizD4fyyzJ1C7MIblymTD2Nxz5Mho/3CepwIZg=
 github.com/ProtonMail/go-crypto v1.5.2 h1:cucYnvqcY7UOXVD//mSyjeaPY0SSN3v5cDkYPxumINk=
 github.com/ProtonMail/go-crypto v1.5.2/go.mod h1:/RaSu30DaKO4RY+XdV/ACcCcZkGr7AhUIduq5sjzzCo=
 github.com/anchore/packageurl-go v0.2.0 h1:CkrM4RMUwrEGAiE1OVlxaZNzWj0TuHRey7o4T/EAErk=
@@ -180,8 +180,8 @@ github.com/shogo82148/go-shuffle v0.0.0-20180218125048-27e6095f230d/go.mod h1:2h
 github.com/shogo82148/go-shuffle v1.1.1 h1:blBmJwTA4Kkl/97v7ljYIbsP7tnD2KXyPX3V/AaLIxo=
 github.com/shogo82148/go-shuffle v1.1.1/go.mod h1:Yz0+ymgWXAr6PTHLwDqtzyswBBXe2viBtIAaUjh/7MY=
 github.com/sirupsen/logrus v1.7.0/go.mod h1:yWOB1SBYBC5VeMP7gHvWumXLIWorT60ONWic61uBYv0=
-github.com/sirupsen/logrus v1.9.4 h1:TsZE7l11zFCLZnZ+teH4Umoq5BhEIfIzfRDZ1Uzql2w=
-github.com/sirupsen/logrus v1.9.4/go.mod h1:ftWc9WdOfJ0a92nsE2jF5u5ZwH8Bv2zdeOC42RjbV2g=
+github.com/sirupsen/logrus v1.10.2 h1:G2SED73/qrAu6YwbdxOD6peLkCBI3z7L+ykJFTXJBBo=
+github.com/sirupsen/logrus v1.10.2/go.mod h1:SLEg8TqYulVKKfIGHldVp2K2aYz2DKSVBq4g/H5bR7Q=
 github.com/skeema/knownhosts v1.3.3 h1:tiFvsjIW+xqP5cqVsod7atn/xm57OY6v9KwxB1xWUyA=
 github.com/skeema/knownhosts v1.3.3/go.mod h1:2y0ntYxeqSNxOw5pfqSVDcRyBt2FqfxhzNDPoKz/ifQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
