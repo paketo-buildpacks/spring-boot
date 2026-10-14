@@ -110,6 +110,7 @@ func generateMetadata(versionFetcher versionology.VersionFetcher) ([]versionolog
 		},
 		Name:           name,
 		PURL:           fmt.Sprintf("%s@%s", purl, versionString),
+		SHA256:         checksum,
 		Source:         source,
 		SourceChecksum: fmt.Sprintf("sha256:%s", sourceChecksum),
 		Stacks:         []string{"io.buildpacks.stacks.bionic", "io.paketo.stacks.tiny", "*"},
