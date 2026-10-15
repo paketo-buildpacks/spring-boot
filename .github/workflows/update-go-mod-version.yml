@@ -18,14 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        # zizmor: ignore[artipacked] -- persistent credentials required for push-branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+          persist-credentials: false
       - name: Checkout PR Branch
         uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
         with:
           branch: automation/go-mod-update/update-main
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Go
         id: setup-go
         uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
@@ -73,6 +73,7 @@ jobs:
         uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
         with:
           branch: automation/go-mod-update/update-main
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
 
       - name: Open Pull Request
         if: ${{ steps.commit.outputs.commit_sha != '' }}
