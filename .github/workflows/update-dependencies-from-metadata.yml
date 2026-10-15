@@ -325,15 +325,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        # zizmor: ignore[artipacked] -- persistent credentials required for push-branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+          persist-credentials: false
 
       - name: Checkout Branch
         uses: paketo-buildpacks/github-config/actions/pull-request/checkout-branch@main
         with:
           branch: automation/dependencies/update-from-metadata
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Make Temporary Artifact Directory
         id: make-outputdir
@@ -396,6 +396,7 @@ jobs:
         uses: paketo-buildpacks/github-config/actions/pull-request/push-branch@main
         with:
           branch: automation/dependencies/update-from-metadata
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
 
       - name: Open Pull Request
         if: ${{ steps.commit.outputs.commit_sha != '' }}
