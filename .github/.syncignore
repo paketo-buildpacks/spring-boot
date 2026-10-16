@@ -1,2 +1,3 @@
 CODEOWNERS
 workflows/update-spring-generations.yml
+dependabot.yml
