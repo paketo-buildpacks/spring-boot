@@ -18,6 +18,9 @@ updates:
       - "patch"
   cooldown:
     default-days: 7
+  ignore:
+  # Temporary: remove once on libpak v2. github.com/imdario/mergo was renamed to dario.cat/mergo and its v1 tags fail to resolve.
+  - dependency-name: "github.com/imdario/mergo"
 - package-ecosystem: gomod
   directory: "/dependency/retrieval"
   schedule:
