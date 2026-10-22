@@ -77,13 +77,13 @@ jobs:
           echo "compilation-length=$complength" >> "$GITHUB_OUTPUT"
 
       - name: Upload `${{ steps.retrieve.outputs.metadata-filepath }}`
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: metadata.json
           path: ${{ steps.retrieve.outputs.metadata-filepath }}
 
       - name: Upload `${{ steps.retrieve.outputs.from-source-metadata-filepath }}`
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: from-source-metadata.json
           path: ${{ steps.retrieve.outputs.from-source-metadata-filepath }}
@@ -225,7 +225,7 @@ jobs:
           persist-credentials: false
 
       - name: Download artifact files
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: "${{ needs.retrieve.outputs.id }}-${{ matrix.includes.version }}-${{ matrix.includes.os != '' && matrix.includes.os || 'linux' }}-${{ matrix.includes.arch != '' && matrix.includes.arch || 'amd64' }}-${{ matrix.includes.target }}"
 
@@ -261,7 +261,7 @@ jobs:
         run: echo "checksum=$(cat "${CHECKSUM_FILE}")" >> "$GITHUB_OUTPUT"
 
       - name: Download metadata.json
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: metadata.json
 
@@ -301,7 +301,7 @@ jobs:
           arch: ${{ matrix.includes.arch }}
 
       - name: Upload modified metadata
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ steps.dependency-metadata.outputs.file }}
           path: ${{ steps.dependency-metadata.outputs.file }}
@@ -342,7 +342,7 @@ jobs:
 
       # Metadata file for the non-compiled dependencies, if there are any
       - name: Download metadata.json file
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata-files"
           pattern: "from-source-metadata.json"
@@ -352,7 +352,7 @@ jobs:
       # Download each metadata file, and combine them into one
       - name: Download individual metadata-file.json file(s)
         if: ${{ needs.update-metadata.result == 'success' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: "${{ steps.make-outputdir.outputs.outputdir }}/metadata-files"
           pattern: "*metadata-file.json"
