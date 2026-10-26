@@ -19,7 +19,7 @@ require (
 	github.com/dgryski/go-minhash v0.0.0-20190315135803-ad340ca03076 // indirect
 	github.com/ekzhu/minhash-lsh v0.0.0-20190924033628-faac2c6342f8 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-enry/go-license-detector/v4 v4.3.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.2 // indirect
