@@ -207,6 +207,10 @@
 
   [[Projects.Generations]]
     Name = "3.8.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "3.9.x"
     OSS = "2027-12-31"
 
 [[Projects]]
@@ -2750,6 +2754,10 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
+    OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "4.1.x"
     OSS = "2027-12-31"
 
 [[Projects]]
