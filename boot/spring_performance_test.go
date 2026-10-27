@@ -478,6 +478,31 @@ Spring-Boot-Lib: BOOT-INF/lib
 			Expect(allArgs()).To(ContainElement("-XX:AOTMode=on"))
 		})
 
+		// Regression test for #667. Logger.DebugWriter() is nil unless debug logging is on,
+		// and the executor copies the process output straight into it, so a nil writer
+		// panicked instead of keeping the usable cache.
+		it("gives the verification run an output writer when debug logging is off", func() {
+			s := setupTrainingRun(func(appPath string) {
+				Expect(os.WriteFile(filepath.Join(appPath, "application.aot"), []byte("a-real-cache"), 0644)).To(Succeed())
+			}, nil)
+			Expect(s.Logger.IsDebugEnabled()).To(BeFalse())
+
+			layer, err := ctx.Layers.Layer("test-layer")
+			Expect(err).NotTo(HaveOccurred())
+
+			_, err = s.Contribute(layer)
+			Expect(err).NotTo(HaveOccurred())
+
+			var verification effect.Execution
+			for _, call := range executor.Calls {
+				if e := call.Arguments[0].(effect.Execution); slices.Contains(e.Args, "-XX:AOTMode=on") {
+					verification = e
+				}
+			}
+			Expect(verification.Stdout).NotTo(BeNil())
+			Expect(verification.Stderr).NotTo(BeNil())
+		})
+
 		it("fails when the run wrote no cache at all", func() {
 			s := setupTrainingRun(nil, nil)
 

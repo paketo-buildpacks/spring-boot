@@ -299,7 +299,12 @@ func (s SpringPerformance) Contribute(layer libcnb.Layer) (libcnb.Layer, error) 
 				return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
 			}
 			if flavor.Verifiable {
-				if verifyErr := s.LoadAotCache(javaCommand, trainingRunCache, s.Logger.DebugWriter()); verifyErr != nil {
+				// DebugWriter() is nil with debug logging off, hand it a writer that always exists.
+				verifyOut := io.Discard
+				if s.Logger.IsDebugEnabled() {
+					verifyOut = s.Logger.DebugWriter()
+				}
+				if verifyErr := s.LoadAotCache(javaCommand, trainingRunCache, verifyOut); verifyErr != nil {
 					return libcnb.Layer{}, fmt.Errorf("error running build\n%w", err)
 				}
 			}
