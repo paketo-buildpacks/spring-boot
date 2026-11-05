@@ -263,6 +263,10 @@
     Name = "2.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "2.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring AMQP"
   Slug = "spring-amqp"
