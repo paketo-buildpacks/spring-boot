@@ -263,6 +263,10 @@
     Name = "2.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "2.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring AMQP"
   Slug = "spring-amqp"
@@ -522,6 +526,10 @@
     Name = "2025.1.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "2026.0.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Alibaba"
   Slug = "spring-cloud-alibaba"
@@ -648,6 +656,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud CLI"
   Slug = "spring-cloud-cli"
@@ -716,6 +728,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Config"
   Slug = "spring-cloud-config"
@@ -760,6 +776,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring Cloud Connectors"
@@ -810,6 +830,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring Cloud Contract"
@@ -931,6 +955,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Gateway"
   Slug = "spring-cloud-gateway"
@@ -975,6 +1003,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring Cloud GCP"
@@ -1022,6 +1054,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Netflix"
   Slug = "spring-cloud-netflix"
@@ -1066,6 +1102,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring Cloud Open Service Broker"
@@ -1165,6 +1205,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Pipelines"
   Slug = "spring-cloud-pipelines"
@@ -1250,6 +1294,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Stream Applications"
   Slug = "spring-cloud-stream-applications"
@@ -1334,6 +1382,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Vault"
   Slug = "spring-cloud-vault"
@@ -1379,6 +1431,10 @@
     Name = "5.0.x"
     OSS = "2027-07-31"
 
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
+
 [[Projects]]
   Name = "Spring Cloud Zookeeper"
   Slug = "spring-cloud-zookeeper"
@@ -1423,6 +1479,10 @@
   [[Projects.Generations]]
     Name = "5.0.x"
     OSS = "2027-07-31"
+
+  [[Projects.Generations]]
+    Name = "5.1.x"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring CredHub"
