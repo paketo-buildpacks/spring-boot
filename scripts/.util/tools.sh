@@ -46,6 +46,17 @@ function util::tools::arch() {
   esac
 }
 
+function util::tools::repo-name() {
+  local root
+  root="${1}"
+
+  if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
+    printf '%s' "${GITHUB_REPOSITORY#*/}"
+  else
+    basename "${root}"
+  fi
+}
+
 function util::tools::path::export() {
   local dir
   dir="${1}"

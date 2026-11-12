@@ -31,6 +31,7 @@ jobs:
       id: ${{ steps.retrieve.outputs.id }}
       length: ${{ steps.retrieve.outputs.length }}
       compilation-length: ${{ steps.retrieve.outputs.compilation-length }}
+      has-warnings: ${{ steps.check-warnings.outputs.has-warnings }}
     steps:
       - name: Check out code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -55,7 +56,7 @@ jobs:
 
           make retrieve \
             buildpackTomlPath="${GITHUB_WORKSPACE}/buildpack.toml" \
-            output="${OUTPUT}"
+            output="${OUTPUT}" 2>&1 | tee /tmp/retrieve-output.log
 
           id=$(jq -r .[0].id < "${OUTPUT}")
           content=$(jq -r < "${OUTPUT}")
@@ -75,6 +76,21 @@ jobs:
           echo "length=$length" >> "$GITHUB_OUTPUT"
           printf "compilation-json<<%s\n%s\n%s\n" "${delimiter}" "${compilation}" "${delimiter}" >> "$GITHUB_OUTPUT" # see https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
           echo "compilation-length=$complength" >> "$GITHUB_OUTPUT"
+
+      - name: Check for Warnings/Errors
+        id: check-warnings
+        run: |
+          #!/usr/bin/env bash
+          set -euo pipefail
+          shopt -s inherit_errexit
+
+          has_warnings="false"
+          if grep -iqE "warning|error" /tmp/retrieve-output.log; then
+            has_warnings="true"
+            echo "Warnings or errors detected in retrieve output:"
+            grep -iE "warning|error" /tmp/retrieve-output.log || true
+          fi
+          echo "has-warnings=${has_warnings}" >> "$GITHUB_OUTPUT"
 
       - name: Upload `${{ steps.retrieve.outputs.metadata-filepath }}`
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -398,19 +414,28 @@ jobs:
           branch: automation/dependencies/update-from-metadata
           token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
 
-      - name: Open Pull Request
-        if: ${{ steps.commit.outputs.commit_sha != '' }}
+      - name: Open Pull Request (no semver label)
+        if: ${{ steps.commit.outputs.commit_sha != '' && steps.update.outputs.semver_bump == '' }}
         uses: paketo-buildpacks/github-config/actions/pull-request/open@main
         with:
           token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
           title: "Updates buildpack.toml with ${{ steps.update.outputs.new-versions }}"
           branch: automation/dependencies/update-from-metadata
 
+      - name: Open Pull Request
+        if: ${{ steps.commit.outputs.commit_sha != '' && steps.update.outputs.semver_bump != '' }}
+        uses: paketo-buildpacks/github-config/actions/pull-request/open@main
+        with:
+          token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+          title: "Updates buildpack.toml with ${{ steps.update.outputs.new-versions }}"
+          branch: automation/dependencies/update-from-metadata
+          label: "semver:${{ steps.update.outputs.semver_bump }}"
+
   failure:
     name: Alert on Failure
     runs-on: ubuntu-24.04
     needs: [ retrieve, get-compile-and-test, test, compile, update-metadata, assemble ]
-    if: ${{ always() && needs.retrieve.result == 'failure' || needs.get-compile-and-test.result == 'failure' || needs.test.result == 'failure' || needs.compile.result == 'failure' || needs.update-metadata.result == 'failure' || needs.assemble.result == 'failure' }}
+    if: ${{ always() && (needs.retrieve.result == 'failure' || needs.get-compile-and-test.result == 'failure' || needs.test.result == 'failure' || needs.compile.result == 'failure' || needs.update-metadata.result == 'failure' || needs.assemble.result == 'failure' || needs.retrieve.outputs.has-warnings == 'true') }}
     permissions:
       contents: read
       issues: write

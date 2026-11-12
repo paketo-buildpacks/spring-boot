@@ -1,6 +1,6 @@
 name: Set / Validate PR Labels
 on:
-  pull_request_target:
+  pull_request:
     branches:
     - main
     types:
@@ -22,8 +22,9 @@ jobs:
     name: Ensure Minimal Semver Labels
     runs-on: ubuntu-24.04
     permissions:
-      issues: read # read the issue's current labels
-      pull-requests: read # read the pull request's metadata
+      contents: read # check out the repository to determine which files changed
+      issues: write # add the semver label
+      pull-requests: write # update the pull request's labels
     steps:
     - name: Check Minimal Semver Labels
       uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5.6.0
@@ -35,7 +36,9 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Auto-label Semver
-      if: ${{ failure() }}
+      # Pull requests from forks receive a read-only token, so they cannot be
+      # auto-labeled. A maintainer must add the label to those pull requests.
+      if: ${{ failure() && github.event.pull_request.head.repo.full_name == github.repository }}
       uses: paketo-buildpacks/github-config/actions/pull-request/auto-semver-label@main
       env:
-        GITHUB_TOKEN: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

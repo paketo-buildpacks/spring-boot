@@ -25,6 +25,8 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       builders: ${{ steps.builders.outputs.builders }}
+      integration: ${{ steps.config.outputs.integration }}
+      multi: ${{ steps.config.outputs.multi }}
     steps:
     - name: Checkout
       uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -36,6 +38,12 @@ jobs:
         go-version-file: go.mod
     - name: Run Unit Tests
       run: ./scripts/unit.sh
+    - name: Read Implementation Config
+      id: config
+      run: |
+        source "${GITHUB_WORKSPACE}/scripts/.util/implementation.sh"
+        echo "integration=$(util::implementation::integration "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
+        echo "multi=$(util::implementation::is_multi "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
     - name: Get builders from integration.json
       id: builders
       run: |
@@ -48,6 +56,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-24.04
     needs: unit
+    if: ${{ needs.unit.outputs.integration == 'true' }}
     permissions:
       contents: read
       packages: read # pull builder images for integration tests
@@ -89,15 +98,17 @@ jobs:
         TMPDIR: "${{ runner.temp }}"
         GIT_TOKEN: ${{ github.token }}
 
+  # Standard implementation: one buildpack, packaged with jam/pack.
   release:
     name: Release
     runs-on: ubuntu-24.04
-    needs: integration
+    needs: [unit, integration]
+    if: ${{ needs.unit.outputs.multi != 'true' }}
     permissions:
       contents: write # create and update the draft release
     services:
       registry:
-        image: registry:3@sha256:ddf754342cfc8acc51a56d5d0ab6af06826461864460636d8bd5c546dab2a7b8
+        image: registry:3@sha256:82f6ff4a7f982960c8aa51617fea3aabc485df6e55cce80d22deb1de36f1bc3c
         ports:
           - 5000:5000
 
@@ -257,11 +268,289 @@ jobs:
         draft: true
         assets: ${{ steps.create_release_assets.outputs.release_assets }}
 
+  # Multi-implementation: a combined buildpack plus one per component.
+  release-prep:
+    name: Release Prep (multi)
+    runs-on: ubuntu-24.04
+    needs: [unit, integration]
+    if: ${{ always() && needs.unit.outputs.multi == 'true' && needs.unit.result == 'success' && (needs.integration.result == 'success' || needs.integration.result == 'skipped') }}
+    permissions:
+      contents: write # reset the draft release
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+      buildpack_type: ${{ steps.get_buildpack_type.outputs.buildpack_type }}
+      buildpacks: ${{ steps.config.outputs.buildpacks }}
+      combined: ${{ steps.config.outputs.combined }}
+      components: ${{ steps.config.outputs.components }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+        fetch-tags: true
+
+    - name: Setup Go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: go.mod
+
+    - name: Read Implementation Config
+      id: config
+      run: |
+        source "${GITHUB_WORKSPACE}/scripts/.util/implementation.sh"
+        echo "buildpacks=$(util::implementation::buildpacks "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
+        echo "combined=$(util::implementation::combined "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
+        echo "components=$(util::implementation::components "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
+
+    - name: Reset Draft Release
+      id: reset
+      uses: paketo-buildpacks/github-config/actions/release/reset-draft@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ github.token }}
+
+    - name: Calculate Semver Tag
+      if: github.event.inputs.version == ''
+      id: semver
+      uses: paketo-buildpacks/github-config/actions/tag/calculate-semver@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ github.token }}
+        ref-name: ${{ github.ref_name }}
+
+    - name: Set Release Tag
+      id: tag
+      env:
+        INPUT_VERSION: ${{ github.event.inputs.version }}
+        SEMVER_TAG: ${{ steps.semver.outputs.tag }}
+      run: |
+        tag="${INPUT_VERSION}"
+        if [ -z "${tag}" ]; then
+          tag="${SEMVER_TAG}"
+        fi
+        echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+
+    - name: Get buildpack type
+      id: get_buildpack_type
+      run: |
+        if [ -f "extension.toml" ]; then
+          echo "buildpack_type=extension" >> "$GITHUB_OUTPUT"
+        else
+          echo "buildpack_type=buildpack" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Package
+      env:
+        TAG: ${{ steps.tag.outputs.tag }}
+      run: ./scripts/package.sh --version "${TAG}"
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: build-artifacts
+        path: build/
+        retention-days: 1
+
+  generate-notes:
+    name: Generate Release Notes (${{ matrix.buildpack }})
+    runs-on: ubuntu-24.04
+    needs: [unit, release-prep]
+    if: ${{ needs.unit.outputs.multi == 'true' }}
+    services:
+      registry:
+        image: registry:3@sha256:82f6ff4a7f982960c8aa51617fea3aabc485df6e55cce80d22deb1de36f1bc3c
+        ports:
+          - 5000:5000
+    strategy:
+      matrix:
+        buildpack: ${{ fromJSON(needs.release-prep.outputs.buildpacks) }}
+      fail-fast: false
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: build-artifacts
+        path: build/
+
+    # Use the full action for the combined buildpack so the release notes include
+    # the Changes section (PR list since the last release).
+    - name: Create Release Notes
+      id: create-release-notes
+      if: matrix.buildpack == needs.release-prep.outputs.combined
+      uses: paketo-buildpacks/github-config/actions/release/notes@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        buildpack_type: ${{ needs.release-prep.outputs.buildpack_type }}
+        buildpackage_path: build/${{ matrix.buildpack }}.cnb
+
+    - name: Write Release Notes to file
+      if: matrix.buildpack == needs.release-prep.outputs.combined
+      env:
+        RELEASE_BODY: ${{ steps.create-release-notes.outputs.release_body }}
+      run: |
+        printf '%s' "${RELEASE_BODY}" > ./release_notes_raw
+
+    # For the component buildpacks, run jam summarize directly. The Changes
+    # section would be identical for every component and would otherwise be
+    # duplicated in the final release notes.
+    - name: Summarize Component Release Notes
+      if: matrix.buildpack != needs.release-prep.outputs.combined
+      env:
+        BUILDPACK_TYPE: ${{ needs.release-prep.outputs.buildpack_type }}
+        BUILDPACK: ${{ matrix.buildpack }}
+      run: |
+        jam_version="$(curl "https://api.github.com/repos/paketo-buildpacks/jam/releases/latest" \
+          --fail-with-body --show-error \
+          --header "Authorization: token ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}" \
+          --location --silent \
+          | jq -r -S .tag_name)"
+
+        mkdir -p "${HOME}/bin"
+        export PATH="${HOME}/bin:${PATH}"
+        curl "https://github.com/paketo-buildpacks/jam/releases/download/${jam_version}/jam-linux" \
+          --fail-with-body --show-error --silent --location \
+          --output "${HOME}/bin/jam"
+        chmod +x "${HOME}/bin/jam"
+
+        jam summarize \
+          --"${BUILDPACK_TYPE}" "build/${BUILDPACK}.cnb" \
+          --format markdown > ./release_notes_raw
+
+    - name: Get Image Digest
+      id: image_digest
+      env:
+        BUILDPACK_TYPE: ${{ needs.release-prep.outputs.buildpack_type }}
+        BUILDPACK: ${{ matrix.buildpack }}
+      run: |
+        image_name="localhost:5000/${BUILDPACK}:latest"
+
+        ./scripts/publish.sh \
+          --buildpack-type "${BUILDPACK_TYPE}" \
+          --archive-path "build/${BUILDPACK}.tgz" \
+          --image-ref $image_name
+
+        echo "digest=$(sudo skopeo inspect "docker://${image_name}" --tls-verify=false | jq -r .Digest)" >> "$GITHUB_OUTPUT"
+
+    - name: Set Correct Image Digest on Release Notes
+      env:
+        BUILDPACK: ${{ matrix.buildpack }}
+        IMAGE_DIGEST: ${{ steps.image_digest.outputs.digest }}
+      run: |
+        sed -E \
+          "s/\*\*Digest:\*\* \`sha256:[a-f0-9]{64}\`/\*\*Digest:\*\* \`${IMAGE_DIGEST}\`/" \
+          ./release_notes_raw > "./release_notes_${BUILDPACK}"
+
+        printf '%s' "${IMAGE_DIGEST}" > "./${BUILDPACK}-index-digest.sha256"
+
+    - name: Upload release notes artifact
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: release-notes-${{ matrix.buildpack }}
+        path: |
+          ./release_notes_${{ matrix.buildpack }}
+          ./${{ matrix.buildpack }}-index-digest.sha256
+        retention-days: 1
+
+  release-multi:
+    name: Release (multi)
+    runs-on: ubuntu-24.04
+    needs: [unit, release-prep, generate-notes]
+    if: ${{ needs.unit.outputs.multi == 'true' }}
+    permissions:
+      contents: write # create and update the draft release
+    steps:
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: build-artifacts
+        path: build/
+
+    - name: Download all release notes artifacts
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        pattern: release-notes-*
+        merge-multiple: true
+        path: ./release-notes/
+
+    - name: Assemble Release Notes
+      env:
+        COMBINED: ${{ needs.release-prep.outputs.combined }}
+        COMPONENTS: ${{ needs.release-prep.outputs.components }}
+      run: |
+        cat "./release-notes/release_notes_${COMBINED}" > ./release_notes
+        for buildpack in $(jq -r '.[]' <<< "${COMPONENTS}"); do
+          printf "\n\n---\n\n" >> ./release_notes
+          cat "./release-notes/release_notes_${buildpack}" >> ./release_notes
+        done
+
+    - name: Create release assets
+      id: create_release_assets
+      env:
+        REPO_NAME: ${{ github.event.repository.name }}
+        TAG: ${{ needs.release-prep.outputs.tag }}
+      run: |
+        source "${GITHUB_WORKSPACE}/scripts/.util/implementation.sh"
+
+        release_assets='[]'
+
+        for filepath in build/*.cnb; do
+          filename=$(basename "$filepath")
+          name="${filename%.cnb}"
+          suffix="$(util::implementation::asset-suffix "${GITHUB_WORKSPACE}" "${name}")"
+          asset_name="${REPO_NAME}-${TAG}${suffix}.cnb"
+          release_assets=$(echo "$release_assets" | jq --arg name "${asset_name}" --arg path "$filepath" \
+            '. + [{"path": $path, "name": $name, "content_type": "application/gzip"}]')
+        done
+
+        for filepath in build/*.tgz; do
+          filename=$(basename "$filepath")
+          name="${filename%.tgz}"
+          suffix="$(util::implementation::asset-suffix "${GITHUB_WORKSPACE}" "${name}")"
+          asset_name="${REPO_NAME}-${TAG}${suffix}.tgz"
+          release_assets=$(echo "$release_assets" | jq --arg name "${asset_name}" --arg path "$filepath" \
+            '. + [{"path": $path, "name": $name, "content_type": "application/gzip"}]')
+        done
+
+        for filepath in ./release-notes/*-index-digest.sha256; do
+          filename=$(basename "$filepath")
+          name="${filename%-index-digest.sha256}"
+          suffix="$(util::implementation::asset-suffix "${GITHUB_WORKSPACE}" "${name}")"
+          asset_name="${REPO_NAME}-${TAG}${suffix}-index-digest.sha256"
+          release_assets=$(echo "$release_assets" | jq --arg name "${asset_name}" --arg path "$filepath" \
+            '. + [{"path": $path, "name": $name, "content_type": "text/plain"}]')
+        done
+
+        release_assets=$(jq -c <<< "$release_assets")
+        printf "release_assets=%s\n" "${release_assets}" >> "$GITHUB_OUTPUT"
+
+    - name: Create Release
+      uses: paketo-buildpacks/github-config/actions/release/create@main
+      with:
+        repo: ${{ github.repository }}
+        token: ${{ secrets.PAKETO_BOT_GITHUB_TOKEN }}
+        tag_name: v${{ needs.release-prep.outputs.tag }}
+        target_commitish: ${{ github.sha }}
+        name: v${{ needs.release-prep.outputs.tag }}
+        body_filepath: "./release_notes"
+        draft: true
+        assets: ${{ steps.create_release_assets.outputs.release_assets }}
+
   failure:
     name: Alert on Failure
     runs-on: ubuntu-24.04
-    needs: [ unit, integration, release ]
-    if: ${{ always() && needs.unit.result == 'failure' || needs.integration.result == 'failure' || needs.release.result == 'failure' }}
+    needs: [unit, integration, release, release-prep, generate-notes, release-multi]
+    if: ${{ always() && (needs.unit.result == 'failure' || needs.integration.result == 'failure' || needs.release.result == 'failure' || needs.release-prep.result == 'failure' || needs.generate-notes.result == 'failure' || needs.release-multi.result == 'failure') }}
     permissions:
       contents: read
       issues: write

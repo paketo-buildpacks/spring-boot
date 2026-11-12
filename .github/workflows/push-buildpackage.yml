@@ -16,9 +16,34 @@ permissions:
   contents: read
 
 jobs:
+  prepare:
+    name: Read Buildpack List
+    runs-on: ubuntu-24.04
+    outputs:
+      buildpacks: ${{ steps.config.outputs.buildpacks }}
+      multi: ${{ steps.config.outputs.multi }}
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    - name: Read Implementation Config
+      id: config
+      run: |
+        source "${GITHUB_WORKSPACE}/scripts/.util/implementation.sh"
+        echo "buildpacks=$(util::implementation::buildpacks "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
+        echo "multi=$(util::implementation::is_multi "${GITHUB_WORKSPACE}")" >> "$GITHUB_OUTPUT"
+
   push:
     name: Push
     runs-on: ubuntu-24.04
+    needs: prepare
+    strategy:
+      matrix:
+        buildpack: ${{ fromJSON(needs.prepare.outputs.buildpacks) }}
+      fail-fast: false
     env:
       GCR_REGISTRY: "gcr.io"
       GCR_PASSWORD: ${{ secrets.GCR_PUSH_BOT_JSON_KEY }}
@@ -36,36 +61,41 @@ jobs:
 
     - name: Parse Event
       id: event
+      env:
+        BUILDPACK: ${{ matrix.buildpack }}
       run: |
+        suffix="$(source "${GITHUB_WORKSPACE}/scripts/.util/implementation.sh"; util::implementation::asset-suffix "${GITHUB_WORKSPACE}" "${BUILDPACK}")"
+
         FULL_VERSION="$(jq -r '.release.tag_name' "${GITHUB_EVENT_PATH}" | sed s/^v//)"
         MINOR_VERSION="$(echo "${FULL_VERSION}" | awk -F '.' '{print $1 "." $2 }')"
         MAJOR_VERSION="$(echo "${FULL_VERSION}" | awk -F '.' '{print $1 }')"
         echo "tag_full=${FULL_VERSION}" >> "$GITHUB_OUTPUT"
         echo "tag_minor=${MINOR_VERSION}" >> "$GITHUB_OUTPUT"
         echo "tag_major=${MAJOR_VERSION}" >> "$GITHUB_OUTPUT"
-        echo "download_tgz_file_url=$(jq -r '.release.assets[] | select(.name | endswith(".tgz")) | .url' "${GITHUB_EVENT_PATH}")" >> "$GITHUB_OUTPUT"
-        echo "download_cnb_file_url=$(jq -r --arg tag_full "$FULL_VERSION" '.release.assets[] | select(.name | endswith($tag_full + ".cnb")) | .url' "${GITHUB_EVENT_PATH}")" >> "$GITHUB_OUTPUT"
-        echo "download_sha256_file_url=$(jq -r '.release.assets[] | select(.name | endswith("index-digest.sha256")) | .url' "${GITHUB_EVENT_PATH}")" >> "$GITHUB_OUTPUT"
+        echo "asset_suffix=${suffix}" >> "$GITHUB_OUTPUT"
+        echo "download_tgz_file_url=$(jq -r --arg suffix "${suffix}" '.release.assets[] | select(.name | endswith($suffix + ".tgz")) | .url' "${GITHUB_EVENT_PATH}")" >> "$GITHUB_OUTPUT"
+        echo "download_cnb_file_url=$(jq -r --arg tag_full "$FULL_VERSION" --arg suffix "${suffix}" '.release.assets[] | select(.name | endswith($tag_full + $suffix + ".cnb")) | .url' "${GITHUB_EVENT_PATH}")" >> "$GITHUB_OUTPUT"
+        echo "download_sha256_file_url=$(jq -r --arg suffix "${suffix}" '.release.assets[] | select(.name | endswith($suffix + "-index-digest.sha256")) | .url' "${GITHUB_EVENT_PATH}")" >> "$GITHUB_OUTPUT"
 
     - name: Download .cnb buildpack
       uses: paketo-buildpacks/github-config/actions/release/download-asset@main
       with:
         url: ${{ steps.event.outputs.download_cnb_file_url }}
-        output: "/github/workspace/buildpackage.cnb"
+        output: "/github/workspace/buildpackage${{ steps.event.outputs.asset_suffix }}.cnb"
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Download .tgz buildpack
       uses: paketo-buildpacks/github-config/actions/release/download-asset@main
       with:
         url: ${{ steps.event.outputs.download_tgz_file_url }}
-        output: "/github/workspace/buildpack.tgz"
+        output: "/github/workspace/buildpack${{ steps.event.outputs.asset_suffix }}.tgz"
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Download .sha digest
       uses: paketo-buildpacks/github-config/actions/release/download-asset@main
       with:
         url: ${{ steps.event.outputs.download_sha256_file_url }}
-        output: "/github/workspace/index-digest.sha256"
+        output: "/github/workspace/index-digest${{ steps.event.outputs.asset_suffix }}.sha256"
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Parse Configs
@@ -91,8 +121,9 @@ jobs:
     - name: Validate version
       env:
         TAG_FULL: ${{ steps.event.outputs.tag_full }}
+        ASSET_SUFFIX: ${{ steps.event.outputs.asset_suffix }}
       run: |
-        buidpackTomlVersion=$(sudo skopeo inspect "oci-archive:${GITHUB_WORKSPACE}/buildpackage.cnb" | jq -r '.Labels."io.buildpacks.buildpackage.metadata" | fromjson | .version')
+        buidpackTomlVersion=$(sudo skopeo inspect "oci-archive:${GITHUB_WORKSPACE}/buildpackage${ASSET_SUFFIX}.cnb" | jq -r '.Labels."io.buildpacks.buildpackage.metadata" | fromjson | .version')
         githubReleaseVersion="${TAG_FULL}"
         if [[ "$buidpackTomlVersion" != "$githubReleaseVersion" ]]; then
           echo "Version in buildpack.toml ($buidpackTomlVersion) and github release ($githubReleaseVersion) are not identical"
@@ -109,21 +140,21 @@ jobs:
         fi
 
     - name: Docker login docker.io
-      uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+      uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
       with:
         username: ${{ env.DOCKERHUB_USERNAME }}
         password: ${{ env.DOCKERHUB_PASSWORD }}
         registry: ${{ env.DOCKERHUB_REGISTRY }}
 
     - name: Docker login gcr.io
-      uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
+      uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
       if: ${{ steps.parse_configs.outputs.push_to_gcr == 'true' }}
       with:
         username: ${{ env.GCR_USERNAME }}
         password: ${{ env.GCR_PASSWORD }}
         registry: ${{ env.GCR_REGISTRY }}
 
-    - uses: buildpacks/github-actions/setup-tools@af8c06ccd592e27001cbf78083dcc9b47aa6652a # v6.1.1
+    - uses: buildpacks/github-actions/setup-tools@50b58314ff7858c48496a3fee25308c8a18eae79 # v6.2.3
     - name: Push to DockerHub
       if: ${{  steps.parse_configs.outputs.push_to_dockerhub == 'true' }}
       id: push
@@ -133,22 +164,25 @@ jobs:
         TAG_FULL: ${{ steps.event.outputs.tag_full }}
         TAG_MINOR: ${{ steps.event.outputs.tag_minor }}
         TAG_MAJOR: ${{ steps.event.outputs.tag_major }}
+        ASSET_SUFFIX: ${{ steps.event.outputs.asset_suffix }}
+        BUILDPACK: ${{ matrix.buildpack }}
       run: |
-        IMAGE="${GITHUB_REPOSITORY_OWNER/-/}/${GITHUB_REPOSITORY#${GITHUB_REPOSITORY_OWNER}/}" # translates 'paketo-buildpacks/bundle-install' to 'paketobuildpacks/bundle-install'
+        IMAGE_NAME="$(source "${GITHUB_WORKSPACE}/scripts/.util/implementation.sh"; util::implementation::image "${GITHUB_WORKSPACE}" "${BUILDPACK}")"
+        IMAGE="paketobuildpacks/${IMAGE_NAME}"
         echo "${DOCKERHUB_PASSWORD}" | sudo skopeo login --username "${DOCKERHUB_USERNAME}" --password-stdin ${DOCKERHUB_REGISTRY}
 
         ./scripts/publish.sh \
-          --archive-path ./buildpack.tgz \
+          --archive-path "./buildpack${ASSET_SUFFIX}.tgz" \
           --buildpack-type "${BUILDPACK_TYPE}" \
           --image-ref "${DOCKERHUB_REGISTRY}/${IMAGE}:${TAG_FULL}"
 
         ## Validate that the image index digest pushed to registry matches with the one on the release notes
         pushed_image_index_digest=$(crane digest "${DOCKERHUB_REGISTRY}/${IMAGE}:${TAG_FULL}" | xargs)
 
-        echo "Index digest from release notes: $(cat ./index-digest.sha256)"
+        echo "Index digest from release notes: $(cat ./index-digest${ASSET_SUFFIX}.sha256)"
         echo "Index digest pushed to registry: $pushed_image_index_digest"
 
-        if [ "$(cat ./index-digest.sha256)" != "$pushed_image_index_digest" ]; then
+        if [ "$(cat ./index-digest${ASSET_SUFFIX}.sha256)" != "$pushed_image_index_digest" ]; then
           echo "The image index digest pushed to registry does not match the expected digest from release notes"
           exit 1;
         fi
@@ -157,25 +191,27 @@ jobs:
         sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${IMAGE}:${TAG_FULL}" "docker://${DOCKERHUB_REGISTRY}/${IMAGE}:${TAG_MAJOR}" --multi-arch all
         sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${IMAGE}:${TAG_FULL}" "docker://${DOCKERHUB_REGISTRY}/${IMAGE}:latest" --multi-arch all
         echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+        echo "image_name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
         echo "digest=$pushed_image_index_digest" >> "$GITHUB_OUTPUT"
 
     - name: Push to GCR
       if: ${{ steps.parse_configs.outputs.push_to_gcr == 'true' }}
       env:
         PUSH_IMAGE: ${{ steps.push.outputs.image }}
-        REPOSITORY: ${{ github.repository }}
+        PUSH_IMAGE_NAME: ${{ steps.push.outputs.image_name }}
         TAG_FULL: ${{ steps.event.outputs.tag_full }}
         TAG_MINOR: ${{ steps.event.outputs.tag_minor }}
         TAG_MAJOR: ${{ steps.event.outputs.tag_major }}
       run: |
         echo "${GCR_PASSWORD}" | sudo skopeo login --username "${GCR_USERNAME}" --password-stdin "${GCR_REGISTRY}"
 
-        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/${REPOSITORY}:${TAG_FULL}" --multi-arch all
-        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/${REPOSITORY}:${TAG_MINOR}" --multi-arch all
-        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/${REPOSITORY}:${TAG_MAJOR}" --multi-arch all
-        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/${REPOSITORY}:latest" --multi-arch all
+        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/paketo-buildpacks/${PUSH_IMAGE_NAME}:${TAG_FULL}" --multi-arch all
+        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/paketo-buildpacks/${PUSH_IMAGE_NAME}:${TAG_MINOR}" --multi-arch all
+        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/paketo-buildpacks/${PUSH_IMAGE_NAME}:${TAG_MAJOR}" --multi-arch all
+        sudo skopeo copy "docker://${DOCKERHUB_REGISTRY}/${PUSH_IMAGE}" "docker://${GCR_REGISTRY}/paketo-buildpacks/${PUSH_IMAGE_NAME}:latest" --multi-arch all
 
     - name: Register with CNB Registry
+      if: ${{ needs.prepare.outputs.multi != 'true' }}
       uses: docker://ghcr.io/buildpacks/actions/registry/request-add-entry@sha256:de7c15d1b8606c3189f0b5699bfdfe20afe5f6a315155932e801f334b0dae8f4 # main
       with:
         id: ${{ github.repository }}
@@ -186,8 +222,8 @@ jobs:
   failure:
     name: Alert on Failure
     runs-on: ubuntu-24.04
-    needs: [push]
-    if: ${{ always() && needs.push.result == 'failure' }}
+    needs: [prepare, push]
+    if: ${{ always() && (needs.prepare.result == 'failure' || needs.push.result == 'failure') }}
     permissions:
       contents: read
       issues: write
