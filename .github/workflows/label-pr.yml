@@ -26,19 +26,24 @@ jobs:
       issues: write # add the semver label
       pull-requests: write # update the pull request's labels
     steps:
+    - name: Detect existing label
+      id: detect_label
+      run: |
+        set -euo pipefail
+        label_exists=$(jq -r '.pull_request.labels // [] | map(.name) | length > 0' "${GITHUB_EVENT_PATH}")
+        echo "label_exists=${label_exists}" >> "${GITHUB_OUTPUT}"
+
+    - name: Auto-label Semver
+      if: ${{ github.event.pull_request.head.repo.full_name == github.repository && steps.detect_label.outputs.label_exists != 'true' }}
+      uses: paketo-buildpacks/github-config/actions/pull-request/auto-semver-label@main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Check Minimal Semver Labels
       uses: mheap/github-action-required-labels@23e10fde7e062233401931a0eece796cd9bf3177 # v5.6.0
       with:
         count: 1
         labels: semver:major, semver:minor, semver:patch
         mode: exactly
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Auto-label Semver
-      # Pull requests from forks receive a read-only token, so they cannot be
-      # auto-labeled. A maintainer must add the label to those pull requests.
-      if: ${{ failure() && github.event.pull_request.head.repo.full_name == github.repository }}
-      uses: paketo-buildpacks/github-config/actions/pull-request/auto-semver-label@main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
