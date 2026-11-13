@@ -13,6 +13,9 @@ source "${ROOT_DIR}/scripts/.util/tools.sh"
 # shellcheck source=SCRIPTDIR/.util/print.sh
 source "${ROOT_DIR}/scripts/.util/print.sh"
 
+# shellcheck source=SCRIPTDIR/.util/implementation.sh
+source "${ROOT_DIR}/scripts/.util/implementation.sh"
+
 function main {
   local version output token
   token=""
@@ -69,8 +72,13 @@ function main {
     buildpack_type=extension
   fi
 
-  buildpack::archive "${version}" "${buildpack_type}"
-  buildpackage::create "${output}" "${buildpack_type}"
+  if [[ "$(util::implementation::is_multi "${ROOT_DIR}")" == "true" ]]; then
+    buildpackage::create::individual "${version}" "${buildpack_type}"
+    buildpackage::create::combined "${version}" "${buildpack_type}"
+  else
+    buildpack::archive "${version}" "${buildpack_type}"
+    buildpackage::create "${output}" "${buildpack_type}"
+  fi
 }
 
 function usage() {
@@ -78,6 +86,10 @@ function usage() {
 package.sh --version <version> [OPTIONS]
 
 Packages a buildpack or an extension into a buildpackage .cnb file.
+
+When multi-implementation.json exists, packages the combined buildpack and one
+buildpack per component instead. The components and the libpak-tools command are
+read from ${ROOT_DIR}/multi-implementation.json.
 
 OPTIONS
   --help               -h            prints the command usage
@@ -109,6 +121,10 @@ function tools::install() {
   if [[ -f "${ROOT_DIR}/.libbuildpack" ]]; then
     util::tools::packager::install \
       --directory "${BIN_DIR}"
+  elif [[ "$(util::implementation::is_multi "${ROOT_DIR}")" == "true" ]]; then
+    util::tools::libpak-tools::install \
+      --directory "${BIN_DIR}" \
+      --token "${token}"
   else
     util::tools::jam::install \
       --directory "${BIN_DIR}" \
@@ -153,6 +169,57 @@ function buildpackage::create() {
       --format file
 
   rm -rf ${BUILD_DIR}/cnbdir
+}
+
+function buildpackage::create::individual() {
+  local version buildpack_type combined command artifact_flag config
+  version="${1}"
+  buildpack_type="${2}"
+  config="$(util::implementation::config "${ROOT_DIR}")"
+
+  combined="$(util::implementation::combined "${ROOT_DIR}")"
+  command="$(jq -r '."libpak-tools".command' <<< "${config}")"
+  artifact_flag="$(jq -r '."libpak-tools"."artifact-flag"' <<< "${config}")"
+
+  util::print::title "Packaging ${buildpack_type}..."
+
+  local args=()
+  while IFS= read -r name; do
+    args+=(
+      --buildpack-id "paketo-buildpacks/${name}@${version}"
+      "--${artifact_flag}" "${name}"
+    )
+  done < <(jq -r --arg combined "${combined}" '.buildpacks[].name | select(. != $combined)' <<< "${config}")
+
+  if [[ ${#args[@]} -eq 0 ]]; then
+    util::print::error "no component buildpacks configured in $(util::implementation::config-path "${ROOT_DIR}")"
+  fi
+
+  libpak-tools "${command}" "${args[@]}" \
+    --format file \
+    --buildpack-path . \
+    --output-path "${BUILD_DIR}"
+}
+
+function buildpackage::create::combined() {
+  local version buildpack_type combined command include_all_flag config
+  version="${1}"
+  buildpack_type="${2}"
+  config="$(util::implementation::config "${ROOT_DIR}")"
+
+  combined="$(util::implementation::combined "${ROOT_DIR}")"
+  command="$(jq -r '."libpak-tools".command' <<< "${config}")"
+  include_all_flag="$(jq -r '."libpak-tools"."include-all-flag"' <<< "${config}")"
+
+  util::print::title "Packaging ${buildpack_type}..."
+
+  libpak-tools "${command}" \
+    --single-buildpack \
+    --buildpack-id "paketo-buildpacks/${combined}@${version}" \
+    "--${include_all_flag}" \
+    --format file \
+    --buildpack-path . \
+    --output-path "${BUILD_DIR}"
 }
 
 main "${@:-}"
