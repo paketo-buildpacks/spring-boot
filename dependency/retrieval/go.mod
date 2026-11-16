@@ -1,6 +1,6 @@
 module github.com/paketo-buildpacks/spring-boot/v5/dependency/retrieval
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
