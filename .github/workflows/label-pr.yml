@@ -26,15 +26,15 @@ jobs:
       issues: write # add the semver label
       pull-requests: write # update the pull request's labels
     steps:
-    - name: Detect existing label
+    - name: Detect existing semver label
       id: detect_label
       run: |
         set -euo pipefail
-        label_exists=$(jq -r '.pull_request.labels // [] | map(.name) | length > 0' "${GITHUB_EVENT_PATH}")
-        echo "label_exists=${label_exists}" >> "${GITHUB_OUTPUT}"
+        semver_label_exists=$(jq -r '.pull_request.labels // [] | map(.name) | any(startswith("semver:"))' "${GITHUB_EVENT_PATH}")
+        echo "semver_label_exists=${semver_label_exists}" >> "${GITHUB_OUTPUT}"
 
     - name: Auto-label Semver
-      if: ${{ github.event.pull_request.head.repo.full_name == github.repository && steps.detect_label.outputs.label_exists != 'true' }}
+      if: ${{ github.event.pull_request.head.repo.full_name == github.repository && steps.detect_label.outputs.semver_label_exists != 'true' }}
       uses: paketo-buildpacks/github-config/actions/pull-request/auto-semver-label@main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
