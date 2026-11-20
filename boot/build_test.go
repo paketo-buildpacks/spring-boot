@@ -648,6 +648,52 @@ Spring-Boot-Lib: BOOT-INF/lib
 
 		})
 
+		for _, version := range []string{"4.2.0", "4.2.0-RC1", "4.3.1", "5.0.0"} {
+			it("installs no bindings for Spring Boot "+version, func() {
+				Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+						Spring-Boot-Version: `+version+`
+						Spring-Boot-Classes: BOOT-INF/classes
+						Spring-Boot-Lib: BOOT-INF/lib
+						`), 0644)).To(Succeed())
+
+				result, err := build.Build(ctx)
+				Expect(err).NotTo(HaveOccurred())
+
+				for _, layer := range result.Layers {
+					Expect(layer).NotTo(BeAssignableToTypeOf(boot.SpringCloudBindings{}))
+					if helper, ok := layer.(libpak.HelperLayerContributor); ok {
+						Expect(helper.Names).NotTo(ContainElement("spring-cloud-bindings"))
+					}
+				}
+			})
+		}
+
+		it("still installs bindings for Spring Boot 4.1", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+						Spring-Boot-Version: 4.1.2
+						Spring-Boot-Classes: BOOT-INF/classes
+						Spring-Boot-Lib: BOOT-INF/lib
+						`), 0644)).To(Succeed())
+
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
+		})
+
+		it("installs bindings for Spring Boot 4.2 when BP_SPRING_CLOUD_BINDINGS_VERSION is set", func() {
+			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
+						Spring-Boot-Version: 4.2.0
+						Spring-Boot-Classes: BOOT-INF/classes
+						Spring-Boot-Lib: BOOT-INF/lib
+						`), 0644)).To(Succeed())
+			t.Setenv("BP_SPRING_CLOUD_BINDINGS_VERSION", "2")
+			result, err := build.Build(ctx)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(result.Layers[0].(boot.SpringCloudBindings).LayerContributor.Dependency.Version).To(Equal("2.1.0"))
+		})
+
 		it("installs the correct bindings version based on the SCB Configuration Variable", func() {
 			Expect(os.WriteFile(filepath.Join(ctx.Application.Path, "META-INF", "MANIFEST.MF"), []byte(`
 						Spring-Boot-Version: 2.1.1
