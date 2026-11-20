@@ -51,7 +51,7 @@ const (
 	LabelDataFlowConfigurationMetadata = "org.springframework.cloud.dataflow.spring-configuration-metadata.json"
 	SpringCloudBindingsBoot2           = "1"
 	SpringCloudBindingsBoot3           = "2"
-	SpringCloudBindingsNone            = ""
+	SpringCloudBindingsNone            = "None"
 	FileSystemProvider                 = "java.nio.file.spi.FileSystemProvider"
 	NestedFileSystemProvider           = "org.springframework.boot.loader.nio.file.NestedFileSystemProvider"
 )
