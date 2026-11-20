@@ -51,6 +51,7 @@ const (
 	LabelDataFlowConfigurationMetadata = "org.springframework.cloud.dataflow.spring-configuration-metadata.json"
 	SpringCloudBindingsBoot2           = "1"
 	SpringCloudBindingsBoot3           = "2"
+	SpringCloudBindingsNone            = "None"
 	FileSystemProvider                 = "java.nio.file.spi.FileSystemProvider"
 	NestedFileSystemProvider           = "org.springframework.boot.loader.nio.file.NestedFileSystemProvider"
 )
@@ -223,19 +224,23 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 			}
 		}
 
-		dep, err := dr.Resolve("spring-cloud-bindings", scbVer)
-		if err != nil {
-			return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+		if scbVer == SpringCloudBindingsNone {
+			b.Logger.Header("Spring Cloud Bindings is not contributed by default for Spring Boot 4.2+, no released version supports it")
+		} else {
+			dep, err := dr.Resolve("spring-cloud-bindings", scbVer)
+			if err != nil {
+				return libcnb.BuildResult{}, fmt.Errorf("unable to find dependency\n%w", err)
+			}
+
+			helpers = append(helpers, "spring-cloud-bindings")
+
+			bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
+			bindingsLayer.Logger = b.Logger
+			result.Layers = append(result.Layers, bindingsLayer)
+			result.BOM.Entries = append(result.BOM.Entries, be) //nolint:staticcheck // hold off on the BOM migration for now
+
+			additionalLibs = append(additionalLibs, filepath.Base(dep.URI))
 		}
-
-		helpers = append(helpers, "spring-cloud-bindings")
-
-		bindingsLayer, be := NewSpringCloudBindings(filepath.Join(context.Application.Path, lib), dep, dc)
-		bindingsLayer.Logger = b.Logger
-		result.Layers = append(result.Layers, bindingsLayer)
-		result.BOM.Entries = append(result.BOM.Entries, be) //nolint:staticcheck // hold off on the BOM migration for now
-
-		additionalLibs = append(additionalLibs, filepath.Base(dep.URI))
 	}
 
 	dir := filepath.Join(context.Application.Path, "META-INF", "native-image")
@@ -514,12 +519,17 @@ func FindExistingDependency(jars []libjvm.MavenJAR, dependencyName string) bool 
 
 func getSCBVersion(manifestVer string) (string, error) {
 	bootTwoConstraint, _ := semver.NewConstraint("<= 3.0.0")
+	// Spring Boot 4.2 removed the EnvironmentPostProcessor interface that Spring Cloud Bindings 2 implements
+	unsupportedConstraint, _ := semver.NewConstraint(">= 4.2.0")
 	bv, err := bootVersion(manifestVer)
 	if err != nil {
 		return SpringCloudBindingsBoot2, err
 	}
 	if bootTwoConstraint.Check(bv) {
 		return SpringCloudBindingsBoot2, nil
+	}
+	if unsupportedConstraint.Check(bv) {
+		return SpringCloudBindingsNone, nil
 	}
 	return SpringCloudBindingsBoot3, nil
 }
