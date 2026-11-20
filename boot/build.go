@@ -283,6 +283,16 @@ func (b Build) Build(context libcnb.BuildContext) (libcnb.BuildResult, error) {
 
 		cdsLayer := NewSpringPerformance(dc, context.Application.Path, manifest, aotEnabled, performanceType, classpathString, reZipExplodedJar, cdsTrainingJavaToolOptions)
 		cdsLayer.Logger = b.Logger
+		// When TRAINING_RUN_JAVA_TOOL_OPTIONS is explicitly provided, it's only for the training run.
+		// Don't propagate it (or JAVA_TOOL_OPTIONS) to launch, because:
+		// - If loading a pre-recorded cache: it was recorded with different options, so appending
+		//   JAVA_TOOL_OPTIONS would cause incompatibility
+		// - If recording: the training run uses its own options via TrainingRunJavaToolOptions
+		if !cdsTrainingJavaToolOptionsProvided {
+			cdsLayer.JavaToolOptions = sherpa.GetEnvWithDefault("JAVA_TOOL_OPTIONS", "")
+		} else {
+			cdsLayer.JavaToolOptions = ""
+		}
 		cdsLayer.AotCachePath, cdsLayer.AotCachePathExplicit = cr.Resolve("BP_JVM_AOTCACHE_PATH")
 		result.Layers = append(result.Layers, cdsLayer)
 
