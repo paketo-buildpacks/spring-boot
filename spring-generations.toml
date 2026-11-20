@@ -678,6 +678,26 @@
   Slug = "spring-cloud-cloudfoundry"
   Status = "END_OF_LIFE"
 
+  [[Projects.Generations]]
+    Name = "2.0.x"
+    OSS = "2019-03-31"
+
+  [[Projects.Generations]]
+    Name = "2.1.x"
+    OSS = "2019-10-31"
+
+  [[Projects.Generations]]
+    Name = "2.2.x"
+    OSS = "2021-05-31"
+
+  [[Projects.Generations]]
+    Name = "3.0.x"
+    OSS = "2022-05-31"
+
+  [[Projects.Generations]]
+    Name = "3.1.x"
+    OSS = "2023-06-30"
+
 [[Projects]]
   Name = "Spring Cloud - Cloud Foundry Service Broker"
   Slug = "spring-cloud-cloudfoundry-service-broker"
@@ -3102,7 +3122,7 @@
 
   [[Projects.Generations]]
     Name = "4.0.x"
-    OSS = "2026-12-31"
+    OSS = "2027-12-31"
 
 [[Projects]]
   Name = "Spring Social"
