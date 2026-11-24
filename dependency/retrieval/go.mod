@@ -33,7 +33,7 @@ require (
 	github.com/pjbgf/sha1cd v0.7.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/sergi/go-diff v1.4.0 // indirect
+	github.com/sergi/go-diff v1.4.4 // indirect
 	github.com/shogo82148/go-shuffle v1.1.1 // indirect
 	github.com/skeema/knownhosts v1.3.3 // indirect
 	github.com/ulikunitz/xz v0.5.17 // indirect
