@@ -33,14 +33,14 @@ require (
 	github.com/pjbgf/sha1cd v0.7.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
-	github.com/sergi/go-diff v1.4.4 // indirect
+	github.com/sergi/go-diff v1.4.5 // indirect
 	github.com/shogo82148/go-shuffle v1.1.1 // indirect
 	github.com/skeema/knownhosts v1.3.3 // indirect
 	github.com/ulikunitz/xz v0.5.17 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.59.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
-	golang.org/x/net v0.62.0 // indirect
+	golang.org/x/net v0.63.0 // indirect
 	golang.org/x/sys v0.50.0 // indirect
 	golang.org/x/text v0.44.0 // indirect
 	gonum.org/v1/gonum v0.17.0 // indirect
