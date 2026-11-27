@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
-	github.com/paketo-buildpacks/libdependency v0.2.1
+	github.com/paketo-buildpacks/libdependency v0.2.2
 	github.com/paketo-buildpacks/packit/v2 v2.26.0
 )
 
